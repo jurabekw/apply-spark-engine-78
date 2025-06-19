@@ -9,6 +9,226 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      application_forms: {
+        Row: {
+          created_at: string
+          description: string | null
+          form_fields: Json
+          id: string
+          is_public: boolean | null
+          job_posting_id: string | null
+          public_url_slug: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          form_fields: Json
+          id?: string
+          is_public?: boolean | null
+          job_posting_id?: string | null
+          public_url_slug?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          form_fields?: Json
+          id?: string
+          is_public?: boolean | null
+          job_posting_id?: string | null
+          public_url_slug?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_forms_job_posting_id_fkey"
+            columns: ["job_posting_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          ai_analysis: Json | null
+          ai_score: number | null
+          cover_letter: string | null
+          created_at: string
+          education: string | null
+          email: string
+          experience_years: number | null
+          id: string
+          job_posting_id: string | null
+          name: string
+          phone: string | null
+          position: string | null
+          resume_file_path: string | null
+          skills: string[] | null
+          source: string | null
+          status: string | null
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          work_history: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          ai_score?: number | null
+          cover_letter?: string | null
+          created_at?: string
+          education?: string | null
+          email: string
+          experience_years?: number | null
+          id?: string
+          job_posting_id?: string | null
+          name: string
+          phone?: string | null
+          position?: string | null
+          resume_file_path?: string | null
+          skills?: string[] | null
+          source?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+          work_history?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          ai_score?: number | null
+          cover_letter?: string | null
+          created_at?: string
+          education?: string | null
+          email?: string
+          experience_years?: number | null
+          id?: string
+          job_posting_id?: string | null
+          name?: string
+          phone?: string | null
+          position?: string | null
+          resume_file_path?: string | null
+          skills?: string[] | null
+          source?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+          work_history?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_job_posting_id_fkey"
+            columns: ["job_posting_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_submissions: {
+        Row: {
+          candidate_id: string | null
+          form_id: string
+          id: string
+          ip_address: unknown | null
+          submission_data: Json
+          submitted_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          form_id: string
+          id?: string
+          ip_address?: unknown | null
+          submission_data: Json
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          form_id?: string
+          id?: string
+          ip_address?: unknown | null
+          submission_data?: Json
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "application_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_postings: {
+        Row: {
+          created_at: string
+          department: string | null
+          description: string | null
+          experience_level: string | null
+          id: string
+          location: string | null
+          requirements: string
+          salary_range: string | null
+          skills_required: string[] | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location?: string | null
+          requirements: string
+          salary_range?: string | null
+          skills_required?: string[] | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string
+          salary_range?: string | null
+          skills_required?: string[] | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company: string | null
