@@ -52,7 +52,7 @@ Please extract the following information and provide a JSON response:
   "email": "email address if found",
   "phone": "phone number if found", 
   "position": "current or desired position",
-  "experience_years": number of years of experience,
+  "experience_years": number of years of experience (as a number, or null if not found),
   "skills": ["array", "of", "skills"],
   "education": "education background",
   "work_history": "brief work history summary",
@@ -65,7 +65,10 @@ Please extract the following information and provide a JSON response:
   }
 }
 
-Focus on accuracy and be thorough in your analysis.`
+IMPORTANT: 
+- For experience_years, return a NUMBER or null if not found. Do not return strings like "Not found" or "N/A".
+- For ai_score, return a NUMBER between 0-100.
+- Always return valid JSON.`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -78,7 +81,7 @@ Focus on accuracy and be thorough in your analysis.`
         messages: [
           {
             role: 'system',
-            content: 'You are an expert HR assistant that analyzes resumes and provides structured feedback. Always respond with valid JSON.'
+            content: 'You are an expert HR assistant that analyzes resumes and provides structured feedback. Always respond with valid JSON. For numeric fields, use numbers or null, never strings.'
           },
           {
             role: 'user',
@@ -107,23 +110,74 @@ Focus on accuracy and be thorough in your analysis.`
       throw new Error('Invalid AI response format')
     }
 
+    // Validate and sanitize the data before database insertion
+    const sanitizeData = (data) => {
+      return {
+        name: data.name || 'Unknown',
+        email: data.email || '',
+        phone: data.phone || null,
+        position: data.position || null,
+        experience_years: validateInteger(data.experience_years),
+        skills: Array.isArray(data.skills) ? data.skills : [],
+        education: data.education || null,
+        work_history: data.work_history || null,
+        ai_score: validateScore(data.ai_score),
+        ai_analysis: data.ai_analysis || null
+      }
+    }
+
+    const validateInteger = (value) => {
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      if (typeof value === 'number' && !isNaN(value) && Number.isInteger(value)) {
+        return Math.max(0, Math.min(50, value)) // Cap at reasonable range
+      }
+      if (typeof value === 'string') {
+        const parsed = parseInt(value.replace(/\D/g, ''))
+        if (!isNaN(parsed)) {
+          return Math.max(0, Math.min(50, parsed))
+        }
+      }
+      return null
+    }
+
+    const validateScore = (value) => {
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      if (typeof value === 'number' && !isNaN(value)) {
+        return Math.max(0, Math.min(100, Math.round(value)))
+      }
+      if (typeof value === 'string') {
+        const parsed = parseFloat(value.replace(/[^\d.]/g, ''))
+        if (!isNaN(parsed)) {
+          return Math.max(0, Math.min(100, Math.round(parsed)))
+        }
+      }
+      return null
+    }
+
+    const sanitizedData = sanitizeData(candidateData)
+    console.log('Sanitized candidate data:', sanitizedData)
+
     // Insert candidate into database with original filename
     const { data: candidate, error: dbError } = await supabase
       .from('candidates')
       .insert({
         user_id: userId,
-        name: candidateData.name || 'Unknown',
-        email: candidateData.email || '',
-        phone: candidateData.phone,
-        position: candidateData.position,
-        experience_years: candidateData.experience_years,
-        skills: candidateData.skills || [],
-        education: candidateData.education,
-        work_history: candidateData.work_history,
+        name: sanitizedData.name,
+        email: sanitizedData.email,
+        phone: sanitizedData.phone,
+        position: sanitizedData.position,
+        experience_years: sanitizedData.experience_years,
+        skills: sanitizedData.skills,
+        education: sanitizedData.education,
+        work_history: sanitizedData.work_history,
         resume_file_path: resumeFilePath,
-        original_filename: originalFilename, // Store original filename
-        ai_score: candidateData.ai_score,
-        ai_analysis: candidateData.ai_analysis,
+        original_filename: originalFilename,
+        ai_score: sanitizedData.ai_score,
+        ai_analysis: sanitizedData.ai_analysis,
         status: 'new',
         source: 'upload'
       })
