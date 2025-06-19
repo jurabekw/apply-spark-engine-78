@@ -5,86 +5,88 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Filter, Download, Star, Eye } from 'lucide-react';
+import { Search, Filter, Download, Star, Eye, Loader2 } from 'lucide-react';
+import { useCandidates } from '@/hooks/useCandidates';
 
 const CandidateTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Sample data - in production this would come from your database
-  const candidates = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      position: 'Senior Frontend Developer',
-      score: 92,
-      status: 'Strong Fit',
-      experience: '6 years',
-      skills: ['React', 'TypeScript', 'Node.js'],
-      submittedAt: '2024-01-15',
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      email: 'm.chen@email.com',
-      position: 'Full Stack Engineer',
-      score: 87,
-      status: 'Good Match',
-      experience: '4 years',
-      skills: ['Vue.js', 'Python', 'AWS'],
-      submittedAt: '2024-01-14',
-    },
-    {
-      id: 3,
-      name: 'Emily Rodriguez',
-      email: 'emily.r@email.com',
-      position: 'UI/UX Designer',
-      score: 78,
-      status: 'Average',
-      experience: '3 years',
-      skills: ['Figma', 'Sketch', 'CSS'],
-      submittedAt: '2024-01-13',
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      email: 'd.kim@email.com',
-      position: 'Backend Developer',
-      score: 65,
-      status: 'Below Average',
-      experience: '2 years',
-      skills: ['Java', 'Spring', 'MySQL'],
-      submittedAt: '2024-01-12',
-    },
-  ];
+  const { candidates, loading, updateCandidateStatus } = useCandidates();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Strong Fit':
+      case 'shortlisted':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'Good Match':
+      case 'interviewed':
         return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Average':
+      case 'reviewing':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Below Average':
+      case 'rejected':
         return 'bg-red-100 text-red-800 border-red-200';
-      default:
+      case 'hired':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: // 'new'
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (score: number | undefined) => {
+    if (!score) return 'text-gray-400';
     if (score >= 85) return 'text-green-600 font-semibold';
     if (score >= 70) return 'text-blue-600 font-semibold';
     if (score >= 60) return 'text-yellow-600 font-semibold';
     return 'text-red-600 font-semibold';
   };
 
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      'new': 'New',
+      'reviewing': 'Reviewing',
+      'shortlisted': 'Shortlisted',
+      'interviewed': 'Interviewed',
+      'hired': 'Hired',
+      'rejected': 'Rejected'
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
   const filteredCandidates = candidates.filter(candidate =>
     candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    candidate.position.toLowerCase().includes(searchTerm.toLowerCase())
+    (candidate.position || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const handleStatusChange = async (candidateId: string, newStatus: string) => {
+    await updateCandidateStatus(candidateId, newStatus);
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Candidate Database</h2>
+            <p className="text-gray-600">Manage and review all candidate submissions</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+              <span className="ml-2 text-gray-600">Loading candidates...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -121,88 +123,124 @@ const CandidateTable = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Candidate</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>AI Score</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Experience</TableHead>
-                  <TableHead>Key Skills</TableHead>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.map((candidate) => (
-                  <TableRow key={candidate.id} className="hover:bg-gray-50">
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-gray-900">{candidate.name}</div>
-                        <div className="text-sm text-gray-500">{candidate.email}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{candidate.position}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className={getScoreColor(candidate.score)}>
-                          {candidate.score}%
-                        </span>
-                        {candidate.score >= 85 && (
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(candidate.status)}>
-                        {candidate.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{candidate.experience}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {candidate.skills.slice(0, 2).map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                        {candidate.skills.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{candidate.skills.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {candidate.submittedAt}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
+          {filteredCandidates.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Search className="w-16 h-16 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  No candidates found
+                </h3>
+                <p className="text-gray-500">
+                  {candidates.length === 0 
+                    ? "Upload some resumes to get started with AI-powered candidate screening."
+                    : "Try adjusting your search terms."
+                  }
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Candidate</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>AI Score</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Experience</TableHead>
+                    <TableHead>Key Skills</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredCandidates.map((candidate) => (
+                    <TableRow key={candidate.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-gray-900">{candidate.name}</div>
+                          <div className="text-sm text-gray-500">{candidate.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {candidate.position || 'Not specified'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className={getScoreColor(candidate.ai_score)}>
+                            {candidate.ai_score ? `${candidate.ai_score}%` : 'N/A'}
+                          </span>
+                          {candidate.ai_score && candidate.ai_score >= 85 && (
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(candidate.status)}>
+                          {getStatusLabel(candidate.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {candidate.experience_years ? `${candidate.experience_years} years` : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {candidate.skills && candidate.skills.length > 0 ? (
+                            <>
+                              {candidate.skills.slice(0, 2).map((skill, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                              {candidate.skills.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{candidate.skills.length - 2}
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No skills listed</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">
+                        {formatDate(candidate.submitted_at || candidate.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            // TODO: Implement candidate detail view
+                            console.log('View candidate:', candidate.id);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <h3 className="font-semibold text-blue-900 mb-2">
-              Demo Data Displayed
-            </h3>
-            <p className="text-sm text-blue-700">
-              This table shows sample candidate data. Connect Supabase to store and manage real candidate information with full CRUD operations.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {candidates.length > 0 && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <h3 className="font-semibold text-green-900 mb-2">
+                Real Data Connected
+              </h3>
+              <p className="text-sm text-green-700">
+                This table shows actual candidate data from your database. All resume processing and AI analysis is fully functional.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
