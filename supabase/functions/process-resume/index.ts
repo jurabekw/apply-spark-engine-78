@@ -7,6 +7,44 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Simple PDF text extraction - looks for text content in PDF structure
+const extractTextFromPDF = async (pdfBuffer: Uint8Array): Promise<string> => {
+  try {
+    // Convert buffer to string for text extraction
+    const pdfText = new TextDecoder('latin1').decode(pdfBuffer);
+    
+    // Extract text content using regex patterns
+    const textMatches = pdfText.match(/\(([^)]+)\)/g) || [];
+    const extractedText = textMatches
+      .map(match => match.slice(1, -1)) // Remove parentheses
+      .filter(text => text.length > 2) // Filter out single characters
+      .join(' ');
+    
+    // Also try to find text streams
+    const streamMatches = pdfText.match(/stream\s+(.*?)\s+endstream/gs) || [];
+    let streamText = '';
+    
+    for (const stream of streamMatches) {
+      const content = stream.replace(/^stream\s+/, '').replace(/\s+endstream$/, '');
+      // Look for readable text in the stream
+      const readableText = content.match(/[A-Za-z0-9\s@.+-]+/g);
+      if (readableText) {
+        streamText += readableText.join(' ') + ' ';
+      }
+    }
+    
+    const finalText = (extractedText + ' ' + streamText).trim();
+    
+    console.log('Extracted text length:', finalText.length);
+    console.log('Sample extracted text:', finalText.substring(0, 200));
+    
+    return finalText || 'Unable to extract text from PDF';
+  } catch (error) {
+    console.error('Error extracting text from PDF:', error);
+    return 'PDF text extraction failed';
+  }
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,7 +53,6 @@ serve(async (req) => {
 
   try {
     const { 
-      resumeText, 
       jobRequirements, 
       jobTitle, 
       userId, 
@@ -26,7 +63,6 @@ serve(async (req) => {
     console.log('Processing resume for job:', jobTitle)
     console.log('Original filename:', originalFilename)
     console.log('Storage path:', resumeFilePath)
-    console.log('Resume text length:', resumeText?.length || 0)
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -34,6 +70,28 @@ serve(async (req) => {
     
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Download the PDF file from storage
+    console.log('Downloading PDF file from storage...')
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('resumes')
+      .download(resumeFilePath)
+
+    if (downloadError) {
+      console.error('Error downloading file:', downloadError)
+      throw new Error(`Failed to download file: ${downloadError.message}`)
+    }
+
+    // Convert file to buffer and extract text
+    const arrayBuffer = await fileData.arrayBuffer()
+    const pdfBuffer = new Uint8Array(arrayBuffer)
+    const resumeText = await extractTextFromPDF(pdfBuffer)
+
+    console.log('Resume text extracted, length:', resumeText?.length || 0)
+
+    if (!resumeText || resumeText.trim().length < 10) {
+      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file is not password protected or image-only.')
+    }
 
     // Get OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -150,7 +208,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
       // Fallback: create a basic candidate entry
       candidateData = {
         name: originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: null, // Now allowed to be null
+        email: null,
         phone: null,
         position: jobTitle || 'Not specified',
         experience_years: null,
@@ -172,7 +230,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
     const sanitizeData = (data) => {
       return {
         name: data.name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: validateEmail(data.email), // Now can be null
+        email: validateEmail(data.email),
         phone: validatePhone(data.phone),
         position: data.position || null,
         experience_years: validateExperience(data.experience_years),
@@ -186,14 +244,12 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
 
     const validateEmail = (email) => {
       if (!email || email === '' || email === 'null' || email === 'undefined') return null
-      // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       return emailRegex.test(email.toString()) ? email.toString().trim() : null
     }
 
     const validatePhone = (phone) => {
       if (!phone || phone === '' || phone === 'null' || phone === 'undefined') return null
-      // Clean phone number and check if it has enough digits
       const cleanPhone = phone.toString().replace(/\D/g, '')
       return cleanPhone.length >= 7 ? phone.toString().trim() : null
     }
@@ -216,7 +272,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
 
     const validateScore = (value) => {
       if (value === null || value === undefined || value === '') {
-        return 50 // Default score instead of null
+        return 50
       }
       if (typeof value === 'number' && !isNaN(value)) {
         return Math.max(0, Math.min(100, Math.round(value)))
@@ -227,7 +283,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
           return Math.max(0, Math.min(100, Math.round(parsed)))
         }
       }
-      return 50 // Default score
+      return 50
     }
 
     const validateAnalysis = (analysis) => {
@@ -260,7 +316,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
       .insert({
         user_id: userId,
         name: sanitizedData.name,
-        email: sanitizedData.email, // Now can be null
+        email: sanitizedData.email,
         phone: sanitizedData.phone,
         position: sanitizedData.position,
         experience_years: sanitizedData.experience_years,
@@ -301,15 +357,16 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
   } catch (error) {
     console.error('Error in process-resume function:', error)
     
-    // Provide more specific error messages
     let errorMessage = 'An unexpected error occurred while processing the resume.'
     
-    if (error.message.includes('OpenAI API')) {
+    if (error.message.includes('OpenA I API')) {
       errorMessage = 'Failed to analyze resume content. Please try again.'
     } else if (error.message.includes('Database')) {
       errorMessage = 'Failed to save candidate data. Please contact support.'
     } else if (error.message.includes('API key')) {
       errorMessage = 'Service configuration error. Please contact support.'
+    } else if (error.message.includes('download')) {
+      errorMessage = 'Failed to access uploaded file. Please try uploading again.'
     }
     
     return new Response(

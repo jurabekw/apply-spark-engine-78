@@ -55,35 +55,3 @@ export const generateUniqueFilename = (originalFilename: string, userId: string)
   
   return `${userId.substring(0, 8)}_${timestamp}_${name}${extension}`;
 };
-
-/**
- * Extracts text from PDF files using the browser's File API
- * This is a placeholder implementation that reads the file as text
- * In a real implementation, you'd use a PDF parsing library like pdf-parse or PDF.js
- */
-export const extractTextFromPDF = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = () => {
-      try {
-        // This is a simplified implementation
-        // In practice, you'd need a proper PDF parsing library
-        const result = reader.result as string;
-        
-        // For now, we'll return a placeholder message indicating the file was read
-        // The actual PDF text extraction will be handled by the backend
-        resolve(`PDF file: ${file.name} (${file.size} bytes) - Content will be extracted on the server`);
-      } catch (error) {
-        reject(new Error(`Failed to read PDF file: ${error instanceof Error ? error.message : 'Unknown error'}`));
-      }
-    };
-    
-    reader.onerror = () => {
-      reject(new Error('Failed to read the PDF file'));
-    };
-    
-    // Read as text for now - in a real implementation, you'd use ArrayBuffer and a PDF library
-    reader.readAsText(file);
-  });
-};

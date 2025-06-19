@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { extractTextFromPDF } from '@/utils/fileUtils';
+import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
 
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -55,18 +54,11 @@ const UploadSection = () => {
 
   const processResume = async (file: File) => {
     try {
-      // Extract text from PDF
-      const resumeText = await extractTextFromPDF(file);
-      
-      if (!resumeText || resumeText.trim().length < 50) {
-        throw new Error('Could not extract sufficient text from the PDF. Please ensure the file is not password protected or image-only.');
-      }
-
-      // Generate unique filename
-      const timestamp = Date.now();
-      const safeFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filename = `${user?.id}_${timestamp}_${safeFilename}`;
+      // Generate unique filename using our utility
+      const filename = generateUniqueFilename(file.name, user?.id || 'anonymous');
       const filePath = `${user?.id}/${filename}`;
+
+      console.log(`Uploading file: ${file.name} (${file.size} bytes) to ${filePath}`);
 
       // Upload file to Supabase storage
       const { error: uploadError } = await supabase.storage
@@ -78,10 +70,11 @@ const UploadSection = () => {
         throw new Error(`Failed to upload file: ${uploadError.message}`);
       }
 
-      // Process resume with AI
+      console.log('File uploaded successfully, now processing with AI...');
+
+      // Process resume with AI - the edge function will handle PDF text extraction
       const { data, error } = await supabase.functions.invoke('process-resume', {
         body: {
-          resumeText,
           jobRequirements,
           jobTitle,
           userId: user?.id,
