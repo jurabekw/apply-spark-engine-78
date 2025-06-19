@@ -15,6 +15,7 @@ export interface Candidate {
   education?: string;
   work_history?: string;
   resume_file_path?: string;
+  original_filename?: string;
   cover_letter?: string;
   ai_score?: number;
   ai_analysis?: any;
