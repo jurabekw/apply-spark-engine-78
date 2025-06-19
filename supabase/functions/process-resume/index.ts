@@ -41,47 +41,62 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
-    // Enhanced prompt for multilingual resume analysis
-    const prompt = `Analyze this resume for the job position "${jobTitle}" with requirements: "${jobRequirements}".
+    // Enhanced prompt for more accurate resume analysis
+    const prompt = `You are an expert HR assistant. Analyze this resume for the job position "${jobTitle}" with requirements: "${jobRequirements}".
 
 Resume content:
 ${resumeText}
 
-IMPORTANT INSTRUCTIONS:
-1. This resume may be in Russian, English, or other languages - analyze it regardless of language
-2. Extract ALL available information even if limited
-3. For Russian names, keep them in original Cyrillic if present
-4. Translate job titles and skills to English when possible, but also keep originals
-5. Be aggressive in extracting information - don't be too conservative
-6. If experience isn't explicitly stated, make reasonable inferences from job history
-7. Extract skills from job descriptions if not explicitly listed
-8. Provide a score even with limited information - don't default to null
+CRITICAL INSTRUCTIONS - EXTRACT INFORMATION PRECISELY:
 
-You must respond with ONLY a valid JSON object, no additional text or markdown formatting.
+1. CONTACT INFORMATION - Look carefully for:
+   - Email addresses (look for @ symbols and common email formats)
+   - Phone numbers (look for sequences of digits, may include +, -, (), spaces)
+   - Full name (usually at the top of resume)
 
-Extract the following information and provide a JSON response:
+2. EXPERIENCE CALCULATION - Be very careful:
+   - Look for employment dates (2020-2023, Jan 2020 - Present, etc.)
+   - Calculate total years of work experience by adding up all employment periods
+   - If dates are unclear, look for phrases like "3 years experience" or similar
+   - If no clear experience is found, set to null (not 0)
+
+3. SKILLS EXTRACTION:
+   - Look for dedicated skills sections
+   - Extract technical skills, programming languages, tools
+   - Include both hard and soft skills mentioned
+
+4. SCORING (0-100):
+   - Be realistic and justified in scoring
+   - Consider job requirements match
+   - Factor in experience level, skills alignment, education relevance
+
+5. LANGUAGE HANDLING:
+   - Process resumes in any language (Russian, English, etc.)
+   - Keep original names in their native script
+   - Translate skills and job titles to English when possible
+
+RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
+
 {
-  "name": "candidate name (keep original script/language)",
-  "email": "email address if found",
-  "phone": "phone number if found", 
-  "position": "current or desired position (translate if needed)",
-  "experience_years": estimated years of experience as a number (make reasonable inference if not explicit),
-  "skills": ["array", "of", "skills", "both", "original", "and", "translated"],
-  "education": "education background",
-  "work_history": "brief work history summary",
-  "ai_score": score from 0-100 based on job match (provide score even with limited info),
+  "name": "exact full name from resume",
+  "email": "email address if found (null if not found)",
+  "phone": "phone number if found (null if not found)", 
+  "position": "current/desired position from resume",
+  "experience_years": calculated total years as integer (null if unclear),
+  "skills": ["skill1", "skill2", "skill3"],
+  "education": "education details",
+  "work_history": "brief work experience summary",
+  "ai_score": score from 0-100 (integer),
   "ai_analysis": {
-    "strengths": ["identified strengths"],
-    "weaknesses": ["potential gaps or weaknesses"],
-    "match_reasoning": "detailed explanation of the score and match assessment",
-    "recommendations": "hiring recommendations and next steps",
+    "strengths": ["specific strength 1", "specific strength 2"],
+    "weaknesses": ["specific weakness 1", "specific weakness 2"],
+    "match_reasoning": "detailed explanation of why this score was given and how candidate matches job requirements",
+    "recommendations": "specific hiring recommendations",
     "language_notes": "note if resume is in non-English language"
   }
-}
+}`
 
-CRITICAL: Respond with ONLY the JSON object, no other text.`
-
-    console.log('Calling OpenAI API...')
+    console.log('Calling OpenAI API with enhanced prompt...')
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -90,21 +105,19 @@ CRITICAL: Respond with ONLY the JSON object, no other text.`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Updated to current model
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert multilingual HR assistant that analyzes resumes in any language. 
-            You MUST respond with ONLY a valid JSON object, no additional text, explanations, or markdown formatting.
-            Extract all available information and make reasonable inferences when needed.`
+            content: `You are an expert HR resume analyzer. You MUST respond with ONLY a valid JSON object, no additional text, explanations, or markdown formatting. Be extremely careful about extracting contact information and calculating experience years accurately. Look for email patterns (@), phone number patterns (digits with separators), and date ranges for experience calculation.`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.2,
-        response_format: { type: "json_object" } // Force JSON response
+        temperature: 0.1, // Lower temperature for more consistent extraction
+        response_format: { type: "json_object" }
       }),
     })
 
@@ -120,10 +133,9 @@ CRITICAL: Respond with ONLY the JSON object, no other text.`
     const analysisText = aiResponse.choices[0].message.content
     console.log('Raw AI response:', analysisText)
 
-    // Parse the AI response with better error handling
+    // Parse the AI response with improved error handling
     let candidateData
     try {
-      // Clean the response text in case there are any markdown artifacts
       const cleanedText = analysisText.replace(/```json\s*|\s*```/g, '').trim()
       candidateData = JSON.parse(cleanedText)
       console.log('Successfully parsed candidate data:', candidateData)
@@ -134,8 +146,8 @@ CRITICAL: Respond with ONLY the JSON object, no other text.`
       // Fallback: create a basic candidate entry
       candidateData = {
         name: originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: '',
-        phone: '',
+        email: null,
+        phone: null,
         position: jobTitle || 'Not specified',
         experience_years: null,
         skills: [],
@@ -152,30 +164,38 @@ CRITICAL: Respond with ONLY the JSON object, no other text.`
       }
     }
 
-    // Validate and sanitize the data
+    // Enhanced data validation and sanitization
     const sanitizeData = (data) => {
       return {
         name: data.name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: data.email || '',
-        phone: data.phone || null,
+        email: validateEmail(data.email),
+        phone: validatePhone(data.phone),
         position: data.position || null,
-        experience_years: validateInteger(data.experience_years),
-        skills: Array.isArray(data.skills) ? data.skills : [],
+        experience_years: validateExperience(data.experience_years),
+        skills: Array.isArray(data.skills) ? data.skills.filter(skill => skill && skill.trim()) : [],
         education: data.education || null,
         work_history: data.work_history || null,
         ai_score: validateScore(data.ai_score),
-        ai_analysis: data.ai_analysis || {
-          strengths: [],
-          weaknesses: ['Limited analysis available'],
-          match_reasoning: 'Basic analysis completed',
-          recommendations: 'Consider for further review',
-          language_notes: 'Standard processing'
-        }
+        ai_analysis: validateAnalysis(data.ai_analysis)
       }
     }
 
-    const validateInteger = (value) => {
-      if (value === null || value === undefined || value === '') {
+    const validateEmail = (email) => {
+      if (!email || email === '' || email === 'null') return null
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      return emailRegex.test(email) ? email : null
+    }
+
+    const validatePhone = (phone) => {
+      if (!phone || phone === '' || phone === 'null') return null
+      // Clean phone number and check if it has enough digits
+      const cleanPhone = phone.toString().replace(/\D/g, '')
+      return cleanPhone.length >= 7 ? phone : null
+    }
+
+    const validateExperience = (value) => {
+      if (value === null || value === undefined || value === '' || value === 'null') {
         return null
       }
       if (typeof value === 'number' && !isNaN(value) && Number.isInteger(value)) {
@@ -204,6 +224,26 @@ CRITICAL: Respond with ONLY the JSON object, no other text.`
         }
       }
       return 50 // Default score
+    }
+
+    const validateAnalysis = (analysis) => {
+      if (!analysis || typeof analysis !== 'object') {
+        return {
+          strengths: [],
+          weaknesses: ['Limited analysis available'],
+          match_reasoning: 'Basic analysis completed',
+          recommendations: 'Consider for further review',
+          language_notes: 'Standard processing'
+        }
+      }
+
+      return {
+        strengths: Array.isArray(analysis.strengths) ? analysis.strengths : [],
+        weaknesses: Array.isArray(analysis.weaknesses) ? analysis.weaknesses : ['Analysis incomplete'],
+        match_reasoning: analysis.match_reasoning || 'Score based on available information',
+        recommendations: analysis.recommendations || 'Review candidate details for decision',
+        language_notes: analysis.language_notes || 'Standard processing'
+      }
     }
 
     const sanitizedData = sanitizeData(candidateData)
