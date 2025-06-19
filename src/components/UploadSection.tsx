@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +17,7 @@ const UploadSection = () => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
   const [processedCount, setProcessedCount] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { createJobPosting, jobPostings } = useJobPostings();
@@ -42,6 +42,10 @@ const UploadSection = () => {
         description: `${pdfFiles.length} PDF files ready for processing.`,
       });
     }
+  };
+
+  const handleChooseFilesClick = () => {
+    fileInputRef.current?.click();
   };
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
@@ -242,19 +246,22 @@ const UploadSection = () => {
                   Drag and drop PDF files here, or click to browse
                 </p>
                 <Input
+                  ref={fileInputRef}
                   type="file"
                   multiple
                   accept=".pdf"
                   onChange={handleFileUpload}
                   className="hidden"
-                  id="file-upload"
                   disabled={processing}
                 />
-                <Label htmlFor="file-upload">
-                  <Button variant="outline" className="cursor-pointer" disabled={processing}>
-                    Choose Files
-                  </Button>
-                </Label>
+                <Button 
+                  variant="outline" 
+                  onClick={handleChooseFilesClick}
+                  disabled={processing}
+                  type="button"
+                >
+                  Choose Files
+                </Button>
               </div>
             </div>
 
