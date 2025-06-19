@@ -7,41 +7,120 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Simple PDF text extraction - looks for text content in PDF structure
+// Improved PDF text extraction function
 const extractTextFromPDF = async (pdfBuffer: Uint8Array): Promise<string> => {
   try {
-    // Convert buffer to string for text extraction
-    const pdfText = new TextDecoder('latin1').decode(pdfBuffer);
+    console.log('Starting PDF text extraction, buffer size:', pdfBuffer.length);
     
-    // Extract text content using regex patterns
-    const textMatches = pdfText.match(/\(([^)]+)\)/g) || [];
-    const extractedText = textMatches
-      .map(match => match.slice(1, -1)) // Remove parentheses
-      .filter(text => text.length > 2) // Filter out single characters
-      .join(' ');
+    // Convert to string for parsing
+    const pdfString = new TextDecoder('latin1').decode(pdfBuffer);
     
-    // Also try to find text streams
-    const streamMatches = pdfText.match(/stream\s+(.*?)\s+endstream/gs) || [];
-    let streamText = '';
+    // Look for text objects in PDF structure
+    let extractedText = '';
     
-    for (const stream of streamMatches) {
-      const content = stream.replace(/^stream\s+/, '').replace(/\s+endstream$/, '');
-      // Look for readable text in the stream
-      const readableText = content.match(/[A-Za-z0-9\s@.+-]+/g);
-      if (readableText) {
-        streamText += readableText.join(' ') + ' ';
+    // Method 1: Extract text from BT/ET blocks (text objects)
+    const textObjectRegex = /BT\s+(.*?)\s+ET/gs;
+    const textObjects = pdfString.match(textObjectRegex) || [];
+    
+    console.log('Found text objects:', textObjects.length);
+    
+    for (const textObj of textObjects) {
+      // Extract text from Tj and TJ operators
+      const tjMatches = textObj.match(/\((.*?)\)\s*Tj/g) || [];
+      const tjArrayMatches = textObj.match(/\[(.*?)\]\s*TJ/g) || [];
+      
+      for (const match of tjMatches) {
+        const text = match.match(/\((.*?)\)/)?.[1];
+        if (text && text.length > 1) {
+          extractedText += text.replace(/\\[rn]/g, ' ') + ' ';
+        }
+      }
+      
+      for (const match of tjArrayMatches) {
+        const content = match.match(/\[(.*?)\]/)?.[1];
+        if (content) {
+          // Extract strings from TJ arrays
+          const strings = content.match(/\((.*?)\)/g) || [];
+          for (const str of strings) {
+            const text = str.slice(1, -1); // Remove parentheses
+            if (text && text.length > 1) {
+              extractedText += text.replace(/\\[rn]/g, ' ') + ' ';
+            }
+          }
+        }
       }
     }
     
-    const finalText = (extractedText + ' ' + streamText).trim();
+    // Method 2: Look for stream objects with text content
+    const streamRegex = /stream\s+(.*?)\s+endstream/gs;
+    const streams = pdfString.match(streamRegex) || [];
     
-    console.log('Extracted text length:', finalText.length);
-    console.log('Sample extracted text:', finalText.substring(0, 200));
+    console.log('Found streams:', streams.length);
     
-    return finalText || 'Unable to extract text from PDF';
+    for (const stream of streams) {
+      const content = stream.replace(/^stream\s+/, '').replace(/\s+endstream$/, '');
+      
+      // Try to find readable text patterns
+      const readableText = content.match(/[A-Za-z0-9@.\-+\s]{3,}/g);
+      if (readableText) {
+        for (const text of readableText) {
+          // Filter out likely non-text content
+          if (!/^[\d\s.]+$/.test(text) && text.trim().length > 2) {
+            extractedText += text.trim() + ' ';
+          }
+        }
+      }
+    }
+    
+    // Method 3: Direct text extraction from parentheses
+    const directTextMatches = pdfString.match(/\(([^)]{2,})\)/g) || [];
+    console.log('Found direct text matches:', directTextMatches.length);
+    
+    for (const match of directTextMatches) {
+      const text = match.slice(1, -1); // Remove parentheses
+      if (text && text.length > 2 && /[A-Za-z]/.test(text)) {
+        extractedText += text.replace(/\\[rn]/g, ' ') + ' ';
+      }
+    }
+    
+    // Clean up extracted text
+    extractedText = extractedText
+      .replace(/\s+/g, ' ')
+      .replace(/\\[rn]/g, ' ')
+      .replace(/[^\x20-\x7E\u00A0-\u024F\u1E00-\u1EFF]/g, ' ')
+      .trim();
+    
+    console.log('Extracted text length:', extractedText.length);
+    console.log('Sample extracted text:', extractedText.substring(0, 500));
+    
+    // If we still don't have much readable text, try a more aggressive approach
+    if (extractedText.length < 100) {
+      console.log('Trying alternative extraction method...');
+      
+      // Look for any readable sequences
+      const alternativeText = pdfString.match(/[A-Za-z][A-Za-z0-9@.\-+\s]{10,}/g) || [];
+      let altExtracted = '';
+      
+      for (const text of alternativeText) {
+        if (!/^[\d\s.]+$/.test(text) && text.includes(' ')) {
+          altExtracted += text.trim() + ' ';
+        }
+      }
+      
+      if (altExtracted.length > extractedText.length) {
+        extractedText = altExtracted.trim();
+      }
+    }
+    
+    if (extractedText.length < 50) {
+      console.log('WARNING: Very little text extracted from PDF');
+      return 'Limited text content found in PDF. Please ensure the PDF contains selectable text and is not a scanned image.';
+    }
+    
+    return extractedText;
   } catch (error) {
     console.error('Error extracting text from PDF:', error);
-    return 'PDF text extraction failed';
+    return 'PDF text extraction failed. Please ensure the file is a valid PDF with selectable text.';
   }
 };
 
@@ -89,8 +168,8 @@ serve(async (req) => {
 
     console.log('Resume text extracted, length:', resumeText?.length || 0)
 
-    if (!resumeText || resumeText.trim().length < 10) {
-      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file is not password protected or image-only.')
+    if (!resumeText || resumeText.trim().length < 50) {
+      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
     }
 
     // Get OpenAI API key
@@ -359,7 +438,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
     
     let errorMessage = 'An unexpected error occurred while processing the resume.'
     
-    if (error.message.includes('OpenA I API')) {
+    if (error.message.includes('OpenAI API')) {
       errorMessage = 'Failed to analyze resume content. Please try again.'
     } else if (error.message.includes('Database')) {
       errorMessage = 'Failed to save candidate data. Please contact support.'
