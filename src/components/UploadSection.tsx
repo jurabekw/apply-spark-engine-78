@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJobPostings } from '@/hooks/useJobPostings';
+import { generateUniqueFilename } from '@/utils/fileUtils';
 
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -55,24 +57,40 @@ const UploadSection = () => {
   };
 
   const uploadFileToStorage = async (file: File, userId: string): Promise<string> => {
-    const fileName = `${userId}/${Date.now()}-${file.name}`;
-    
-    const { data, error } = await supabase.storage
-      .from('resumes')
-      .upload(fileName, file);
+    try {
+      // Generate a sanitized, unique filename
+      const sanitizedFilename = generateUniqueFilename(file.name, userId);
+      const filePath = `${userId}/${sanitizedFilename}`;
+      
+      console.log(`Uploading file: ${file.name} -> ${filePath}`);
+      
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    if (error) {
-      throw new Error(`Upload failed: ${error.message}`);
+      if (error) {
+        console.error('Storage upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+
+      console.log('File uploaded successfully:', data.path);
+      return data.path;
+    } catch (error) {
+      console.error('Error in uploadFileToStorage:', error);
+      throw error;
     }
-
-    return fileName;
   };
 
   const processResumeWithAI = async (file: File) => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      // Upload file to storage
+      console.log(`Processing resume: ${file.name} (${file.size} bytes)`);
+      
+      // Upload file to storage with sanitized filename
       const filePath = await uploadFileToStorage(file, user.id);
       
       // Extract text from PDF
@@ -86,17 +104,21 @@ const UploadSection = () => {
           jobTitle,
           userId: user.id,
           resumeFilePath: filePath,
+          originalFilename: file.name, // Pass original filename
         },
       });
 
       if (error) {
+        console.error('AI processing error:', error);
         throw new Error(error.message || 'AI processing failed');
       }
 
       if (!data.success) {
+        console.error('AI processing failed:', data.error);
         throw new Error(data.error || 'Processing failed');
       }
 
+      console.log('Resume processed successfully:', data.candidate?.name);
       return data.candidate;
     } catch (error) {
       console.error('Error processing resume:', error);

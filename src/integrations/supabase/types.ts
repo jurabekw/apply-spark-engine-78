@@ -71,6 +71,7 @@ export type Database = {
           id: string
           job_posting_id: string | null
           name: string
+          original_filename: string | null
           phone: string | null
           position: string | null
           resume_file_path: string | null
@@ -93,6 +94,7 @@ export type Database = {
           id?: string
           job_posting_id?: string | null
           name: string
+          original_filename?: string | null
           phone?: string | null
           position?: string | null
           resume_file_path?: string | null
@@ -115,6 +117,7 @@ export type Database = {
           id?: string
           job_posting_id?: string | null
           name?: string
+          original_filename?: string | null
           phone?: string | null
           position?: string | null
           resume_file_path?: string | null
