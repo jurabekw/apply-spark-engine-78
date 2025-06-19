@@ -26,6 +26,8 @@ serve(async (req) => {
     console.log('Processing resume for job:', jobTitle)
     console.log('Original filename:', originalFilename)
     console.log('Storage path:', resumeFilePath)
+    console.log('Resume text length:', resumeText?.length || 0)
+    console.log('Resume text preview (first 500 chars):', resumeText?.substring(0, 500))
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -40,35 +42,56 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
-    // Call OpenAI API for resume analysis
+    // Enhanced prompt for multilingual resume analysis
     const prompt = `Analyze this resume for the job position "${jobTitle}" with requirements: "${jobRequirements}".
 
 Resume content:
 ${resumeText}
 
+IMPORTANT INSTRUCTIONS:
+1. This resume may be in Russian, English, or other languages - analyze it regardless of language
+2. Extract ALL available information even if limited
+3. For Russian names, keep them in original Cyrillic if present
+4. Translate job titles and skills to English when possible, but also keep originals
+5. Be aggressive in extracting information - don't be too conservative
+6. If experience isn't explicitly stated, make reasonable inferences from job history
+7. Extract skills from job descriptions if not explicitly listed
+8. Provide a score even with limited information - don't default to null
+
+Common Russian job titles and skills to recognize:
+- "Менеджер" = Manager
+- "Разработчик" = Developer  
+- "Специалист" = Specialist
+- "Директор" = Director
+- "Координатор" = Coordinator
+- "Аналитик" = Analyst
+
 Please extract the following information and provide a JSON response:
 {
-  "name": "candidate name",
+  "name": "candidate name (keep original script/language)",
   "email": "email address if found",
   "phone": "phone number if found", 
-  "position": "current or desired position",
-  "experience_years": number of years of experience (as a number, or null if not found),
-  "skills": ["array", "of", "skills"],
+  "position": "current or desired position (translate if needed)",
+  "experience_years": estimated years of experience as a number (make reasonable inference if not explicit),
+  "skills": ["array", "of", "skills", "both", "original", "and", "translated"],
   "education": "education background",
   "work_history": "brief work history summary",
-  "ai_score": score from 0-100 based on job match,
+  "ai_score": score from 0-100 based on job match (provide score even with limited info),
   "ai_analysis": {
-    "strengths": ["strength1", "strength2"],
-    "weaknesses": ["weakness1", "weakness2"],
-    "match_reasoning": "explanation of the score",
-    "recommendations": "hiring recommendations"
+    "strengths": ["identified strengths"],
+    "weaknesses": ["potential gaps or weaknesses"],
+    "match_reasoning": "detailed explanation of the score and match assessment",
+    "recommendations": "hiring recommendations and next steps",
+    "language_notes": "note if resume is in non-English language"
   }
 }
 
-IMPORTANT: 
-- For experience_years, return a NUMBER or null if not found. Do not return strings like "Not found" or "N/A".
-- For ai_score, return a NUMBER between 0-100.
-- Always return valid JSON.`
+CRITICAL REQUIREMENTS:
+- For experience_years: Return a NUMBER (estimate if needed) or null only if absolutely no work history exists
+- For ai_score: Return a NUMBER between 0-100 (don't default to null - provide reasonable estimate)
+- Extract information aggressively - something is better than nothing
+- If resume is mostly in Russian/other language, note this in ai_analysis.language_notes
+- Always return valid JSON`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -81,14 +104,23 @@ IMPORTANT:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert HR assistant that analyzes resumes and provides structured feedback. Always respond with valid JSON. For numeric fields, use numbers or null, never strings.'
+            content: `You are an expert multilingual HR assistant that analyzes resumes in any language (especially Russian, English, and other languages). 
+            
+            Key principles:
+            - Extract ALL available information regardless of language
+            - Make reasonable inferences when information isn't explicit
+            - Provide scores and analysis even with limited information
+            - Handle Cyrillic text, special characters, and mixed languages
+            - Always respond with valid JSON
+            - For numeric fields, use numbers or null only when absolutely no information exists
+            - Be aggressive in information extraction - don't be overly conservative`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
+        temperature: 0.2, // Lower temperature for more consistent extraction
       }),
     })
 
@@ -101,12 +133,16 @@ IMPORTANT:
     const aiResponse = await response.json()
     const analysisText = aiResponse.choices[0].message.content
 
+    console.log('Raw AI response:', analysisText)
+
     // Parse the AI response
     let candidateData
     try {
       candidateData = JSON.parse(analysisText)
+      console.log('Parsed candidate data:', candidateData)
     } catch (parseError) {
       console.error('Failed to parse AI response:', analysisText)
+      console.error('Parse error:', parseError)
       throw new Error('Invalid AI response format')
     }
 
@@ -161,23 +197,40 @@ IMPORTANT:
     const sanitizedData = sanitizeData(candidateData)
     console.log('Sanitized candidate data:', sanitizedData)
 
+    // Add fallback logic for critical fields
+    const finalData = {
+      ...sanitizedData,
+      // Ensure we have at least a basic analysis even if AI failed
+      ai_analysis: sanitizedData.ai_analysis || {
+        strengths: [],
+        weaknesses: ["Limited information available for analysis"],
+        match_reasoning: "Analysis based on available resume content. May require manual review due to language or formatting issues.",
+        recommendations: "Consider manual review of this candidate's resume for complete evaluation.",
+        language_notes: "Resume may contain non-English content or formatting issues."
+      },
+      // Provide a default score if none was given
+      ai_score: sanitizedData.ai_score !== null ? sanitizedData.ai_score : 50
+    }
+
+    console.log('Final processed data:', finalData)
+
     // Insert candidate into database with original filename
     const { data: candidate, error: dbError } = await supabase
       .from('candidates')
       .insert({
         user_id: userId,
-        name: sanitizedData.name,
-        email: sanitizedData.email,
-        phone: sanitizedData.phone,
-        position: sanitizedData.position,
-        experience_years: sanitizedData.experience_years,
-        skills: sanitizedData.skills,
-        education: sanitizedData.education,
-        work_history: sanitizedData.work_history,
+        name: finalData.name,
+        email: finalData.email,
+        phone: finalData.phone,
+        position: finalData.position,
+        experience_years: finalData.experience_years,
+        skills: finalData.skills,
+        education: finalData.education,
+        work_history: finalData.work_history,
         resume_file_path: resumeFilePath,
         original_filename: originalFilename,
-        ai_score: sanitizedData.ai_score,
-        ai_analysis: sanitizedData.ai_analysis,
+        ai_score: finalData.ai_score,
+        ai_analysis: finalData.ai_analysis,
         status: 'new',
         source: 'upload'
       })
