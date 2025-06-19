@@ -1,16 +1,16 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Filter, Download, Star, Eye, Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Search, Filter, Download, Star, Eye, Loader2, Trash2 } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 
 const CandidateTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { candidates, loading, updateCandidateStatus } = useCandidates();
+  const { candidates, loading, updateCandidateStatus, deleteCandidate } = useCandidates();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -65,6 +65,10 @@ const CandidateTable = () => {
 
   const handleStatusChange = async (candidateId: string, newStatus: string) => {
     await updateCandidateStatus(candidateId, newStatus);
+  };
+
+  const handleDeleteCandidate = async (candidateId: string) => {
+    await deleteCandidate(candidateId);
   };
 
   if (loading) {
@@ -207,16 +211,46 @@ const CandidateTable = () => {
                         {formatDate(candidate.submitted_at || candidate.created_at)}
                       </TableCell>
                       <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => {
-                            // TODO: Implement candidate detail view
-                            console.log('View candidate:', candidate.id);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              // TODO: Implement candidate detail view
+                              console.log('View candidate:', candidate.id);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data including their resume.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteCandidate(candidate.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

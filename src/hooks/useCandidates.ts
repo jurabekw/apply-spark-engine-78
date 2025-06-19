@@ -84,6 +84,47 @@ export const useCandidates = () => {
     }
   };
 
+  const deleteCandidate = async (candidateId: string) => {
+    try {
+      // First, get the candidate to check if they have a resume file
+      const candidate = candidates.find(c => c.id === candidateId);
+      
+      // Delete the resume file from storage if it exists
+      if (candidate?.resume_file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('resumes')
+          .remove([candidate.resume_file_path]);
+        
+        if (storageError) {
+          console.error('Error deleting resume file:', storageError);
+          // Continue with candidate deletion even if file deletion fails
+        }
+      }
+
+      // Delete the candidate record
+      const { error } = await supabase
+        .from('candidates')
+        .delete()
+        .eq('id', candidateId);
+
+      if (error) throw error;
+      
+      setCandidates(prev => prev.filter(candidate => candidate.id !== candidateId));
+
+      toast({
+        title: "Candidate deleted",
+        description: "Candidate has been permanently deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting candidate:', error);
+      toast({
+        title: "Error deleting candidate",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchCandidates();
   }, [user]);
@@ -92,6 +133,7 @@ export const useCandidates = () => {
     candidates,
     loading,
     updateCandidateStatus,
+    deleteCandidate,
     refetch: fetchCandidates,
   };
 };
