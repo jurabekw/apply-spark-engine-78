@@ -1,9 +1,16 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, User, Bell } from 'lucide-react';
+import { Settings, User, Bell, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -31,7 +38,11 @@ const Header = () => {
             </Button>
             <Button variant="ghost" size="sm">
               <User className="w-4 h-4" />
-              HR Admin
+              {user?.email?.split('@')[0] || 'HR Admin'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4" />
+              Sign Out
             </Button>
           </div>
         </div>

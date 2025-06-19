@@ -1,9 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
@@ -11,6 +13,31 @@ import StatsCards from '@/components/StatsCards';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-sm">HR</span>
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
@@ -50,7 +77,7 @@ const Index = () => {
                 </p>
               </div>
               <Badge variant="secondary" className="px-3 py-1">
-                Demo Mode - Connect Supabase for full functionality
+                Welcome back, {user.email}!
               </Badge>
             </div>
 
