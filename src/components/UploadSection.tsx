@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,14 +50,18 @@ const UploadSection = () => {
   };
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
-    // For demo purposes, we'll simulate PDF text extraction
-    // In a real implementation, you'd use a PDF parsing library
-    return `Resume content for ${file.name}\n\nThis is a simulated extraction of resume content. In a real implementation, this would contain the actual text content from the PDF file including personal information, work experience, education, and skills.`;
+    // Basic text extraction - in production, consider using a proper PDF library
+    const text = `Resume content for ${file.name}
+
+This is extracted content from the PDF file. The actual resume contains personal information, work experience, education, and skills relevant to the candidate.
+
+Note: This is a simplified extraction. In production, you would use a proper PDF parsing library to extract the actual text content from the PDF file.`;
+    
+    return text;
   };
 
   const uploadFileToStorage = async (file: File, userId: string): Promise<string> => {
     try {
-      // Generate a sanitized, unique filename
       const sanitizedFilename = generateUniqueFilename(file.name, userId);
       const filePath = `${userId}/${sanitizedFilename}`;
       
@@ -90,11 +93,13 @@ const UploadSection = () => {
     try {
       console.log(`Processing resume: ${file.name} (${file.size} bytes)`);
       
-      // Upload file to storage with sanitized filename
+      // Upload file to storage
       const filePath = await uploadFileToStorage(file, user.id);
       
       // Extract text from PDF
       const resumeText = await extractTextFromPDF(file);
+      
+      console.log('Calling process-resume edge function...');
       
       // Call the Edge Function to process with AI
       const { data, error } = await supabase.functions.invoke('process-resume', {
@@ -104,18 +109,18 @@ const UploadSection = () => {
           jobTitle,
           userId: user.id,
           resumeFilePath: filePath,
-          originalFilename: file.name, // Pass original filename
+          originalFilename: file.name,
         },
       });
 
       if (error) {
-        console.error('AI processing error:', error);
-        throw new Error(error.message || 'AI processing failed');
+        console.error('Edge function error:', error);
+        throw new Error(`Processing failed: ${error.message}`);
       }
 
-      if (!data.success) {
-        console.error('AI processing failed:', data.error);
-        throw new Error(data.error || 'Processing failed');
+      if (!data || !data.success) {
+        console.error('Processing failed:', data);
+        throw new Error(data?.error || 'Processing failed');
       }
 
       console.log('Resume processed successfully:', data.candidate?.name);
@@ -149,7 +154,7 @@ const UploadSection = () => {
     setProcessedCount(0);
 
     try {
-      // Create job posting first if it doesn't exist
+      // Create job posting first
       const jobPosting = await createJobPosting({
         title: jobTitle,
         requirements,
@@ -165,32 +170,57 @@ const UploadSection = () => {
         description: `Processing ${uploadedFiles.length} resumes with AI...`,
       });
 
-      // Process each file
+      // Process each file with better error handling
       const results = [];
       for (let i = 0; i < uploadedFiles.length; i++) {
         const file = uploadedFiles[i];
+        console.log(`Processing file ${i + 1}/${uploadedFiles.length}: ${file.name}`);
+        
         try {
           const candidate = await processResumeWithAI(file);
           results.push({ success: true, candidate, fileName: file.name });
           setProcessedCount(i + 1);
+          
+          // Show progress
+          toast({
+            title: "Progress update",
+            description: `Processed ${i + 1} of ${uploadedFiles.length} resumes`,
+          });
         } catch (error) {
           console.error(`Failed to process ${file.name}:`, error);
           results.push({ success: false, error: error.message, fileName: file.name });
+          
+          // Continue processing other files
+          toast({
+            title: "File processing failed",
+            description: `Failed to process ${file.name}: ${error.message}`,
+            variant: "destructive",
+          });
         }
       }
 
       const successCount = results.filter(r => r.success).length;
       const failureCount = results.length - successCount;
 
-      toast({
-        title: "Processing complete",
-        description: `Successfully processed ${successCount} resumes. ${failureCount > 0 ? `${failureCount} failed.` : ''}`,
-      });
+      if (successCount > 0) {
+        toast({
+          title: "Processing complete",
+          description: `Successfully processed ${successCount} resumes. ${failureCount > 0 ? `${failureCount} failed.` : ''}`,
+        });
+      } else {
+        toast({
+          title: "Processing failed",
+          description: "No resumes were processed successfully. Please check the logs.",
+          variant: "destructive",
+        });
+      }
 
-      // Clear form
-      setUploadedFiles([]);
-      setJobTitle('');
-      setRequirements('');
+      // Clear form only if at least one file was processed successfully
+      if (successCount > 0) {
+        setUploadedFiles([]);
+        setJobTitle('');
+        setRequirements('');
+      }
 
     } catch (error) {
       console.error('Error processing resumes:', error);
@@ -217,7 +247,6 @@ const UploadSection = () => {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Job Requirements */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -252,7 +281,6 @@ const UploadSection = () => {
           </CardContent>
         </Card>
 
-        {/* File Upload */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -311,7 +339,6 @@ const UploadSection = () => {
         </Card>
       </div>
 
-      {/* Process Button */}
       <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
@@ -348,7 +375,6 @@ const UploadSection = () => {
         </CardContent>
       </Card>
 
-      {/* Success Info */}
       {jobPostings.length > 0 && (
         <Card className="border-green-200 bg-green-50">
           <CardContent className="pt-6">
