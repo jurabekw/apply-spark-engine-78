@@ -50,30 +50,34 @@ ${resumeText}
 CRITICAL INSTRUCTIONS - EXTRACT INFORMATION PRECISELY:
 
 1. CONTACT INFORMATION - Look carefully for:
-   - Email addresses (look for @ symbols and common email formats)
-   - Phone numbers (look for sequences of digits, may include +, -, (), spaces)
-   - Full name (usually at the top of resume)
+   - Email addresses (look for @ symbols and common email formats like name@domain.com)
+   - Phone numbers (look for sequences of digits, may include +, -, (), spaces, country codes)
+   - Full name (usually at the top of resume, may be in different languages)
 
 2. EXPERIENCE CALCULATION - Be very careful:
-   - Look for employment dates (2020-2023, Jan 2020 - Present, etc.)
+   - Look for employment dates (2020-2023, Jan 2020 - Present, 2020-н.в., с 2020 по 2023, etc.)
    - Calculate total years of work experience by adding up all employment periods
+   - Account for overlapping positions by using the earliest start to latest end date
    - If dates are unclear, look for phrases like "3 years experience" or similar
    - If no clear experience is found, set to null (not 0)
 
 3. SKILLS EXTRACTION:
    - Look for dedicated skills sections
-   - Extract technical skills, programming languages, tools
+   - Extract technical skills, programming languages, tools, software
    - Include both hard and soft skills mentioned
+   - Look for skills in different languages and translate to English
 
 4. SCORING (0-100):
    - Be realistic and justified in scoring
-   - Consider job requirements match
+   - Consider job requirements match carefully
    - Factor in experience level, skills alignment, education relevance
+   - Higher scores (80+) only for strong matches
 
 5. LANGUAGE HANDLING:
-   - Process resumes in any language (Russian, English, etc.)
-   - Keep original names in their native script
+   - Process resumes in any language (Russian, English, Uzbek, etc.)
+   - Keep original names in their native script if needed
    - Translate skills and job titles to English when possible
+   - Note the resume language in language_notes
 
 RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
 
@@ -146,7 +150,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
       // Fallback: create a basic candidate entry
       candidateData = {
         name: originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: null,
+        email: null, // Now allowed to be null
         phone: null,
         position: jobTitle || 'Not specified',
         experience_years: null,
@@ -168,7 +172,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
     const sanitizeData = (data) => {
       return {
         name: data.name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-        email: validateEmail(data.email),
+        email: validateEmail(data.email), // Now can be null
         phone: validatePhone(data.phone),
         position: data.position || null,
         experience_years: validateExperience(data.experience_years),
@@ -181,17 +185,17 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
     }
 
     const validateEmail = (email) => {
-      if (!email || email === '' || email === 'null') return null
+      if (!email || email === '' || email === 'null' || email === 'undefined') return null
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      return emailRegex.test(email) ? email : null
+      return emailRegex.test(email.toString()) ? email.toString().trim() : null
     }
 
     const validatePhone = (phone) => {
-      if (!phone || phone === '' || phone === 'null') return null
+      if (!phone || phone === '' || phone === 'null' || phone === 'undefined') return null
       // Clean phone number and check if it has enough digits
       const cleanPhone = phone.toString().replace(/\D/g, '')
-      return cleanPhone.length >= 7 ? phone : null
+      return cleanPhone.length >= 7 ? phone.toString().trim() : null
     }
 
     const validateExperience = (value) => {
@@ -256,7 +260,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
       .insert({
         user_id: userId,
         name: sanitizedData.name,
-        email: sanitizedData.email,
+        email: sanitizedData.email, // Now can be null
         phone: sanitizedData.phone,
         position: sanitizedData.position,
         experience_years: sanitizedData.experience_years,
@@ -283,7 +287,8 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
     return new Response(
       JSON.stringify({ 
         success: true, 
-        candidate: candidate 
+        candidate: candidate,
+        message: 'Resume processed successfully'
       }),
       { 
         headers: { 
@@ -295,11 +300,24 @@ RESPOND WITH ONLY A VALID JSON OBJECT - NO OTHER TEXT:
 
   } catch (error) {
     console.error('Error in process-resume function:', error)
+    
+    // Provide more specific error messages
+    let errorMessage = 'An unexpected error occurred while processing the resume.'
+    
+    if (error.message.includes('OpenAI API')) {
+      errorMessage = 'Failed to analyze resume content. Please try again.'
+    } else if (error.message.includes('Database')) {
+      errorMessage = 'Failed to save candidate data. Please contact support.'
+    } else if (error.message.includes('API key')) {
+      errorMessage = 'Service configuration error. Please contact support.'
+    }
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message,
-        details: error.stack
+        error: errorMessage,
+        details: error.message,
+        timestamp: new Date().toISOString()
       }),
       { 
         status: 500,

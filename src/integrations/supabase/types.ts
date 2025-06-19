@@ -66,7 +66,7 @@ export type Database = {
           cover_letter: string | null
           created_at: string
           education: string | null
-          email: string
+          email: string | null
           experience_years: number | null
           id: string
           job_posting_id: string | null
@@ -89,7 +89,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           education?: string | null
-          email: string
+          email?: string | null
           experience_years?: number | null
           id?: string
           job_posting_id?: string | null
@@ -112,7 +112,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           education?: string | null
-          email?: string
+          email?: string | null
           experience_years?: number | null
           id?: string
           job_posting_id?: string | null

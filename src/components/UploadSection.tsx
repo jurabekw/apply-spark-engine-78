@@ -1,483 +1,327 @@
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Upload, FileText, Zap, AlertCircle, Loader2, X } from 'lucide-react';
+import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useJobPostings } from '@/hooks/useJobPostings';
-import { generateUniqueFilename } from '@/utils/fileUtils';
+import { extractTextFromPDF } from '@/utils/fileUtils';
 
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
-  const [requirements, setRequirements] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [processing, setProcessing] = useState(false);
-  const [processedCount, setProcessedCount] = useState(0);
-  const [currentProcessingFile, setCurrentProcessingFile] = useState<string>('');
-  const [processingProgress, setProcessingProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [jobRequirements, setJobRequirements] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { createJobPosting, jobPostings } = useJobPostings();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const pdfFiles = files.filter(file => file.type === 'application/pdf');
-    
-    if (pdfFiles.length !== files.length) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload only PDF files.",
-        variant: "destructive",
-      });
-    }
-    
-    setUploadedFiles(prev => [...prev, ...pdfFiles]);
-    
-    if (pdfFiles.length > 0) {
-      toast({
-        title: "Files uploaded successfully",
-        description: `${pdfFiles.length} PDF files ready for processing.`,
-      });
-    }
-  };
-
-  const handleChooseFilesClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    // Basic text extraction - in production, consider using a proper PDF library
-    const text = `Resume content for ${file.name}
-
-This is extracted content from the PDF file. The actual resume contains personal information, work experience, education, and skills relevant to the candidate.
-
-Note: This is a simplified extraction. In production, you would use a proper PDF parsing library to extract the actual text content from the PDF file.`;
-    
-    return text;
-  };
-
-  const uploadFileToStorage = async (file: File, userId: string): Promise<string> => {
-    try {
-      const sanitizedFilename = generateUniqueFilename(file.name, userId);
-      const filePath = `${userId}/${sanitizedFilename}`;
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      // Filter for PDF files only
+      const pdfFiles = Array.from(files).filter(file => 
+        file.type === 'application/pdf'
+      );
       
-      console.log(`Uploading file: ${file.name} -> ${filePath}`);
-      
-      const { data, error } = await supabase.storage
-        .from('resumes')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+      if (pdfFiles.length !== files.length) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select only PDF files.",
+          variant: "destructive",
         });
-
-      if (error) {
-        console.error('Storage upload error:', error);
-        throw new Error(`Upload failed: ${error.message}`);
+        return;
       }
 
-      console.log('File uploaded successfully:', data.path);
-      return data.path;
-    } catch (error) {
-      console.error('Error in uploadFileToStorage:', error);
-      throw error;
+      if (pdfFiles.length > 10) {
+        toast({
+          title: "Too many files",
+          description: "Please select maximum 10 files at once.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create a new FileList-like object with only PDF files
+      const dataTransfer = new DataTransfer();
+      pdfFiles.forEach(file => dataTransfer.items.add(file));
+      setSelectedFiles(dataTransfer.files);
     }
   };
 
-  const validateResumeContent = (filename: string, resumeText: string): boolean => {
-    // Check if file name suggests it's a resume
-    const resumeKeywords = ['resume', 'cv', 'curriculum'];
-    const hasResumeInName = resumeKeywords.some(keyword => 
-      filename.toLowerCase().includes(keyword)
-    );
-
-    // Check if content contains resume-like information
-    const contentKeywords = ['experience', 'education', 'skills', 'work', 'employment', 'university', 'college', 'degree'];
-    const hasResumeContent = contentKeywords.some(keyword => 
-      resumeText.toLowerCase().includes(keyword)
-    );
-
-    // For now, since we're using simulated text extraction, we'll be more lenient
-    // In production with real PDF extraction, this validation would be more robust
-    return true; // Temporarily allowing all PDFs until real PDF extraction is implemented
-  };
-
-  const processResumeWithAI = async (file: File, fileIndex: number, totalFiles: number) => {
-    if (!user) throw new Error('User not authenticated');
-
+  const processResume = async (file: File) => {
     try {
-      console.log(`Processing resume: ${file.name} (${file.size} bytes)`);
-      setCurrentProcessingFile(file.name);
-      setProcessingProgress((fileIndex / totalFiles) * 100);
-      
-      // Upload file to storage
-      const filePath = await uploadFileToStorage(file, user.id);
-      
       // Extract text from PDF
       const resumeText = await extractTextFromPDF(file);
       
-      // Validate if this is actually a resume
-      if (!validateResumeContent(file.name, resumeText)) {
-        throw new Error(`File "${file.name}" does not appear to be a valid resume. Please upload actual resume files only.`);
+      if (!resumeText || resumeText.trim().length < 50) {
+        throw new Error('Could not extract sufficient text from the PDF. Please ensure the file is not password protected or image-only.');
       }
-      
-      console.log('Calling process-resume edge function...');
-      
-      // Call the Edge Function to process with AI
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const safeFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `${user?.id}_${timestamp}_${safeFilename}`;
+      const filePath = `${user?.id}/${filename}`;
+
+      // Upload file to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(`Failed to upload file: ${uploadError.message}`);
+      }
+
+      // Process resume with AI
       const { data, error } = await supabase.functions.invoke('process-resume', {
         body: {
           resumeText,
-          jobRequirements: requirements,
+          jobRequirements,
           jobTitle,
-          userId: user.id,
+          userId: user?.id,
           resumeFilePath: filePath,
-          originalFilename: file.name,
-        },
+          originalFilename: file.name
+        }
       });
 
       if (error) {
-        console.error('Edge function error:', error);
-        throw new Error(`Processing failed: ${error.message}`);
+        console.error('Processing error:', error);
+        // Clean up uploaded file on processing error
+        await supabase.storage.from('resumes').remove([filePath]);
+        throw new Error(error.message || 'Failed to process resume');
       }
 
-      if (!data || !data.success) {
-        console.error('Processing failed:', data);
-        throw new Error(data?.error || 'Processing failed - AI analysis returned invalid data');
+      if (!data.success) {
+        // Clean up uploaded file on processing failure
+        await supabase.storage.from('resumes').remove([filePath]);
+        throw new Error(data.error || 'Resume processing failed');
       }
 
-      console.log('Resume processed successfully:', data.candidate?.name);
-      return data.candidate;
+      return {
+        success: true,
+        filename: file.name,
+        candidate: data.candidate
+      };
+
     } catch (error) {
       console.error('Error processing resume:', error);
-      throw error;
+      return {
+        success: false,
+        filename: file.name,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
     }
   };
 
-  const handleProcessResumes = async () => {
-    if (!jobTitle.trim() || !requirements.trim()) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedFiles || selectedFiles.length === 0) {
+      toast({
+        title: "No files selected",
+        description: "Please select at least one PDF file to process.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!jobTitle.trim() || !jobRequirements.trim()) {
       toast({
         title: "Missing information",
-        description: "Please fill in job title and requirements.",
+        description: "Please provide both job title and requirements.",
         variant: "destructive",
       });
       return;
     }
 
-    if (uploadedFiles.length === 0) {
-      toast({
-        title: "No files uploaded",
-        description: "Please upload at least one resume.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setProcessing(true);
-    setProcessedCount(0);
-    setProcessingProgress(0);
-    setCurrentProcessingFile('');
+    setIsProcessing(true);
+    setProcessingProgress([]);
+    
+    const files = Array.from(selectedFiles);
+    let successCount = 0;
+    let failureCount = 0;
+    const failedFiles: string[] = [];
 
     try {
-      // Create job posting first
-      const jobPosting = await createJobPosting({
-        title: jobTitle,
-        requirements,
-        status: 'active',
-      });
-
-      if (!jobPosting) {
-        throw new Error('Failed to create job posting');
-      }
-
-      toast({
-        title: "Processing started",
-        description: `Processing ${uploadedFiles.length} resumes with AI...`,
-      });
-
-      // Process each file with better error handling
-      const results = [];
-      for (let i = 0; i < uploadedFiles.length; i++) {
-        const file = uploadedFiles[i];
-        console.log(`Processing file ${i + 1}/${uploadedFiles.length}: ${file.name}`);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setProcessingProgress(prev => [...prev, `Processing ${file.name}...`]);
         
-        try {
-          const candidate = await processResumeWithAI(file, i, uploadedFiles.length);
-          results.push({ success: true, candidate, fileName: file.name });
-          setProcessedCount(i + 1);
-          setProcessingProgress(((i + 1) / uploadedFiles.length) * 100);
-          
-          // Show progress
-          toast({
-            title: "Progress update",
-            description: `Processed ${i + 1} of ${uploadedFiles.length} resumes`,
-          });
-        } catch (error) {
-          console.error(`Failed to process ${file.name}:`, error);
-          results.push({ success: false, error: error.message, fileName: file.name });
-          
-          // Show specific error for invalid files
-          if (error.message.includes('does not appear to be a valid resume')) {
-            toast({
-              title: "Invalid file rejected",
-              description: error.message,
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "File processing failed",
-              description: `Failed to process ${file.name}: ${error.message}`,
-              variant: "destructive",
-            });
-          }
+        const result = await processResume(file);
+        
+        if (result.success) {
+          successCount++;
+          setProcessingProgress(prev => [
+            ...prev.slice(0, -1), 
+            `✅ ${file.name} - Processed successfully`
+          ]);
+        } else {
+          failureCount++;
+          failedFiles.push(file.name);
+          setProcessingProgress(prev => [
+            ...prev.slice(0, -1), 
+            `❌ ${file.name} - ${result.error}`
+          ]);
         }
       }
 
-      const successCount = results.filter(r => r.success).length;
-      const failureCount = results.length - successCount;
-
-      if (successCount > 0) {
+      // Show final results
+      if (successCount > 0 && failureCount === 0) {
         toast({
-          title: "Processing complete",
-          description: `Successfully processed ${successCount} resumes. ${failureCount > 0 ? `${failureCount} failed.` : ''}`,
+          title: "Processing Complete!",
+          description: `Successfully processed ${successCount} resume${successCount > 1 ? 's' : ''}.`,
+        });
+      } else if (successCount > 0 && failureCount > 0) {
+        toast({
+          title: "Partial Success",
+          description: `Processed ${successCount} resume${successCount > 1 ? 's' : ''} successfully. ${failureCount} failed.`,
+          variant: "destructive",
         });
       } else {
         toast({
-          title: "Processing failed",
-          description: "No resumes were processed successfully. Please check the files and try again.",
+          title: "Processing Failed",
+          description: `Failed to process all ${failureCount} resume${failureCount > 1 ? 's' : ''}. Please check the files and try again.`,
           variant: "destructive",
         });
       }
 
-      // Clear form only if at least one file was processed successfully
+      // Reset form on success
       if (successCount > 0) {
-        setUploadedFiles([]);
+        setSelectedFiles(null);
         setJobTitle('');
-        setRequirements('');
+        setJobRequirements('');
+        // Reset file input
+        const fileInput = document.getElementById('resume-files') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
       }
 
     } catch (error) {
-      console.error('Error processing resumes:', error);
+      console.error('Batch processing error:', error);
       toast({
-        title: "Processing failed",
-        description: error.message || "An error occurred during processing.",
+        title: "Processing Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setProcessing(false);
-      setProcessedCount(0);
-      setProcessingProgress(0);
-      setCurrentProcessingFile('');
+      setIsProcessing(false);
     }
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          AI-Powered Resume Screening
-        </h2>
-        <p className="text-gray-600">
-          Upload resumes and define job requirements for intelligent candidate matching
-        </p>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-yellow-500" />
-              Job Requirements
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="jobTitle">Job Title</Label>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Upload className="w-5 h-5" />
+          Upload & Process Resumes
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="job-title">Job Title</Label>
               <Input
-                id="jobTitle"
-                placeholder="e.g., Senior Software Engineer"
+                id="job-title"
+                placeholder="e.g., Senior Frontend Developer"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
-                className="mt-1"
-                disabled={processing}
+                disabled={isProcessing}
+                required
               />
             </div>
-            
-            <div>
-              <Label htmlFor="requirements">Required Skills & Qualifications</Label>
-              <Textarea
-                id="requirements"
-                placeholder="e.g., 5+ years experience, React, Node.js, TypeScript, Bachelor's degree in Computer Science..."
-                value={requirements}
-                onChange={(e) => setRequirements(e.target.value)}
-                className="mt-1 min-h-[120px]"
-                disabled={processing}
+            <div className="space-y-2">
+              <Label htmlFor="resume-files">Resume Files (PDF only)</Label>
+              <Input
+                id="resume-files"
+                type="file"
+                multiple
+                accept=".pdf"
+                onChange={handleFileSelect}
+                disabled={isProcessing}
+                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="w-5 h-5 text-indigo-600" />
-              Upload Resumes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-400 transition-colors">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <div className="space-y-2">
-                <p className="text-gray-600">
-                  Drag and drop PDF resume files here, or click to browse
-                </p>
-                <p className="text-sm text-gray-500">
-                  Only PDF files containing actual resumes will be accepted
-                </p>
-                <Input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  disabled={processing}
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={handleChooseFilesClick}
-                  disabled={processing}
-                  type="button"
-                >
-                  Choose Files
-                </Button>
+          <div className="space-y-2">
+            <Label htmlFor="requirements">Job Requirements & Skills</Label>
+            <Textarea
+              id="requirements"
+              placeholder="Describe the key requirements, skills, and qualifications for this position..."
+              value={jobRequirements}
+              onChange={(e) => setJobRequirements(e.target.value)}
+              disabled={isProcessing}
+              rows={4}
+              required
+            />
+          </div>
+
+          {selectedFiles && selectedFiles.length > 0 && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium text-gray-900 mb-2">Selected Files ({selectedFiles.length}):</h4>
+              <div className="space-y-1">
+                {Array.from(selectedFiles).map((file, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                    <FileText className="w-4 h-4" />
+                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                ))}
               </div>
             </div>
+          )}
 
-            {uploadedFiles.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <p className="font-medium text-gray-700">
-                  Uploaded Files ({uploadedFiles.length})
-                </p>
-                <div className="max-h-40 overflow-y-auto space-y-1">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                      <FileText className="w-4 h-4 text-red-500" />
-                      <span className="text-sm text-gray-700 truncate flex-1">
-                        {file.name}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        {(file.size / 1024).toFixed(1)} KB
-                      </Badge>
-                      {!processing && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+          {processingProgress.length > 0 && (
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Processing Status:</h4>
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {processingProgress.map((message, index) => (
+                  <div key={index} className="text-sm text-blue-700 font-mono">
+                    {message}
+                  </div>
+                ))}
               </div>
+            </div>
+          )}
+
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing Resumes...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2" />
+                Process {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
+              </>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </Button>
+        </form>
 
-      {/* Processing Progress */}
-      {processing && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-blue-900">Processing Resumes...</h3>
-                <Badge variant="secondary">{processedCount} of {uploadedFiles.length}</Badge>
-              </div>
-              
-              <Progress value={processingProgress} className="h-2" />
-              
-              <div className="text-sm text-blue-700">
-                {currentProcessingFile && (
-                  <p>Currently processing: <span className="font-medium">{currentProcessingFile}</span></p>
-                )}
-                <p className="text-xs text-blue-600 mt-1">
-                  AI is analyzing resumes and matching them against job requirements...
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
+        <div className="mt-6 p-4 bg-green-50 rounded-lg">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">
-                {processing ? 'Processing Resumes...' : 'Ready to Process Resumes?'}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {processing 
-                  ? `Processing ${processedCount} of ${uploadedFiles.length} resumes...`
-                  : 'AI will analyze and rank candidates based on your requirements'
-                }
+              <h4 className="font-semibold text-green-900 mb-1">AI-Powered Analysis</h4>
+              <p className="text-sm text-green-700">
+                Our system will automatically extract candidate information, calculate experience, 
+                identify skills, and provide an AI-powered match score for each resume against your job requirements.
               </p>
             </div>
-            <Button 
-              onClick={handleProcessResumes}
-              className="bg-indigo-600 hover:bg-indigo-700"
-              size="lg"
-              disabled={processing}
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Process with AI
-                </>
-              )}
-            </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {jobPostings.length > 0 && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-green-600 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-green-800 mb-1">
-                  System Ready
-                </h4>
-                <p className="text-sm text-green-700">
-                  AI-powered resume processing is active. Upload actual resume files (PDF format only) 
-                  to get intelligent candidate analysis and scoring. Invalid files will be rejected.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
