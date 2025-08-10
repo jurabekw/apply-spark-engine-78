@@ -8,11 +8,6 @@ import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import CandidateSearch from "./pages/CandidateSearch";
-import BatchAnalysis from "./pages/BatchAnalysis";
-import Analytics from "./pages/Analytics";
-import DashboardLayout from "./layouts/DashboardLayout";
-import EmployeeCRM from "./pages/EmployeeCRM";
 
 const queryClient = new QueryClient();
 
@@ -25,13 +20,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/dashboard/*" element={<DashboardLayout />}>
-              <Route index element={<Index />} />
-              <Route path="candidate-search" element={<CandidateSearch />} />
-              <Route path="bulk-analysis" element={<BatchAnalysis />} />
-              <Route path="employee-crm" element={<EmployeeCRM />} />
-              <Route path="analytics" element={<Analytics />} />
-            </Route>
+            <Route path="/dashboard" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
