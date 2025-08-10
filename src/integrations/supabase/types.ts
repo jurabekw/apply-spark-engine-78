@@ -14,7 +14,123 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      candidates: {
+        Row: {
+          ai_analysis: Json | null
+          ai_score: number | null
+          cover_letter: string | null
+          created_at: string
+          education: string | null
+          email: string | null
+          experience_years: number | null
+          id: string
+          name: string
+          original_filename: string | null
+          phone: string | null
+          position: string | null
+          resume_file_path: string | null
+          skills: string[] | null
+          source: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          work_history: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          ai_score?: number | null
+          cover_letter?: string | null
+          created_at?: string
+          education?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          name: string
+          original_filename?: string | null
+          phone?: string | null
+          position?: string | null
+          resume_file_path?: string | null
+          skills?: string[] | null
+          source?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+          work_history?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          ai_score?: number | null
+          cover_letter?: string | null
+          created_at?: string
+          education?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          name?: string
+          original_filename?: string | null
+          phone?: string | null
+          position?: string | null
+          resume_file_path?: string | null
+          skills?: string[] | null
+          source?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+          work_history?: string | null
+        }
+        Relationships: []
+      }
+      job_postings: {
+        Row: {
+          created_at: string
+          department: string | null
+          description: string | null
+          experience_level: string | null
+          id: string
+          location: string | null
+          requirements: string
+          salary_range: string | null
+          skills_required: string[] | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location?: string | null
+          requirements: string
+          salary_range?: string | null
+          skills_required?: string[] | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string
+          salary_range?: string | null
+          skills_required?: string[] | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
