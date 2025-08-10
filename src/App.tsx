@@ -12,6 +12,7 @@ import CandidateSearch from "./pages/CandidateSearch";
 import BatchAnalysis from "./pages/BatchAnalysis";
 import Analytics from "./pages/Analytics";
 import DashboardLayout from "./layouts/DashboardLayout";
+import EmployeeCRM from "./pages/EmployeeCRM";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +28,8 @@ const App = () => (
             <Route path="/dashboard/*" element={<DashboardLayout />}>
               <Route index element={<Index />} />
               <Route path="candidate-search" element={<CandidateSearch />} />
-              <Route path="batch-analysis" element={<BatchAnalysis />} />
+              <Route path="bulk-analysis" element={<BatchAnalysis />} />
+              <Route path="employee-crm" element={<EmployeeCRM />} />
               <Route path="analytics" element={<Analytics />} />
             </Route>
             <Route path="/auth" element={<Auth />} />

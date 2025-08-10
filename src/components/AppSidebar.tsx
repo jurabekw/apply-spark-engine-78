@@ -1,4 +1,4 @@
-import { Search, FileBarChart, TrendingUp } from "lucide-react"
+import { Search, FileBarChart, TrendingUp, Users } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -15,23 +15,29 @@ import {
 } from "@/components/ui/sidebar"
 
 const items = [
-  { 
-    title: "HH Candidate Search", 
-    url: "/dashboard/candidate-search", 
-    icon: Search,
-    description: "Search and evaluate candidates"
-  },
-  { 
-    title: "Batch Resume Analysis", 
-    url: "/dashboard/batch-analysis", 
+  {
+    title: "Bulk Resume Analysis",
+    url: "/dashboard/bulk-analysis",
     icon: FileBarChart,
-    description: "Analyze multiple resumes at once"
+    description: "Analyze multiple resumes at once",
   },
-  { 
-    title: "Extensive Analytics", 
-    url: "/dashboard/analytics", 
+  {
+    title: "HH Candidate Search",
+    url: "/dashboard/candidate-search",
+    icon: Search,
+    description: "Search and evaluate candidates",
+  },
+  {
+    title: "Employee CRM",
+    url: "/dashboard/employee-crm",
+    icon: Users,
+    description: "Manage employee relationships",
+  },
+  {
+    title: "Analytics",
+    url: "/dashboard/analytics",
     icon: TrendingUp,
-    description: "Deep insights and reporting"
+    description: "Deep insights and reporting",
   },
 ]
 

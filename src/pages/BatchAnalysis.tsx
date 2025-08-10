@@ -8,7 +8,7 @@ const BatchAnalysis = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Batch Resume Analysis
+          Bulk Resume Analysis
         </h1>
         <p className="text-muted-foreground">
           Process multiple resumes simultaneously with AI-powered analysis
