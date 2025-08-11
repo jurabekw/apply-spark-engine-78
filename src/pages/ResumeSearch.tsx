@@ -46,13 +46,10 @@ type DebugStats = {
 // Validation Schema
 const schema = z.object({
   jobTitle: z.string().min(2, "Please enter at least 2 characters"),
-  requiredSkills: z
-    .string()
-    .transform((s) => s.replace(/\s*,\s*/g, ", "))
-    .refine((s) => s.split(",").map((t) => t.trim()).filter(Boolean).length > 0, {
-      message: "Please enter skills separated by commas",
-    }),
-  experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"]),
+  requiredSkills: z.string().transform(s => s.replace(/\s*,\s*/g, ", ")).refine(s => s.split(",").map(t => t.trim()).filter(Boolean).length > 0, {
+    message: "Please enter skills separated by commas"
+  }),
+  experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"])
 });
 
 // Helpers
@@ -62,95 +59,78 @@ const parseScore = (score: string): number => {
   const n = Math.min(100, parseInt(m[0]!, 10));
   return n;
 };
-
 const scoreTone = (n: number) => {
-  if (n >= 80) return { bg: "bg-success", text: "text-success-foreground" };
-  if (n >= 60) return { bg: "bg-warning", text: "text-warning-foreground" };
-  return { bg: "bg-destructive", text: "text-destructive-foreground" };
+  if (n >= 80) return {
+    bg: "bg-success",
+    text: "text-success-foreground"
+  };
+  if (n >= 60) return {
+    bg: "bg-warning",
+    text: "text-warning-foreground"
+  };
+  return {
+    bg: "bg-destructive",
+    text: "text-destructive-foreground"
+  };
 };
-
-function normalizeCandidates(
-  payload: any,
-  opts?: { noDedupe?: boolean; onStats?: (stats: Omit<DebugStats, 'noDedupe'>) => void }
-): Candidate[] {
+function normalizeCandidates(payload: any, opts?: {
+  noDedupe?: boolean;
+  onStats?: (stats: Omit<DebugStats, 'noDedupe'>) => void;
+}): Candidate[] {
   const results: Candidate[] = [];
-
   const toArray = (val: any): any[] => {
     if (!val) return [];
     return Array.isArray(val) ? val : [val];
   };
-
   const parseMaybeJson = (val: any): any => {
     if (typeof val === "string") {
       try {
         return JSON.parse(val);
       } catch {
         // Try NDJSON
-        const lines = val.split("\n").map((l) => l.trim()).filter(Boolean);
+        const lines = val.split("\n").map(l => l.trim()).filter(Boolean);
         if (lines.length > 1) {
-          const parsed = lines
-            .map((l) => {
-              try {
-                return JSON.parse(l);
-              } catch {
-                return null;
-              }
-            })
-            .filter(Boolean);
+          const parsed = lines.map(l => {
+            try {
+              return JSON.parse(l);
+            } catch {
+              return null;
+            }
+          }).filter(Boolean);
           return parsed.length ? parsed : val;
         }
       }
     }
     return val;
   };
-
   const isCandidateLike = (obj: any): boolean => {
     if (!obj || typeof obj !== "object") return false;
-    return Boolean(
-      obj.title ||
-        obj.alternate_url ||
-        obj.AI_score ||
-        obj.experience ||
-        obj.education_level ||
-        obj.key_skills
-    );
+    return Boolean(obj.title || obj.alternate_url || obj.AI_score || obj.experience || obj.education_level || obj.key_skills);
   };
-
   const toCandidate = (obj: any): Candidate | null => {
     if (!obj || typeof obj !== "object") return null;
     // Some Make/Integromat shapes nest the payload
     const candidateObj = obj.content?.data ?? obj.content ?? obj.output?.data ?? obj.output ?? obj.data ?? obj;
-
     if (!isCandidateLike(candidateObj)) return null;
-
     const skillsRaw = (candidateObj.key_skills ?? candidateObj.skills) as any;
-    const key_skills = Array.isArray(skillsRaw)
-      ? skillsRaw.map((s: any) => String(s))
-      : typeof skillsRaw === "string"
-      ? skillsRaw.split(",").map((s) => s.trim()).filter(Boolean)
-      : [];
-
+    const key_skills = Array.isArray(skillsRaw) ? skillsRaw.map((s: any) => String(s)) : typeof skillsRaw === "string" ? skillsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
     const scoreRaw = candidateObj.AI_score ?? candidateObj.ai_score ?? candidateObj.score;
-
     return {
       title: String(candidateObj.title ?? candidateObj.position ?? "Candidate"),
       experience: String(candidateObj.experience ?? candidateObj.experience_years ?? ""),
       education_level: String(candidateObj.education_level ?? candidateObj.education ?? ""),
       AI_score: scoreRaw != null ? String(scoreRaw) : "0",
       key_skills,
-      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? ""),
+      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? "")
     };
   };
-
   const visit = (node: any) => {
     if (!node) return;
     node = parseMaybeJson(node);
-
     if (Array.isArray(node)) {
       node.forEach(visit);
       return;
     }
-
     if (typeof node !== "object") return;
 
     // Common top-level shapes
@@ -158,22 +138,18 @@ function normalizeCandidates(
       toArray(parseMaybeJson(node.candidates)).forEach(visit);
       return;
     }
-
     if (node.candidates) {
       toArray(parseMaybeJson(node.candidates)).forEach(visit);
       return;
     }
-
     if (Array.isArray((node as any).bundles)) {
       (node as any).bundles.forEach((b: any) => visit(b));
       return;
     }
-
     if (Array.isArray((node as any).result)) {
       (node as any).result.forEach(visit);
       return;
     }
-
     if (Array.isArray((node as any).items)) {
       (node as any).items.forEach(visit);
       return;
@@ -190,17 +166,16 @@ function normalizeCandidates(
     const values = Object.values(node);
     if (values.length) values.forEach(visit);
   };
-
   try {
     visit(payload);
   } catch (e) {
     console.error("Failed to normalize candidates:", e, payload);
   }
-
   const extracted = results.length;
-
   if (opts?.noDedupe) {
-    console.debug("normalizeCandidates: dedupe disabled", { extracted });
+    console.debug("normalizeCandidates: dedupe disabled", {
+      extracted
+    });
     opts?.onStats?.({
       extracted,
       kept: extracted,
@@ -209,13 +184,15 @@ function normalizeCandidates(
       droppedByUrl: 0,
       keptByFP: 0,
       droppedByFP: 0,
-      skipped: 0,
+      skipped: 0
     });
     return results;
   }
 
   // Deduplicate (conservative)
-  console.debug("normalizeCandidates: before dedupe", { extracted });
+  console.debug("normalizeCandidates: before dedupe", {
+    extracted
+  });
   const seenAlt = new Set<string>();
   const seenFP = new Set<string>();
   let keptByUrl = 0;
@@ -223,41 +200,63 @@ function normalizeCandidates(
   let keptByFP = 0;
   let droppedByFP = 0;
   let skipped = 0;
-
   const deduped = results.filter((c, i) => {
     const url = (c.alternate_url || "").trim();
     if (url) {
       if (seenAlt.has(url)) {
         droppedByUrl++;
-        console.debug("dedupe drop", { i, keyType: "alternate_url", key: url, title: c.title });
+        console.debug("dedupe drop", {
+          i,
+          keyType: "alternate_url",
+          key: url,
+          title: c.title
+        });
         return false;
       }
       seenAlt.add(url);
       keptByUrl++;
-      console.debug("dedupe keep", { i, keyType: "alternate_url", key: url, title: c.title });
+      console.debug("dedupe keep", {
+        i,
+        keyType: "alternate_url",
+        key: url,
+        title: c.title
+      });
       return true;
     }
-
     const meaningful = Boolean(c.title && c.experience && (c.key_skills?.length || 0) > 0);
     if (!meaningful) {
       skipped++;
-      console.debug("dedupe skip", { i, keyType: "none", title: c.title });
+      console.debug("dedupe skip", {
+        i,
+        keyType: "none",
+        title: c.title
+      });
       return true; // don't dedupe when we can't form a meaningful fingerprint
     }
-
     const fp = `t:${c.title}|e:${c.experience}|edu:${c.education_level}|s:${(c.key_skills || []).slice(0, 5).join(',')}`;
     if (seenFP.has(fp)) {
       droppedByFP++;
-      console.debug("dedupe drop", { i, keyType: "fingerprint", key: fp, title: c.title });
+      console.debug("dedupe drop", {
+        i,
+        keyType: "fingerprint",
+        key: fp,
+        title: c.title
+      });
       return false;
     }
     seenFP.add(fp);
     keptByFP++;
-    console.debug("dedupe keep", { i, keyType: "fingerprint", key: fp, title: c.title });
+    console.debug("dedupe keep", {
+      i,
+      keyType: "fingerprint",
+      key: fp,
+      title: c.title
+    });
     return true;
   });
-
-  console.debug("normalizeCandidates: after dedupe", { kept: deduped.length });
+  console.debug("normalizeCandidates: after dedupe", {
+    kept: deduped.length
+  });
   opts?.onStats?.({
     extracted,
     kept: deduped.length,
@@ -266,28 +265,35 @@ function normalizeCandidates(
     droppedByUrl,
     keptByFP,
     droppedByFP,
-    skipped,
+    skipped
   });
-
   return deduped;
 }
-
 const WEBHOOK_URL = "https://hook.eu2.make.com/rqe1ozj0uxqwb8cf19i1prbwhi8fdalk";
-
-async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 60000, ...rest } = init;
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & {
+  timeout?: number;
+} = {}) {
+  const {
+    timeout = 60000,
+    ...rest
+  } = init;
   if ((AbortSignal as any).timeout) {
-    return fetch(input, { ...rest, signal: (AbortSignal as any).timeout(timeout) });
+    return fetch(input, {
+      ...rest,
+      signal: (AbortSignal as any).timeout(timeout)
+    });
   }
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
-    return await fetch(input, { ...rest, signal: controller.signal });
+    return await fetch(input, {
+      ...rest,
+      signal: controller.signal
+    });
   } finally {
     clearTimeout(id);
   }
 }
-
 export default function ResumeSearch() {
   // SEO
   useEffect(() => {
@@ -310,9 +316,12 @@ export default function ResumeSearch() {
     }
     link.setAttribute("href", window.location.origin + "/resume-search");
   }, []);
-
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
 
   // Form
   const form = useForm<z.infer<typeof schema>>({
@@ -320,8 +329,8 @@ export default function ResumeSearch() {
     defaultValues: {
       jobTitle: "",
       requiredSkills: "",
-      experienceLevel: "between1And3",
-    },
+      experienceLevel: "between1And3"
+    }
   });
 
   // State
@@ -332,9 +341,12 @@ export default function ResumeSearch() {
 
   // Debug candidates state changes
   useEffect(() => {
-    console.log('Candidates state updated:', { 
-      count: candidates.length, 
-      candidates: candidates.slice(0, 3).map(c => ({ title: c.title, url: c.alternate_url }))
+    console.log('Candidates state updated:', {
+      count: candidates.length,
+      candidates: candidates.slice(0, 3).map(c => ({
+        title: c.title,
+        url: c.alternate_url
+      }))
     });
   }, [candidates]);
   const [noDedupe, setNoDedupe] = useState(true);
@@ -352,7 +364,7 @@ export default function ResumeSearch() {
     }
     const steps = 3;
     stepTimer.current = window.setInterval(() => {
-      setLoadingStep((s) => (s + 1) % steps);
+      setLoadingStep(s => (s + 1) % steps);
     }, 8000);
     return () => {
       if (stepTimer.current) window.clearInterval(stepTimer.current);
@@ -363,11 +375,9 @@ export default function ResumeSearch() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("resumeSearch.noDedupe");
-      if (saved === "1" || saved === "true") setNoDedupe(true);
-      else if (saved === "0" || saved === "false") setNoDedupe(false);
+      if (saved === "1" || saved === "true") setNoDedupe(true);else if (saved === "0" || saved === "false") setNoDedupe(false);
     } catch {}
   }, []);
-
   useEffect(() => {
     try {
       localStorage.setItem("resumeSearch.noDedupe", noDedupe ? "1" : "0");
@@ -380,7 +390,7 @@ export default function ResumeSearch() {
     const params = new URLSearchParams({
       title: v.jobTitle,
       skills: v.requiredSkills,
-      exp: v.experienceLevel,
+      exp: v.experienceLevel
     });
     return `${window.location.origin}/resume-search?${params.toString()}`;
   }, [form.watch(["jobTitle", "requiredSkills", "experienceLevel"])]) as string;
@@ -390,34 +400,36 @@ export default function ResumeSearch() {
     const url = new URL(window.location.href);
     const title = url.searchParams.get("title") ?? "";
     const skills = url.searchParams.get("skills") ?? "";
-    const exp = (url.searchParams.get("exp") as any) ?? "between1And3";
-    form.reset({ jobTitle: title, requiredSkills: skills, experienceLevel: exp });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const exp = url.searchParams.get("exp") as any ?? "between1And3";
+    form.reset({
+      jobTitle: title,
+      requiredSkills: skills,
+      experienceLevel: exp
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const handleSearch = async (values: z.infer<typeof schema>) => {
     setLoading(true);
     setError(null);
     setCandidates([]);
     setRawPayload(null);
     if (debugEnabled) setDebugInfo(null);
-
     try {
       const response = await fetchWithTimeout(WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           job_title: values.jobTitle.trim(),
           required_skills: values.requiredSkills.trim(),
-          experience_level: values.experienceLevel,
+          experience_level: values.experienceLevel
         }),
-        timeout: 60000,
+        timeout: 60000
       });
-
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-
       const raw = await response.json();
       console.debug("HH webhook raw payload:", raw);
       setRawPayload(raw);
@@ -431,16 +443,21 @@ export default function ResumeSearch() {
         candidatesType: typeof raw?.candidates,
         candidatesLength: Array.isArray(raw?.candidates) ? raw.candidates.length : 'not array'
       });
-
       console.log('Raw webhook response data:', raw);
       const normalized = normalizeCandidates(raw, {
         noDedupe,
-        onStats: (stats) => {
-          if (debugEnabled) setDebugInfo({ ...stats, noDedupe });
-        },
+        onStats: stats => {
+          if (debugEnabled) setDebugInfo({
+            ...stats,
+            noDedupe
+          });
+        }
       });
-      console.log('Normalized candidates:', { count: normalized.length, candidates: normalized });
-      
+      console.log('Normalized candidates:', {
+        count: normalized.length,
+        candidates: normalized
+      });
+
       // Add detailed logging AFTER normalization
       console.debug("POST-NORMALIZATION RESULTS:", {
         normalizedCount: normalized.length,
@@ -450,23 +467,22 @@ export default function ResumeSearch() {
         thirdCandidate: normalized[2],
         allTitles: normalized.map(c => c.title)
       });
-
       console.debug("ABOUT TO SET CANDIDATES STATE:", normalized);
       setCandidates(normalized);
       console.debug("STATE SET. Current candidates length should be:", normalized.length);
-      
       if (normalized.length === 0) {
         setError("No candidates found matching your criteria. Try adjusting your requirements.");
       }
-
       if (user?.id) {
-        const { error: dbError } = await supabase.from("hh_searches").insert({
+        const {
+          error: dbError
+        } = await supabase.from("hh_searches").insert({
           user_id: user.id,
           job_title: values.jobTitle.trim(),
           required_skills: values.requiredSkills.trim(),
           experience_level: values.experienceLevel,
           response: raw,
-          candidate_count: normalized.length,
+          candidate_count: normalized.length
         });
         if (dbError) {
           console.error("Failed to save hh_searches:", dbError);
@@ -488,10 +504,12 @@ export default function ResumeSearch() {
       setLoading(false);
     }
   };
-
   const onSubmit = form.handleSubmit(handleSearch);
-
-  const handleRerunSearch = (search: { job_title: string; required_skills: string; experience_level: string }) => {
+  const handleRerunSearch = (search: {
+    job_title: string;
+    required_skills: string;
+    experience_level: string;
+  }) => {
     form.setValue('jobTitle', search.job_title);
     form.setValue('requiredSkills', search.required_skills);
     form.setValue('experienceLevel', search.experience_level as any);
@@ -502,12 +520,10 @@ export default function ResumeSearch() {
       experienceLevel: search.experience_level as any
     });
   };
-
   const renderCandidateCard = (c: Candidate, idx: number) => {
     const n = parseScore(c.AI_score);
     const tone = scoreTone(n);
-    return (
-      <Card key={`${(c.alternate_url && c.alternate_url.trim()) || c.title || 'cand'}-${idx}`} className="transition-shadow hover:shadow-md">
+    return <Card key={`${c.alternate_url && c.alternate_url.trim() || c.title || 'cand'}-${idx}`} className="transition-shadow hover:shadow-md">
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-xl font-bold leading-tight">{c.title} (#{idx + 1})</CardTitle>
@@ -520,34 +536,19 @@ export default function ResumeSearch() {
             <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {c.key_skills?.map((s, i) => (
-              <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
+            {c.key_skills?.map((s, i) => <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
                 {s}
-              </Badge>
-            ))}
+              </Badge>)}
           </div>
           <div className="pt-2">
-            {c.alternate_url?.trim() ? (
-              <a
-                href={c.alternate_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                aria-label="View resume on HH.ru"
-              >
+            {c.alternate_url?.trim() ? <a href={c.alternate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" aria-label="View resume on HH.ru">
                 View Resume <ExternalLink className="h-4 w-4" />
-              </a>
-            ) : (
-              <span className="text-sm text-muted-foreground">Resume link unavailable</span>
-            )}
+              </a> : <span className="text-sm text-muted-foreground">Resume link unavailable</span>}
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   };
-
-  const LoadingStatus = () => (
-    <div className="mt-6 rounded-md border bg-card p-4 text-sm">
+  const LoadingStatus = () => <div className="mt-6 rounded-md border bg-card p-4 text-sm">
       <div className="flex items-center gap-2">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" aria-label="Loading spinner" />
         <span>Searching HH candidates...</span>
@@ -558,11 +559,8 @@ export default function ResumeSearch() {
         <li className={loadingStep === 2 ? "text-foreground" : ""}>Preparing results...</li>
       </ul>
       <p className="mt-2 text-xs text-muted-foreground">This usually takes 30-60 seconds</p>
-    </div>
-  );
-
-  return (
-    <main className="container mx-auto px-4 py-8">
+    </div>;
+  return <main className="container mx-auto px-4 py-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold">HH Candidate Search</h1>
         <p className="text-muted-foreground">Find HH.ru candidates by role, skills, and experience — scored by AI.</p>
@@ -576,25 +574,19 @@ export default function ResumeSearch() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="jobTitle"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-1">
+              <FormField control={form.control} name="jobTitle" render={({
+              field
+            }) => <FormItem className="md:col-span-1">
                     <FormLabel>Job Title</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. Software Developer, Marketing Manager" aria-label="Job Title" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="experienceLevel"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-1">
+              <FormField control={form.control} name="experienceLevel" render={({
+              field
+            }) => <FormItem className="md:col-span-1">
                     <FormLabel>Experience Level</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
@@ -610,61 +602,43 @@ export default function ResumeSearch() {
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="requiredSkills"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
+              <FormField control={form.control} name="requiredSkills" render={({
+              field
+            }) => <FormItem className="md:col-span-2">
                     <FormLabel>Required Skills</FormLabel>
                     <FormControl>
                       <Textarea rows={4} placeholder="Enter skills separated by commas (e.g. JavaScript, React, Node.js, Python)" aria-label="Required Skills" {...field} />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">Separate multiple skills with commas</p>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
                   {loading ? "Searching HH.ru..." : "Search candidates"}
                 </Button>
-                <button
-                  type="button"
-                  className="text-sm text-primary underline-offset-4 hover:underline"
-                  onClick={() => navigator.clipboard.writeText(shareLink)}
-                  aria-label="Copy shareable link"
-                >
-                  Copy shareable link
-                </button>
+                
                 <div className="ml-auto flex items-center gap-2">
-                  <Checkbox id="noDedupe" checked={noDedupe} onCheckedChange={(v) => setNoDedupe(Boolean(v))} />
+                  <Checkbox id="noDedupe" checked={noDedupe} onCheckedChange={v => setNoDedupe(Boolean(v))} />
                   <Label htmlFor="noDedupe" className="text-sm">Don't merge duplicates</Label>
                 </div>
               </div>
 
-              {loading && (
-                <div className="md:col-span-2">
+              {loading && <div className="md:col-span-2">
                   <LoadingStatus />
-                </div>
-              )}
+                </div>}
 
-              {error && !loading && (
-                <div className="md:col-span-2 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+              {error && !loading && <div className="md:col-span-2 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-destructive">
                   {error}
-                </div>
-              )}
+                </div>}
             </form>
           </Form>
         </CardContent>
       </Card>
 
-      {debugEnabled && (
-        <Card className="mt-6">
+      {debugEnabled && <Card className="mt-6">
           <CardHeader>
             <CardTitle>Debug</CardTitle>
             <CardDescription>Normalization and deduplication stats</CardDescription>
@@ -672,8 +646,7 @@ export default function ResumeSearch() {
           <CardContent>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div><span className="font-medium">Dedupe disabled:</span> {String(noDedupe)}</div>
-              {debugInfo && (
-                <>
+              {debugInfo && <>
                   <div><span className="font-medium">Extracted:</span> {debugInfo.extracted}</div>
                   <div><span className="font-medium">Kept:</span> {debugInfo.kept}</div>
                   <div><span className="font-medium">Dropped:</span> {debugInfo.dropped}</div>
@@ -682,8 +655,7 @@ export default function ResumeSearch() {
                   <div><span className="font-medium">Kept by FP:</span> {debugInfo.keptByFP}</div>
                   <div><span className="font-medium">Dropped by FP:</span> {debugInfo.droppedByFP}</div>
                   <div><span className="font-medium">Skipped:</span> {debugInfo.skipped}</div>
-                </>
-              )}
+                </>}
             </div>
             <div className="mt-4">
               <Collapsible>
@@ -698,22 +670,11 @@ export default function ResumeSearch() {
               </Collapsible>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Results */}
       <section className="mt-8">
-        {!loading && !error && candidates.length === 0 ? (
-          <SearchHistory 
-            onRerunSearch={handleRerunSearch}
-          />
-        ) : (
-          <ResumeSearchTable 
-            candidates={candidates}
-            loading={loading}
-          />
-        )}
+        {!loading && !error && candidates.length === 0 ? <SearchHistory onRerunSearch={handleRerunSearch} /> : <ResumeSearchTable candidates={candidates} loading={loading} />}
       </section>
-    </main>
-  );
+    </main>;
 }
