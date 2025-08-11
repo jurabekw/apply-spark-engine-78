@@ -36,13 +36,18 @@ const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
     return 'text-red-600 font-semibold';
   };
 
-  const filteredCandidates = candidates.filter(candidate =>
-    candidate.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    candidate.key_skills.some(skill => 
-      skill.toLowerCase().includes(searchTerm.toLowerCase())
-    ) ||
-    candidate.experience.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCandidates = candidates.filter(candidate => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const title = (candidate.title || '').toLowerCase();
+    const experience = (candidate.experience || '').toLowerCase();
+    const skills = candidate.key_skills || [];
+    
+    return title.includes(searchLower) ||
+           experience.includes(searchLower) ||
+           skills.some(skill => (skill || '').toLowerCase().includes(searchLower));
+  });
 
   if (loading) {
     return (
@@ -115,8 +120,10 @@ const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
               <TableBody>
                 {filteredCandidates.map((candidate, index) => {
                   const score = parseScore(candidate.AI_score);
+                  // Create unique key using multiple candidate properties
+                  const uniqueKey = `${candidate.alternate_url || candidate.title}-${index}`;
                   return (
-                    <TableRow key={index} className="hover:bg-muted/50">
+                    <TableRow key={uniqueKey} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="font-medium">{candidate.title}</div>
                       </TableCell>

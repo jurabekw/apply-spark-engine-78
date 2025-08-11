@@ -329,6 +329,14 @@ export default function ResumeSearch() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Debug candidates state changes
+  useEffect(() => {
+    console.log('Candidates state updated:', { 
+      count: candidates.length, 
+      candidates: candidates.slice(0, 3).map(c => ({ title: c.title, url: c.alternate_url }))
+    });
+  }, [candidates]);
   const [noDedupe, setNoDedupe] = useState(true);
   const [rawPayload, setRawPayload] = useState<any | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugStats | null>(null);
@@ -424,12 +432,14 @@ export default function ResumeSearch() {
         candidatesLength: Array.isArray(raw?.candidates) ? raw.candidates.length : 'not array'
       });
 
+      console.log('Raw webhook response data:', raw);
       const normalized = normalizeCandidates(raw, {
         noDedupe,
         onStats: (stats) => {
           if (debugEnabled) setDebugInfo({ ...stats, noDedupe });
         },
       });
+      console.log('Normalized candidates:', { count: normalized.length, candidates: normalized });
       
       // Add detailed logging AFTER normalization
       console.debug("POST-NORMALIZATION RESULTS:", {
