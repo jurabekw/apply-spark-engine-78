@@ -17,6 +17,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import ResumeSearchTable from "@/components/ResumeSearchTable";
+import SearchHistory from "@/components/SearchHistory";
 
 // Types
 type Candidate = {
@@ -479,6 +481,18 @@ export default function ResumeSearch() {
 
   const onSubmit = form.handleSubmit(handleSearch);
 
+  const handleRerunSearch = (search: { job_title: string; required_skills: string; experience_level: string }) => {
+    form.setValue('jobTitle', search.job_title);
+    form.setValue('requiredSkills', search.required_skills);
+    form.setValue('experienceLevel', search.experience_level as any);
+    // Trigger the search
+    handleSearch({
+      jobTitle: search.job_title,
+      requiredSkills: search.required_skills,
+      experienceLevel: search.experience_level as any
+    });
+  };
+
   const renderCandidateCard = (c: Candidate, idx: number) => {
     const n = parseScore(c.AI_score);
     const tone = scoreTone(n);
@@ -680,40 +694,14 @@ export default function ResumeSearch() {
       {/* Results */}
       <section className="mt-8">
         {!loading && !error && candidates.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-10 text-center">
-            <img
-              src="/placeholder.svg"
-              alt="Empty state illustration for resume search"
-              loading="lazy"
-              className="mb-4 h-24 w-24 opacity-70"
-            />
-            <h2 className="text-lg font-semibold">Enter job requirements above to find matching candidates</h2>
-            <p className="text-sm text-muted-foreground">We'll fetch resumes from HH.ru and score them for you.</p>
-          </div>
-        ) : null}
-
-        {candidates.length > 0 && (
-          <>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Found {candidates.length} candidates</p>
-              <div className="text-xs text-muted-foreground">
-                Rendering {candidates.length} cards • State length: {candidates.length}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {(() => {
-                console.debug("RENDERING CANDIDATES:", { 
-                  candidatesLength: candidates.length, 
-                  candidatesArray: candidates,
-                  mapAboutToRun: true 
-                });
-                return candidates.map((c, idx) => {
-                  console.debug(`RENDERING CARD ${idx}:`, c);
-                  return renderCandidateCard(c, idx);
-                });
-              })()}
-            </div>
-          </>
+          <SearchHistory 
+            onRerunSearch={handleRerunSearch}
+          />
+        ) : (
+          <ResumeSearchTable 
+            candidates={candidates}
+            loading={loading}
+          />
         )}
       </section>
     </main>
