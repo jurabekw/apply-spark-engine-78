@@ -4,14 +4,14 @@ import { Settings, User, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 const Header = () => {
-  const { user, signOut } = useAuth();
-
+  const {
+    user,
+    signOut
+  } = useAuth();
   const handleSignOut = async () => {
     await signOut();
   };
-
-  return (
-    <header className="bg-white shadow-sm border-b">
+  return <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -23,12 +23,10 @@ const Header = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Badge variant="outline" className="text-amber-600 border-amber-200">
-            🚀 MVP Demo
-          </Badge>
+          
 
           <Link to="/resume-search" className="hidden md:block">
-            <Button size="sm" variant="brand">HH Candidate Search</Button>
+            
           </Link>
           
           <div className="flex items-center gap-2">
@@ -49,8 +47,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
