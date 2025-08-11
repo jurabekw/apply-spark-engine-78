@@ -412,15 +412,37 @@ export default function ResumeSearch() {
       console.debug("HH webhook raw payload:", raw);
       setRawPayload(raw);
 
+      // Add comprehensive logging BEFORE normalization
+      console.debug("HH webhook raw payload STRUCTURE:", {
+        type: typeof raw,
+        isArray: Array.isArray(raw),
+        keys: typeof raw === 'object' ? Object.keys(raw || {}) : [],
+        candidatesProperty: raw?.candidates,
+        candidatesType: typeof raw?.candidates,
+        candidatesLength: Array.isArray(raw?.candidates) ? raw.candidates.length : 'not array'
+      });
+
       const normalized = normalizeCandidates(raw, {
         noDedupe,
         onStats: (stats) => {
           if (debugEnabled) setDebugInfo({ ...stats, noDedupe });
         },
       });
-      console.debug("Normalized candidates:", { count: normalized.length, first: normalized[0], second: normalized[1] });
+      
+      // Add detailed logging AFTER normalization
+      console.debug("POST-NORMALIZATION RESULTS:", {
+        normalizedCount: normalized.length,
+        normalizedCandidates: normalized,
+        firstCandidate: normalized[0],
+        secondCandidate: normalized[1],
+        thirdCandidate: normalized[2],
+        allTitles: normalized.map(c => c.title)
+      });
 
+      console.debug("ABOUT TO SET CANDIDATES STATE:", normalized);
       setCandidates(normalized);
+      console.debug("STATE SET. Current candidates length should be:", normalized.length);
+      
       if (normalized.length === 0) {
         setError("No candidates found matching your criteria. Try adjusting your requirements.");
       }
@@ -456,6 +478,49 @@ export default function ResumeSearch() {
   };
 
   const onSubmit = form.handleSubmit(handleSearch);
+
+  const renderCandidateCard = (c: Candidate, idx: number) => {
+    const n = parseScore(c.AI_score);
+    const tone = scoreTone(n);
+    return (
+      <Card key={`${(c.alternate_url && c.alternate_url.trim()) || c.title || 'cand'}-${idx}`} className="transition-shadow hover:shadow-md">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3">
+            <CardTitle className="text-xl font-bold leading-tight">{c.title} (#{idx + 1})</CardTitle>
+            <Badge className={`${tone.bg} ${tone.text} border-transparent`}>{n}%</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-sm">
+            <div>📅 <span className="font-medium">Experience:</span> {c.experience}</div>
+            <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {c.key_skills?.map((s, i) => (
+              <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
+                {s}
+              </Badge>
+            ))}
+          </div>
+          <div className="pt-2">
+            {c.alternate_url?.trim() ? (
+              <a
+                href={c.alternate_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
+                aria-label="View resume on HH.ru"
+              >
+                View Resume <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : (
+              <span className="text-sm text-muted-foreground">Resume link unavailable</span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const LoadingStatus = () => (
     <div className="mt-6 rounded-md border bg-card p-4 text-sm">
@@ -571,7 +636,7 @@ export default function ResumeSearch() {
               )}
             </form>
           </Form>
-      </CardContent>
+        </CardContent>
       </Card>
 
       {debugEnabled && (
@@ -623,56 +688,30 @@ export default function ResumeSearch() {
               className="mb-4 h-24 w-24 opacity-70"
             />
             <h2 className="text-lg font-semibold">Enter job requirements above to find matching candidates</h2>
-            <p className="text-sm text-muted-foreground">We’ll fetch resumes from HH.ru and score them for you.</p>
+            <p className="text-sm text-muted-foreground">We'll fetch resumes from HH.ru and score them for you.</p>
           </div>
         ) : null}
 
         {candidates.length > 0 && (
           <>
-            <p className="mb-4 text-sm text-muted-foreground">Found {candidates.length} candidates</p>
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Found {candidates.length} candidates</p>
+              <div className="text-xs text-muted-foreground">
+                Rendering {candidates.length} cards • State length: {candidates.length}
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {candidates.map((c, idx) => {
-                const n = parseScore(c.AI_score);
-                const tone = scoreTone(n);
-                return (
-                  <Card key={`${(c.alternate_url && c.alternate_url.trim()) || c.title || 'cand'}-${idx}`} className="transition-shadow hover:shadow-md">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-3">
-                        <CardTitle className="text-xl font-bold leading-tight">{c.title}</CardTitle>
-                        <Badge className={`${tone.bg} ${tone.text} border-transparent`}>{n}%</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="text-sm">
-                        <div>📅 <span className="font-medium">Experience:</span> {c.experience}</div>
-                        <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {c.key_skills?.map((s, i) => (
-                          <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
-                            {s}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="pt-2">
-                        {c.alternate_url?.trim() ? (
-                          <a
-                            href={c.alternate_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                            aria-label="View resume on HH.ru"
-                          >
-                            View Resume <ExternalLink className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">Resume link unavailable</span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {(() => {
+                console.debug("RENDERING CANDIDATES:", { 
+                  candidatesLength: candidates.length, 
+                  candidatesArray: candidates,
+                  mapAboutToRun: true 
+                });
+                return candidates.map((c, idx) => {
+                  console.debug(`RENDERING CARD ${idx}:`, c);
+                  return renderCandidateCard(c, idx);
+                });
+              })()}
             </div>
           </>
         )}
