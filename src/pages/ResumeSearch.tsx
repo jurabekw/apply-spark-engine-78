@@ -474,6 +474,7 @@ export default function ResumeSearch() {
         setError("No candidates found matching your criteria. Try adjusting your requirements.");
       }
       if (user?.id) {
+        // Save search record
         const {
           error: dbError
         } = await supabase.from("hh_searches").insert({
@@ -486,8 +487,47 @@ export default function ResumeSearch() {
         });
         if (dbError) {
           console.error("Failed to save hh_searches:", dbError);
-        } else {
-          // toast({ title: "Search saved", description: `Found ${normalized.length} candidates` });
+        }
+
+        // Save HH candidates to candidates table so they appear in the main candidate view
+        if (normalized.length > 0) {
+          const candidateInserts = normalized.map(candidate => ({
+            user_id: user.id,
+            name: candidate.title || 'HH Candidate',
+            email: null, // HH doesn't provide emails
+            phone: null, // HH doesn't provide phones
+            position: candidate.title || null,
+            experience_years: candidate.experience ? parseInt(candidate.experience.match(/\d+/)?.[0] || '0') || null : null,
+            skills: candidate.key_skills || [],
+            education: candidate.education_level || null,
+            work_history: null,
+            resume_file_path: null,
+            original_filename: null,
+            ai_score: parseScore(candidate.AI_score),
+            ai_analysis: {
+              hh_url: candidate.alternate_url,
+              experience: candidate.experience,
+              education_level: candidate.education_level,
+              skills: candidate.key_skills
+            },
+            status: 'new',
+            source: 'hh_search'
+          }));
+
+          const { error: candidatesError } = await supabase
+            .from('candidates')
+            .insert(candidateInserts);
+
+          if (candidatesError) {
+            console.error("Failed to save HH candidates:", candidatesError);
+          } else {
+            toast({ 
+              title: "Candidates added", 
+              description: `${normalized.length} HH.ru candidates added to your database`
+            });
+            // Refresh the main candidates view on dashboard
+            window.dispatchEvent(new CustomEvent('candidatesUpdated'));
+          }
         }
       }
     } catch (err: any) {

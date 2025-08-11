@@ -1,12 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Filter, Download, Star, Eye, Loader2, Trash2 } from 'lucide-react';
+import { Search, Filter, Download, Star, Eye, Loader2, Trash2, ExternalLink } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import CandidateDetailModal from './CandidateDetailModal';
 
@@ -14,7 +14,19 @@ const CandidateTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const { candidates, loading, updateCandidateStatus, deleteCandidate } = useCandidates();
+  const { candidates, loading, updateCandidateStatus, deleteCandidate, refetch } = useCandidates();
+
+  // Listen for candidate updates from HH search
+  useEffect(() => {
+    const handleCandidatesUpdated = () => {
+      refetch();
+    };
+
+    window.addEventListener('candidatesUpdated', handleCandidatesUpdated);
+    return () => {
+      window.removeEventListener('candidatesUpdated', handleCandidatesUpdated);
+    };
+  }, [refetch]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -163,6 +175,7 @@ const CandidateTable = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Experience</TableHead>
                       <TableHead>Key Skills</TableHead>
+                      <TableHead>Source</TableHead>
                       <TableHead>Submitted</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -217,6 +230,14 @@ const CandidateTable = () => {
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={candidate.source === 'hh_search' ? 'default' : 'secondary'}
+                            className={candidate.source === 'hh_search' ? 'bg-blue-100 text-blue-800' : ''}
+                          >
+                            {candidate.source === 'hh_search' ? 'HH.ru' : 'Upload'}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-sm text-gray-500">
                           {formatDate(candidate.submitted_at || candidate.created_at)}
                         </TableCell>
@@ -230,6 +251,22 @@ const CandidateTable = () => {
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
+                            {candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                asChild
+                                title="View profile on HH.ru"
+                              >
+                                <a 
+                                  href={candidate.ai_analysis.hh_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            )}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button 
@@ -244,7 +281,7 @@ const CandidateTable = () => {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data including their resume.
+                                    Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data{candidate.source === 'upload' ? ' including their resume' : ''}.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
