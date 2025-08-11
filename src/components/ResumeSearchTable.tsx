@@ -114,7 +114,7 @@ const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
                   <TableHead>Experience</TableHead>
                   <TableHead>Education</TableHead>
                   <TableHead>Key Skills</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Resume</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
