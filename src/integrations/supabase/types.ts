@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hh_searches: {
+        Row: {
+          candidate_count: number
+          created_at: string
+          experience_level: string
+          id: string
+          job_title: string
+          required_skills: string
+          response: Json
+          user_id: string
+        }
+        Insert: {
+          candidate_count?: number
+          created_at?: string
+          experience_level: string
+          id?: string
+          job_title: string
+          required_skills: string
+          response: Json
+          user_id: string
+        }
+        Update: {
+          candidate_count?: number
+          created_at?: string
+          experience_level?: string
+          id?: string
+          job_title?: string
+          required_skills?: string
+          response?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_postings: {
         Row: {
           created_at: string
