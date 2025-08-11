@@ -67,8 +67,8 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { 
 export default function ResumeSearch() {
   // SEO
   useEffect(() => {
-    document.title = "Resume Search | TalentSpark";
-    const desc = "Search HH.ru resumes with AI scoring. Enter role, skills, and experience to find top candidates.";
+    document.title = "HH Candidate Search | TalentSpark";
+    const desc = "Search HH.ru candidates with AI scoring. Enter role, skills, and experience to find top candidates.";
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");
@@ -193,7 +193,7 @@ export default function ResumeSearch() {
     <div className="mt-6 rounded-md border bg-card p-4 text-sm">
       <div className="flex items-center gap-2">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" aria-label="Loading spinner" />
-        <span>Searching candidates...</span>
+        <span>Searching HH candidates...</span>
       </div>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-muted-foreground">
         <li className={loadingStep === 0 ? "text-foreground" : ""}>Connecting to HH.ru...</li>
@@ -207,7 +207,7 @@ export default function ResumeSearch() {
   return (
     <main className="container mx-auto px-4 py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold">Resume Search</h1>
+        <h1 className="text-3xl font-bold">HH Candidate Search</h1>
         <p className="text-muted-foreground">Find HH.ru candidates by role, skills, and experience — scored by AI.</p>
       </header>
 
@@ -274,7 +274,7 @@ export default function ResumeSearch() {
 
               <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
-                  {loading ? "Searching..." : "Search Candidates"}
+                  {loading ? "Searching HH.ru..." : "Search HH Candidates"}
                 </Button>
                 <button
                   type="button"

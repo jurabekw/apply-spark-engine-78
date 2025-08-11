@@ -28,7 +28,7 @@ const Header = () => {
           </Badge>
 
           <Link to="/resume-search" className="hidden md:block">
-            <Button size="sm" variant="brand">Resume Search</Button>
+            <Button size="sm" variant="brand">HH Candidate Search</Button>
           </Link>
           
           <div className="flex items-center gap-2">

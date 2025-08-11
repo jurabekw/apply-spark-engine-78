@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download } from 'lucide-react';
+import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
+import ResumeSearch from '@/pages/ResumeSearch';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -49,6 +50,7 @@ const Index = () => {
           {[
             { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
             { id: 'upload', label: 'Upload Resumes', icon: Upload },
+            { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
             { id: 'candidates', label: 'Candidates', icon: Users },
             { id: 'forms', label: 'Application Forms', icon: FileText },
           ].map(({ id, label, icon: Icon }) => (
@@ -154,6 +156,8 @@ const Index = () => {
         )}
 
         {activeTab === 'upload' && <UploadSection />}
+        
+        {activeTab === 'hh-search' && <ResumeSearch />}
         
         {activeTab === 'candidates' && <CandidateTable />}
         
