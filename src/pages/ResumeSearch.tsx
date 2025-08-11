@@ -52,33 +52,140 @@ const scoreTone = (n: number) => {
 };
 
 function normalizeCandidates(payload: any): Candidate[] {
+  const results: Candidate[] = [];
+
+  const toArray = (val: any): any[] => {
+    if (!val) return [];
+    return Array.isArray(val) ? val : [val];
+  };
+
+  const parseMaybeJson = (val: any): any => {
+    if (typeof val === "string") {
+      try {
+        return JSON.parse(val);
+      } catch {
+        // Try NDJSON
+        const lines = val.split("\n").map((l) => l.trim()).filter(Boolean);
+        if (lines.length > 1) {
+          const parsed = lines
+            .map((l) => {
+              try {
+                return JSON.parse(l);
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean);
+          return parsed.length ? parsed : val;
+        }
+      }
+    }
+    return val;
+  };
+
+  const isCandidateLike = (obj: any): boolean => {
+    if (!obj || typeof obj !== "object") return false;
+    return Boolean(
+      obj.title ||
+        obj.alternate_url ||
+        obj.AI_score ||
+        obj.experience ||
+        obj.education_level ||
+        obj.key_skills
+    );
+  };
+
+  const toCandidate = (obj: any): Candidate | null => {
+    if (!obj || typeof obj !== "object") return null;
+    // Some Make/Integromat shapes nest the payload
+    const candidateObj = obj.content?.data ?? obj.content ?? obj.output?.data ?? obj.output ?? obj.data ?? obj;
+
+    if (!isCandidateLike(candidateObj)) return null;
+
+    const skillsRaw = (candidateObj.key_skills ?? candidateObj.skills) as any;
+    const key_skills = Array.isArray(skillsRaw)
+      ? skillsRaw.map((s: any) => String(s))
+      : typeof skillsRaw === "string"
+      ? skillsRaw.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    const scoreRaw = candidateObj.AI_score ?? candidateObj.ai_score ?? candidateObj.score;
+
+    return {
+      title: String(candidateObj.title ?? candidateObj.position ?? "Candidate"),
+      experience: String(candidateObj.experience ?? candidateObj.experience_years ?? ""),
+      education_level: String(candidateObj.education_level ?? candidateObj.education ?? ""),
+      AI_score: scoreRaw != null ? String(scoreRaw) : "0",
+      key_skills,
+      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? "#"),
+    };
+  };
+
+  const visit = (node: any) => {
+    if (!node) return;
+    node = parseMaybeJson(node);
+
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+
+    if (typeof node !== "object") return;
+
+    // Common top-level shapes
+    if (node.status === "success" && node.candidates) {
+      toArray(parseMaybeJson(node.candidates)).forEach(visit);
+      return;
+    }
+
+    if (node.candidates) {
+      toArray(parseMaybeJson(node.candidates)).forEach(visit);
+      return;
+    }
+
+    if (Array.isArray((node as any).bundles)) {
+      (node as any).bundles.forEach((b: any) => visit(b));
+      return;
+    }
+
+    if (Array.isArray((node as any).result)) {
+      (node as any).result.forEach(visit);
+      return;
+    }
+
+    if (Array.isArray((node as any).items)) {
+      (node as any).items.forEach(visit);
+      return;
+    }
+
+    // Try to interpret current node as a candidate
+    const cand = toCandidate(node);
+    if (cand) {
+      results.push(cand);
+      return;
+    }
+
+    // Objects with numeric keys or nested collections
+    const values = Object.values(node);
+    if (values.length) values.forEach(visit);
+  };
+
   try {
-    const data = typeof payload === "string" ? JSON.parse(payload) : payload;
-
-    if (data?.status === "success") {
-      const c = typeof data.candidates === "string" ? JSON.parse(data.candidates) : data.candidates;
-      if (Array.isArray(c)) return c;
-      if (c) return [c];
-      return [];
-    }
-
-    if (Array.isArray(data)) return data;
-
-    if (data?.candidates) {
-      const c = typeof data.candidates === "string" ? JSON.parse(data.candidates) : data.candidates;
-      if (Array.isArray(c)) return c;
-      if (c) return [c];
-      return [];
-    }
-
-    if (data?.title && data?.experience && data?.education_level) return [data];
-
-    if (Array.isArray((data as any)?.result)) return (data as any).result;
-    if (Array.isArray((data as any)?.items)) return (data as any).items;
+    visit(payload);
   } catch (e) {
     console.error("Failed to normalize candidates:", e, payload);
   }
-  return [];
+
+  // Deduplicate by alternate_url + title
+  const seen = new Set<string>();
+  const deduped = results.filter((c) => {
+    const key = `${c.alternate_url}|${c.title}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return deduped;
 }
 
 const WEBHOOK_URL = "https://hook.eu2.make.com/rqe1ozj0uxqwb8cf19i1prbwhi8fdalk";
