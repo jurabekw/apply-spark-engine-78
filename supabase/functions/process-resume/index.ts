@@ -191,10 +191,10 @@ serve(async (req) => {
       throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
     }
 
-    // Get OpenAI API key
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
+    // Get Gemini API key
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+    if (!geminiApiKey) {
+      throw new Error('Gemini API key not configured')
     }
 
     // Detect contact info hints from extracted text
@@ -246,53 +246,50 @@ Respond with ONLY this JSON object:
   }
 }`
 
-    console.log('Calling OpenAI API with aggressive extraction prompt...')
+    console.log('Calling Gemini API with aggressive extraction prompt...')
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
+        contents: [
           {
-            role: 'system',
-            content: `You are an expert resume data extractor. Extract maximum information even from partially readable or garbled text. Be aggressive in your extraction and make educated guesses when needed. ALWAYS respond with valid JSON only.`
-          },
-          {
-            role: 'user',
-            content: prompt
+            parts: [
+              {
+                text: `You are an expert resume data extractor. Extract maximum information even from partially readable or garbled text. Be aggressive in your extraction and make educated guesses when needed. ALWAYS respond with valid JSON only.\n\n${prompt}`
+              }
+            ]
           }
         ],
-        temperature: 0.3,
-        response_format: { type: "json_object" }
+        generationConfig: {
+          temperature: 0.3,
+          responseMimeType: "application/json"
+        }
       }),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('OpenAI API error:', response.status, errorText)
+      console.error('Gemini API error:', response.status, errorText)
       
       // Handle specific error cases with user-friendly messages
       if (response.status === 429) {
-        throw new Error('OpenAI API quota exceeded. Please check your API billing and usage limits, or try again later.')
-      } else if (response.status === 401) {
-        throw new Error('OpenAI API authentication failed. Please check your API key configuration.')
-      } else if (response.status === 403) {
-        throw new Error('OpenAI API access forbidden. Please verify your API key permissions.')
+        throw new Error('Gemini API quota exceeded. Please try again later or check your API usage.')
+      } else if (response.status === 401 || response.status === 403) {
+        throw new Error('Gemini API authentication failed. Please check your API key configuration.')
       } else if (response.status >= 500) {
-        throw new Error('OpenAI service temporarily unavailable. Please try again in a few minutes.')
+        throw new Error('Gemini service temporarily unavailable. Please try again in a few minutes.')
       } else {
-        throw new Error(`OpenAI API error (${response.status}): ${errorText}`)
+        throw new Error(`Gemini API error (${response.status}): ${errorText}`)
       }
     }
 
     const aiResponse = await response.json()
-    console.log('OpenAI response received successfully')
+    console.log('Gemini response received successfully')
     
-    const analysisText = aiResponse.choices[0].message.content
+    const analysisText = aiResponse.candidates[0].content.parts[0].text
     console.log('Raw AI response:', analysisText)
 
     // Parse and validate the AI response
@@ -391,25 +388,30 @@ Respond with ONLY this JSON object:
   "phone": "phone or null"
 }\nResume text:\n${resumeText}\nHints:\n- email_hint: ${emailHint ?? 'none'}\n- phone_hint: ${phoneHint ?? 'none'}\nRules:\n- Prefer exact strings from the text.\n- If hints appear in the text, you may use them.\n- Return valid JSON only.`
       try {
-        const secondRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        const secondRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${openaiApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              { role: 'system', content: 'You extract work history and contact info from resumes. Return valid JSON only.' },
-              { role: 'user', content: secondPrompt }
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You extract work history and contact info from resumes. Return valid JSON only.\n\n${secondPrompt}`
+                  }
+                ]
+              }
             ],
-            temperature: 0.2,
-            response_format: { type: 'json_object' }
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: "application/json"
+            }
           }),
         })
         if (secondRes.ok) {
           const secondJson = await secondRes.json()
-          const secondText = secondJson.choices?.[0]?.message?.content || ''
+          const secondText = secondJson.candidates?.[0]?.content?.parts?.[0]?.text || ''
           console.log('Second-pass raw response:', secondText)
           try {
             const parsed = JSON.parse(secondText.replace(/```json\s*|\s*```/g, '').trim())

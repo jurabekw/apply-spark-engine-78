@@ -163,8 +163,8 @@ const UploadSection = () => {
           
           // Make quota errors more user-friendly
           if (errorMsg.includes('quota exceeded') || errorMsg.includes('429')) {
-            displayError = 'API quota exceeded - check billing';
-          } else if (errorMsg.includes('authentication') || errorMsg.includes('401')) {
+            displayError = 'API quota exceeded - try again later';
+          } else if (errorMsg.includes('authentication') || errorMsg.includes('401') || errorMsg.includes('403')) {
             displayError = 'API key authentication failed';
           } else if (errorMsg.includes('temporarily unavailable') || errorMsg.includes('500')) {
             displayError = 'Service temporarily unavailable';
@@ -333,8 +333,8 @@ const UploadSection = () => {
             <div>
               <h4 className="font-semibold text-amber-900 mb-1">Processing Requirements</h4>
               <p className="text-sm text-amber-700">
-                Resume processing requires a valid OpenAI API key with available quota. If processing fails due to quota limits, 
-                check your OpenAI billing dashboard or try again later.
+                Resume processing requires a valid Gemini API key. Gemini offers generous free quotas, 
+                making it a cost-effective solution for AI-powered resume analysis.
               </p>
             </div>
           </div>
