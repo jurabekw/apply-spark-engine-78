@@ -117,7 +117,7 @@ function normalizeCandidates(payload: any): Candidate[] {
       education_level: String(candidateObj.education_level ?? candidateObj.education ?? ""),
       AI_score: scoreRaw != null ? String(scoreRaw) : "0",
       key_skills,
-      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? "#"),
+      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? ""),
     };
   };
 
@@ -176,14 +176,39 @@ function normalizeCandidates(payload: any): Candidate[] {
     console.error("Failed to normalize candidates:", e, payload);
   }
 
-  // Deduplicate by alternate_url + title
-  const seen = new Set<string>();
-  const deduped = results.filter((c) => {
-    const key = `${c.alternate_url}|${c.title}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
+  // Deduplicate (conservative)
+  console.debug("normalizeCandidates: before dedupe", { extracted: results.length });
+  const seenAlt = new Set<string>();
+  const seenFP = new Set<string>();
+  const deduped = results.filter((c, i) => {
+    const url = (c.alternate_url || "").trim();
+    if (url) {
+      if (seenAlt.has(url)) {
+        console.debug("dedupe drop", { i, keyType: "alternate_url", key: url, title: c.title });
+        return false;
+      }
+      seenAlt.add(url);
+      console.debug("dedupe keep", { i, keyType: "alternate_url", key: url, title: c.title });
+      return true;
+    }
+
+    const meaningful = Boolean(c.title && c.experience && (c.key_skills?.length || 0) > 0);
+    if (!meaningful) {
+      console.debug("dedupe skip", { i, keyType: "none", title: c.title });
+      return true; // don't dedupe when we can't form a meaningful fingerprint
+    }
+
+    const fp = `t:${c.title}|e:${c.experience}|edu:${c.education_level}|s:${(c.key_skills || []).slice(0, 5).join(',')}`;
+    if (seenFP.has(fp)) {
+      console.debug("dedupe drop", { i, keyType: "fingerprint", key: fp, title: c.title });
+      return false;
+    }
+    seenFP.add(fp);
+    console.debug("dedupe keep", { i, keyType: "fingerprint", key: fp, title: c.title });
     return true;
   });
+
+  console.debug("normalizeCandidates: after dedupe", { kept: deduped.length });
 
   return deduped;
 }
@@ -484,7 +509,7 @@ export default function ResumeSearch() {
                 const n = parseScore(c.AI_score);
                 const tone = scoreTone(n);
                 return (
-                  <Card key={`${c.alternate_url}-${idx}`} className="transition-shadow hover:shadow-md">
+                  <Card key={`${(c.alternate_url && c.alternate_url.trim()) || c.title || 'cand'}-${idx}`} className="transition-shadow hover:shadow-md">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-3">
                         <CardTitle className="text-xl font-bold leading-tight">{c.title}</CardTitle>
@@ -504,15 +529,19 @@ export default function ResumeSearch() {
                         ))}
                       </div>
                       <div className="pt-2">
-                        <a
-                          href={c.alternate_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                          aria-label="View resume on HH.ru"
-                        >
-                          View Resume <ExternalLink className="h-4 w-4" />
-                        </a>
+                        {c.alternate_url?.trim() ? (
+                          <a
+                            href={c.alternate_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
+                            aria-label="View resume on HH.ru"
+                          >
+                            View Resume <ExternalLink className="h-4 w-4" />
+                          </a>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Resume link unavailable</span>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
