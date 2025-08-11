@@ -14,6 +14,8 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 // Types
 type Candidate = {
@@ -23,6 +25,19 @@ type Candidate = {
   AI_score: string;
   key_skills: string[];
   alternate_url: string;
+};
+
+// Debug stats for normalization
+type DebugStats = {
+  extracted: number;
+  kept: number;
+  dropped: number;
+  keptByUrl: number;
+  droppedByUrl: number;
+  keptByFP: number;
+  droppedByFP: number;
+  skipped: number; // items where no meaningful key could be formed
+  noDedupe: boolean;
 };
 
 // Validation Schema
@@ -51,7 +66,10 @@ const scoreTone = (n: number) => {
   return { bg: "bg-destructive", text: "text-destructive-foreground" };
 };
 
-function normalizeCandidates(payload: any): Candidate[] {
+function normalizeCandidates(
+  payload: any,
+  opts?: { noDedupe?: boolean; onStats?: (stats: Omit<DebugStats, 'noDedupe'>) => void }
+): Candidate[] {
   const results: Candidate[] = [];
 
   const toArray = (val: any): any[] => {
@@ -176,39 +194,77 @@ function normalizeCandidates(payload: any): Candidate[] {
     console.error("Failed to normalize candidates:", e, payload);
   }
 
+  const extracted = results.length;
+
+  if (opts?.noDedupe) {
+    console.debug("normalizeCandidates: dedupe disabled", { extracted });
+    opts?.onStats?.({
+      extracted,
+      kept: extracted,
+      dropped: 0,
+      keptByUrl: 0,
+      droppedByUrl: 0,
+      keptByFP: 0,
+      droppedByFP: 0,
+      skipped: 0,
+    });
+    return results;
+  }
+
   // Deduplicate (conservative)
-  console.debug("normalizeCandidates: before dedupe", { extracted: results.length });
+  console.debug("normalizeCandidates: before dedupe", { extracted });
   const seenAlt = new Set<string>();
   const seenFP = new Set<string>();
+  let keptByUrl = 0;
+  let droppedByUrl = 0;
+  let keptByFP = 0;
+  let droppedByFP = 0;
+  let skipped = 0;
+
   const deduped = results.filter((c, i) => {
     const url = (c.alternate_url || "").trim();
     if (url) {
       if (seenAlt.has(url)) {
+        droppedByUrl++;
         console.debug("dedupe drop", { i, keyType: "alternate_url", key: url, title: c.title });
         return false;
       }
       seenAlt.add(url);
+      keptByUrl++;
       console.debug("dedupe keep", { i, keyType: "alternate_url", key: url, title: c.title });
       return true;
     }
 
     const meaningful = Boolean(c.title && c.experience && (c.key_skills?.length || 0) > 0);
     if (!meaningful) {
+      skipped++;
       console.debug("dedupe skip", { i, keyType: "none", title: c.title });
       return true; // don't dedupe when we can't form a meaningful fingerprint
     }
 
     const fp = `t:${c.title}|e:${c.experience}|edu:${c.education_level}|s:${(c.key_skills || []).slice(0, 5).join(',')}`;
     if (seenFP.has(fp)) {
+      droppedByFP++;
       console.debug("dedupe drop", { i, keyType: "fingerprint", key: fp, title: c.title });
       return false;
     }
     seenFP.add(fp);
+    keptByFP++;
     console.debug("dedupe keep", { i, keyType: "fingerprint", key: fp, title: c.title });
     return true;
   });
 
   console.debug("normalizeCandidates: after dedupe", { kept: deduped.length });
+  opts?.onStats?.({
+    extracted,
+    kept: deduped.length,
+    dropped: extracted - deduped.length,
+    keptByUrl,
+    droppedByUrl,
+    keptByFP,
+    droppedByFP,
+    skipped,
+  });
 
   return deduped;
 }
@@ -270,6 +326,9 @@ export default function ResumeSearch() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [noDedupe, setNoDedupe] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<DebugStats | null>(null);
+  const debugEnabled = useMemo(() => new URL(window.location.href).searchParams.get("debug") === "1", []);
   const stepTimer = useRef<number | null>(null);
 
   // Loading steps messaging
@@ -313,6 +372,7 @@ export default function ResumeSearch() {
     setLoading(true);
     setError(null);
     setCandidates([]);
+    if (debugEnabled) setDebugInfo(null);
 
     try {
       const response = await fetchWithTimeout(WEBHOOK_URL, {
@@ -333,7 +393,12 @@ export default function ResumeSearch() {
       const raw = await response.json();
       console.debug("HH webhook raw payload:", raw);
 
-      const normalized = normalizeCandidates(raw);
+      const normalized = normalizeCandidates(raw, {
+        noDedupe,
+        onStats: (stats) => {
+          if (debugEnabled) setDebugInfo({ ...stats, noDedupe });
+        },
+      });
       console.debug("Normalized candidates:", { count: normalized.length, first: normalized[0], second: normalized[1] });
 
       setCandidates(normalized);
@@ -468,6 +533,10 @@ export default function ResumeSearch() {
                 >
                   Copy shareable link
                 </button>
+                <div className="ml-auto flex items-center gap-2">
+                  <Checkbox id="noDedupe" checked={noDedupe} onCheckedChange={(v) => setNoDedupe(Boolean(v))} />
+                  <Label htmlFor="noDedupe" className="text-sm">Don't merge duplicates</Label>
+                </div>
               </div>
 
               {loading && (
