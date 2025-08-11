@@ -1,9 +1,8 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Settings, User, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { Link } from 'react-router-dom';
 const Header = () => {
   const { user, signOut } = useAuth();
 
@@ -23,11 +22,14 @@ const Header = () => {
             <p className="text-xs text-gray-500">AI-Powered Recruitment</p>
           </div>
         </div>
-
         <div className="flex items-center gap-4">
           <Badge variant="outline" className="text-amber-600 border-amber-200">
             🚀 MVP Demo
           </Badge>
+
+          <Link to="/resume-search" className="hidden md:block">
+            <Button size="sm" variant="brand">Resume Search</Button>
+          </Link>
           
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm">

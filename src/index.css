@@ -51,6 +51,14 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Extended semantic tokens */
+    --brand: 217.2 91.2% 59.8%; /* primary blue */
+    --brand-foreground: 210 40% 98%;
+    --success: 160 84% 39%; /* emerald-500 */
+    --success-foreground: 210 40% 98%;
+    --warning: 36 92% 50%; /* amber-500 */
+    --warning-foreground: 24 10% 10%;
   }
 
   .dark {
@@ -89,6 +97,14 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Extended semantic tokens (dark) */
+    --brand: 224.3 76.3% 48%;
+    --brand-foreground: 0 0% 100%;
+    --success: 160 84% 39%;
+    --success-foreground: 210 40% 98%;
+    --warning: 36 92% 50%;
+    --warning-foreground: 210 40% 98%;
   }
 }
 
