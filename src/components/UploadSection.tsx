@@ -9,38 +9,36 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
-
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobRequirements, setJobRequirements] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState<string[]>([]);
-  const { toast } = useToast();
-  const { user } = useAuth();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       // Filter for PDF files only
-      const pdfFiles = Array.from(files).filter(file => 
-        file.type === 'application/pdf'
-      );
-      
+      const pdfFiles = Array.from(files).filter(file => file.type === 'application/pdf');
       if (pdfFiles.length !== files.length) {
         toast({
           title: "Invalid file type",
           description: "Please select only PDF files.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
       if (pdfFiles.length > 10) {
         toast({
           title: "Too many files",
           description: "Please select maximum 10 files at once.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -51,29 +49,28 @@ const UploadSection = () => {
       setSelectedFiles(dataTransfer.files);
     }
   };
-
   const processResume = async (file: File) => {
     try {
       // Generate unique filename using our utility
       const filename = generateUniqueFilename(file.name, user?.id || 'anonymous');
       const filePath = `${user?.id}/${filename}`;
-
       console.log(`Uploading file: ${file.name} (${file.size} bytes) to ${filePath}`);
 
       // Upload file to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from('resumes')
-        .upload(filePath, file);
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('resumes').upload(filePath, file);
       if (uploadError) {
         console.error('Upload error:', uploadError);
         throw new Error(`Failed to upload file: ${uploadError.message}`);
       }
-
       console.log('File uploaded successfully, now processing with AI...');
 
       // Process resume with AI - the edge function will handle PDF text extraction
-      const { data, error } = await supabase.functions.invoke('process-resume', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('process-resume', {
         body: {
           jobRequirements,
           jobTitle,
@@ -82,26 +79,22 @@ const UploadSection = () => {
           originalFilename: file.name
         }
       });
-
       if (error) {
         console.error('Processing error:', error);
         // Clean up uploaded file on processing error
         await supabase.storage.from('resumes').remove([filePath]);
         throw new Error(error.message || 'Failed to process resume');
       }
-
       if (!data.success) {
         // Clean up uploaded file on processing failure
         await supabase.storage.from('resumes').remove([filePath]);
         throw new Error(data.error || 'Resume processing failed');
       }
-
       return {
         success: true,
         filename: file.name,
         candidate: data.candidate
       };
-
     } catch (error) {
       console.error('Error processing resume:', error);
       return {
@@ -111,56 +104,45 @@ const UploadSection = () => {
       };
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({
         title: "No files selected",
         description: "Please select at least one PDF file to process.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!jobTitle.trim() || !jobRequirements.trim()) {
       toast({
         title: "Missing information",
         description: "Please provide both job title and requirements.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsProcessing(true);
     setProcessingProgress([]);
-    
     const files = Array.from(selectedFiles);
     let successCount = 0;
     let failureCount = 0;
     const failedFiles: string[] = [];
-
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         setProcessingProgress(prev => [...prev, `Processing ${file.name}...`]);
-        
         const result = await processResume(file);
-        
         if (result.success) {
           successCount++;
-          setProcessingProgress(prev => [
-            ...prev.slice(0, -1), 
-            `✅ ${file.name} - Processed successfully`
-          ]);
+          setProcessingProgress(prev => [...prev.slice(0, -1), `✅ ${file.name} - Processed successfully`]);
         } else {
           failureCount++;
           failedFiles.push(file.name);
           // Extract more specific error info for display
           const errorMsg = result.error || 'Processing failed';
           let displayError = errorMsg;
-          
+
           // Make quota errors more user-friendly
           if (errorMsg.includes('quota exceeded') || errorMsg.includes('429')) {
             displayError = 'API quota exceeded - try again later';
@@ -169,11 +151,7 @@ const UploadSection = () => {
           } else if (errorMsg.includes('temporarily unavailable') || errorMsg.includes('500')) {
             displayError = 'Service temporarily unavailable';
           }
-          
-          setProcessingProgress(prev => [
-            ...prev.slice(0, -1), 
-            `❌ ${file.name} - ${displayError}`
-          ]);
+          setProcessingProgress(prev => [...prev.slice(0, -1), `❌ ${file.name} - ${displayError}`]);
         }
       }
 
@@ -181,19 +159,19 @@ const UploadSection = () => {
       if (successCount > 0 && failureCount === 0) {
         toast({
           title: "Processing Complete!",
-          description: `Successfully processed ${successCount} resume${successCount > 1 ? 's' : ''}.`,
+          description: `Successfully processed ${successCount} resume${successCount > 1 ? 's' : ''}.`
         });
       } else if (successCount > 0 && failureCount > 0) {
         toast({
           title: "Partial Success",
           description: `Processed ${successCount} resume${successCount > 1 ? 's' : ''} successfully. ${failureCount} failed.`,
-          variant: "destructive",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "Processing Failed",
           description: `Failed to process all ${failureCount} resume${failureCount > 1 ? 's' : ''}. Please check the files and try again.`,
-          variant: "destructive",
+          variant: "destructive"
         });
       }
 
@@ -206,21 +184,18 @@ const UploadSection = () => {
         const fileInput = document.getElementById('resume-files') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
       }
-
     } catch (error) {
       console.error('Batch processing error:', error);
       toast({
         title: "Processing Error",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
     }
   };
-
-  return (
-    <Card className="w-full">
+  return <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="w-5 h-5" />
@@ -232,85 +207,46 @@ const UploadSection = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="job-title">Job Title</Label>
-              <Input
-                id="job-title"
-                placeholder="e.g., Senior Frontend Developer"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                disabled={isProcessing}
-                required
-              />
+              <Input id="job-title" placeholder="e.g., Senior Frontend Developer" value={jobTitle} onChange={e => setJobTitle(e.target.value)} disabled={isProcessing} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="resume-files">Resume Files (PDF only)</Label>
-              <Input
-                id="resume-files"
-                type="file"
-                multiple
-                accept=".pdf"
-                onChange={handleFileSelect}
-                disabled={isProcessing}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
-              />
+              <Input id="resume-files" type="file" multiple accept=".pdf" onChange={handleFileSelect} disabled={isProcessing} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="requirements">Job Requirements & Skills</Label>
-            <Textarea
-              id="requirements"
-              placeholder="Describe the key requirements, skills, and qualifications for this position..."
-              value={jobRequirements}
-              onChange={(e) => setJobRequirements(e.target.value)}
-              disabled={isProcessing}
-              rows={4}
-              required
-            />
+            <Textarea id="requirements" placeholder="Describe the key requirements, skills, and qualifications for this position..." value={jobRequirements} onChange={e => setJobRequirements(e.target.value)} disabled={isProcessing} rows={4} required />
           </div>
 
-          {selectedFiles && selectedFiles.length > 0 && (
-            <div className="bg-gray-50 p-4 rounded-lg">
+          {selectedFiles && selectedFiles.length > 0 && <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium text-gray-900 mb-2">Selected Files ({selectedFiles.length}):</h4>
               <div className="space-y-1">
-                {Array.from(selectedFiles).map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                {Array.from(selectedFiles).map((file, index) => <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
                     <FileText className="w-4 h-4" />
                     {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </div>
-                ))}
+                  </div>)}
               </div>
-            </div>
-          )}
+            </div>}
 
-          {processingProgress.length > 0 && (
-            <div className="bg-blue-50 p-4 rounded-lg">
+          {processingProgress.length > 0 && <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-900 mb-2">Processing Status:</h4>
               <div className="space-y-1 max-h-40 overflow-y-auto">
-                {processingProgress.map((message, index) => (
-                  <div key={index} className="text-sm text-blue-700 font-mono">
+                {processingProgress.map((message, index) => <div key={index} className="text-sm text-blue-700 font-mono">
                     {message}
-                  </div>
-                ))}
+                  </div>)}
               </div>
-            </div>
-          )}
+            </div>}
 
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}
-          >
-            {isProcessing ? (
-              <>
+          <Button type="submit" className="w-full" disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}>
+            {isProcessing ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Processing Resumes...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Upload className="w-4 h-4 mr-2" />
                 Process {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
-              </>
-            )}
+              </>}
           </Button>
         </form>
 
@@ -327,21 +263,8 @@ const UploadSection = () => {
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-amber-900 mb-1">Processing Requirements</h4>
-              <p className="text-sm text-amber-700">
-                Resume processing requires a valid Gemini API key. Gemini offers generous free quotas, 
-                making it a cost-effective solution for AI-powered resume analysis.
-              </p>
-            </div>
-          </div>
-        </div>
+        
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default UploadSection;
