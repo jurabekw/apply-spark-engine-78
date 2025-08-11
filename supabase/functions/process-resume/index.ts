@@ -191,10 +191,10 @@ serve(async (req) => {
       throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
     }
 
-    // Get Gemini API key
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!geminiApiKey) {
-      throw new Error('Gemini API key not configured')
+    // Get OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
     }
 
     // Detect contact info hints from extracted text
@@ -235,50 +235,51 @@ Return JSON:
   }
 }`
 
-    console.log('Calling Gemini API with aggressive extraction prompt...')
+    console.log('Calling OpenAI API with extraction prompt...')
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
+        model: 'gpt-4o-mini',
+        messages: [
           {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
+            role: 'system',
+            content: 'You are an expert resume parser. Extract candidate information and return ONLY valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
           }
         ],
-        generationConfig: {
-          temperature: 0.1,
-          responseMimeType: "application/json"
-        }
+        temperature: 0.1,
+        response_format: { type: "json_object" }
       }),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Gemini API error:', response.status, errorText)
+      console.error('OpenAI API error:', response.status, errorText)
       
       // Handle specific error cases with user-friendly messages
       if (response.status === 429) {
-        throw new Error('Gemini API quota exceeded. Please try again later or check your API usage.')
+        throw new Error('OpenAI API quota exceeded. Please try again later or check your API usage.')
       } else if (response.status === 401 || response.status === 403) {
-        throw new Error('Gemini API authentication failed. Please check your API key configuration.')
+        throw new Error('OpenAI API authentication failed. Please check your API key configuration.')
       } else if (response.status >= 500) {
-        throw new Error('Gemini service temporarily unavailable. Please try again in a few minutes.')
+        throw new Error('OpenAI service temporarily unavailable. Please try again in a few minutes.')
       } else {
-        throw new Error(`Gemini API error (${response.status}): ${errorText}`)
+        throw new Error(`OpenAI API error (${response.status}): ${errorText}`)
       }
     }
 
     const aiResponse = await response.json()
-    console.log('Gemini response received successfully')
+    console.log('OpenAI response received successfully')
     
-    const analysisText = aiResponse.candidates[0].content.parts[0].text
+    const analysisText = aiResponse.choices[0].message.content
     console.log('Raw AI response:', analysisText)
 
     // Parse and validate the AI response
@@ -377,30 +378,31 @@ Return JSON:
   "phone": "phone or null"
 }\nResume text:\n${resumeText}\nHints:\n- email_hint: ${emailHint ?? 'none'}\n- phone_hint: ${phoneHint ?? 'none'}\nRules:\n- Prefer exact strings from the text.\n- If hints appear in the text, you may use them.\n- Return valid JSON only.`
       try {
-        const secondRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+        const secondRes = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
+            'Authorization': `Bearer ${openaiApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contents: [
+            model: 'gpt-4o-mini',
+            messages: [
               {
-                parts: [
-                  {
-                    text: secondPrompt
-                  }
-                ]
+                role: 'system',
+                content: 'Extract specific fields from resume text. Return only valid JSON.'
+              },
+              {
+                role: 'user',
+                content: secondPrompt
               }
             ],
-            generationConfig: {
-              temperature: 0.1,
-              responseMimeType: "application/json"
-            }
+            temperature: 0.1,
+            response_format: { type: "json_object" }
           }),
         })
         if (secondRes.ok) {
           const secondJson = await secondRes.json()
-          const secondText = secondJson.candidates?.[0]?.content?.parts?.[0]?.text || ''
+          const secondText = secondJson.choices?.[0]?.message?.content || ''
           console.log('Second-pass raw response:', secondText)
           try {
             const parsed = JSON.parse(secondText.replace(/```json\s*|\s*```/g, '').trim())
