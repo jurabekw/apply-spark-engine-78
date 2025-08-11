@@ -197,67 +197,52 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
+    // Detect contact info hints from extracted text
+    const emailHints = resumeText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    const emailHint = emailHints.length ? emailHints[0] : null;
+    const phoneCandidates = resumeText.match(/(\+?\d[\d\s().-]{7,}\d)/g) || [];
+    const phoneHint = phoneCandidates.length
+      ? phoneCandidates.sort((a, b) => b.replace(/\D/g, '').length - a.replace(/\D/g, '').length)[0].trim()
+      : null;
+    console.log('Detected contact hints:', { emailHint, phoneHint });
+    
     // Enhanced aggressive extraction prompt
-    const prompt = `You are an expert HR data extraction specialist. Your job is to extract every possible piece of information from this resume text, even if it's partially garbled or incomplete.
+    const prompt = `You are an expert HR data extraction specialist. Extract maximum structured info from the resume text and prefer exact strings copied from the text. Do not hallucinate.
 
-RESUME TEXT TO ANALYZE FOR JOB: "${jobTitle}" with requirements: "${jobRequirements}"
+Job title: "${jobTitle}"
+Requirements: "${jobRequirements}"
 
-RESUME CONTENT:
+CONTACT HINTS (may be correct):
+- email_hint: ${emailHint ?? 'none'}
+- phone_hint: ${phoneHint ?? 'none'}
+
+RESUME TEXT:
 ${resumeText}
 
-EXTRACTION RULES - BE AGGRESSIVE AND CREATIVE:
+STRICT RULES:
+1) Contact: Use the hints only if they also appear in the text; otherwise extract from text. Return null if nothing reliable is present.
+2) Work history: Prioritize explicit company names and titles. Aim for a concise timeline with company → title → dates (if present). Use keywords like Inc, LLC, Ltd, GmbH, Company, or recognizable org names. Avoid generic statements like "no work history" unless nothing at all exists.
+3) Experience years: Derive from ranges/years; make a reasonable estimate if ranges are clear.
+4) Skills: Unique, relevant skills.
+5) Output must be valid JSON only.
 
-1. NAME EXTRACTION: Look for any proper nouns, capitalized words that could be names. If unclear, make educated guesses.
-
-2. CONTACT INFO: 
-   - Email: Look for @ symbols and email patterns, even partial ones
-   - Phone: Look for number sequences 7+ digits long, any format
-   - Extract even if formatting is broken
-
-3. EXPERIENCE CALCULATION:
-   - Look for ANY year mentions (2020, 2021, etc.)
-   - Look for date ranges, employment periods
-   - Look for words like "years", "since", "from", "to"
-   - If you see multiple years, calculate total experience
-   - Make reasonable estimates if dates are unclear
-   - Don't leave as null unless absolutely no time indicators exist
-
-4. SKILLS EXTRACTION:
-   - Look for technical terms, software names, programming languages
-   - Extract job-related keywords from the garbled text
-   - Include both hard and soft skills
-   - Be liberal in what you consider a skill
-
-5. SCORING (1-100):
-   - Don't be too harsh - give benefit of doubt
-   - Score based on any relevant keywords found
-   - Consider experience indicators
-   - Minimum score should be 25 if any relevant text exists
-
-6. POSITION/ROLE:
-   - Look for job titles, role descriptions
-   - Extract from context even if not explicitly stated
-
-BE CREATIVE AND EXTRACT MAXIMUM VALUE FROM AVAILABLE TEXT.
-
-RESPOND WITH ONLY VALID JSON:
-
+Respond with ONLY this JSON object:
 {
-  "name": "best guess at full name from text",
-  "email": "email address if found or null",
-  "phone": "phone number if found or null", 
-  "position": "job title/role from resume or null",
-  "experience_years": calculated years as integer or null,
-  "skills": ["skill1", "skill2", "skill3"] or [],
-  "education": "education info or null",
-  "work_history": "work experience summary or null",
-  "ai_score": score from 25-100,
+  "name": "best guess full name from text",
+  "email": "email or null",
+  "phone": "phone or null",
+  "position": "job title or null",
+  "experience_years": integer or null,
+  "skills": ["skill1", "skill2"],
+  "education": "education or null",
+  "work_history": "concise timeline listing companies and roles; include dates when present or 'dates unavailable'",
+  "ai_score": 25-100,
   "ai_analysis": {
     "strengths": ["strength1", "strength2"],
     "weaknesses": ["weakness1", "weakness2"],
-    "match_reasoning": "explain score reasoning",
-    "recommendations": "hiring recommendations",
-    "extraction_notes": "notes about text quality and extraction challenges"
+    "match_reasoning": "why the score",
+    "recommendations": "hiring recommendation",
+    "extraction_notes": "note if hints were used or if text was garbled"
   }
 }`
 
@@ -270,7 +255,7 @@ RESPOND WITH ONLY VALID JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
@@ -309,11 +294,15 @@ RESPOND WITH ONLY VALID JSON:
       throw new Error('Failed to parse AI analysis response')
     }
 
+    // Prepare fallback contact info from hints
+    const fallbackEmail = emailHint && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailHint) ? emailHint : null;
+    const fallbackPhone = phoneHint && phoneHint.replace(/\D/g, '').length >= 7 ? phoneHint : null;
+
     // Enhanced data validation with more permissive approach
     const sanitizedData = {
       name: candidateData.name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-      email: validateEmail(candidateData.email),
-      phone: validatePhone(candidateData.phone),
+      email: validateEmail(candidateData.email) || fallbackEmail,
+      phone: validatePhone(candidateData.phone) || fallbackPhone,
       position: candidateData.position || null,
       experience_years: validateExperience(candidateData.experience_years),
       skills: Array.isArray(candidateData.skills) ? candidateData.skills.filter(skill => skill && skill.trim()) : [],
@@ -379,7 +368,59 @@ RESPOND WITH ONLY VALID JSON:
       }
     }
 
-    console.log('Final sanitized candidate data:', sanitizedData)
+    // Optional second pass to strengthen work_history and fill missing contact info
+    let finalData = { ...sanitizedData } as typeof sanitizedData
+    const weakWorkHistory = !finalData.work_history || finalData.work_history.length < 30 || !/(19|20)\d{2}/.test(finalData.work_history)
+    if (weakWorkHistory) {
+      console.log('Work history weak/missing. Running second-pass extraction...')
+      const secondPrompt = `From the resume text below, extract ONLY these fields in JSON:\n{
+  "work_history": "concise timeline listing company names and job titles; include dates if present or 'dates unavailable'",
+  "email": "email or null",
+  "phone": "phone or null"
+}\nResume text:\n${resumeText}\nHints:\n- email_hint: ${emailHint ?? 'none'}\n- phone_hint: ${phoneHint ?? 'none'}\nRules:\n- Prefer exact strings from the text.\n- If hints appear in the text, you may use them.\n- Return valid JSON only.`
+      try {
+        const secondRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              { role: 'system', content: 'You extract work history and contact info from resumes. Return valid JSON only.' },
+              { role: 'user', content: secondPrompt }
+            ],
+            temperature: 0.2,
+            response_format: { type: 'json_object' }
+          }),
+        })
+        if (secondRes.ok) {
+          const secondJson = await secondRes.json()
+          const secondText = secondJson.choices?.[0]?.message?.content || ''
+          console.log('Second-pass raw response:', secondText)
+          try {
+            const parsed = JSON.parse(secondText.replace(/```json\s*|\s*```/g, '').trim())
+            if (parsed.work_history && parsed.work_history.length > 20) {
+              finalData.work_history = parsed.work_history
+            }
+            const maybeEmail = validateEmail(parsed.email)
+            const maybePhone = validatePhone(parsed.phone)
+            if (!finalData.email && maybeEmail) finalData.email = maybeEmail
+            if (!finalData.phone && maybePhone) finalData.phone = maybePhone
+          } catch (e) {
+            console.warn('Second-pass parse failed')
+          }
+        } else {
+          const errText = await secondRes.text()
+          console.warn('Second-pass API error:', errText)
+        }
+      } catch (e) {
+        console.error('Second-pass extraction error:', e)
+      }
+    }
+
+    console.log('Final candidate data (after second pass if any):', finalData)
 
     // Insert candidate into database
     console.log('Inserting candidate into database...')
@@ -387,18 +428,18 @@ RESPOND WITH ONLY VALID JSON:
       .from('candidates')
       .insert({
         user_id: userId,
-        name: sanitizedData.name,
-        email: sanitizedData.email,
-        phone: sanitizedData.phone,
-        position: sanitizedData.position,
-        experience_years: sanitizedData.experience_years,
-        skills: sanitizedData.skills,
-        education: sanitizedData.education,
-        work_history: sanitizedData.work_history,
+        name: finalData.name,
+        email: finalData.email,
+        phone: finalData.phone,
+        position: finalData.position,
+        experience_years: finalData.experience_years,
+        skills: finalData.skills,
+        education: finalData.education,
+        work_history: finalData.work_history,
         resume_file_path: resumeFilePath,
         original_filename: originalFilename,
-        ai_score: sanitizedData.ai_score,
-        ai_analysis: sanitizedData.ai_analysis,
+        ai_score: finalData.ai_score,
+        ai_analysis: finalData.ai_analysis,
         status: 'new',
         source: 'upload'
       })
