@@ -65,11 +65,13 @@ const CandidateTable = () => {
     return labels[status as keyof typeof labels] || status;
   };
 
-  const filteredCandidates = candidates.filter(candidate =>
-    candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (candidate.position || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const term = searchTerm.toLowerCase();
+  const filteredCandidates = candidates.filter(candidate => {
+    const name = (candidate.name || '').toLowerCase();
+    const email = (candidate.email || '').toLowerCase();
+    const position = (candidate.position || '').toLowerCase();
+    return name.includes(term) || email.includes(term) || position.includes(term);
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
