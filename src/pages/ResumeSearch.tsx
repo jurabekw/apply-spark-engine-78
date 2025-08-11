@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Types
 type Candidate = {
@@ -326,7 +327,8 @@ export default function ResumeSearch() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [noDedupe, setNoDedupe] = useState(false);
+  const [noDedupe, setNoDedupe] = useState(true);
+  const [rawPayload, setRawPayload] = useState<any | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugStats | null>(null);
   const debugEnabled = useMemo(() => new URL(window.location.href).searchParams.get("debug") === "1", []);
   const stepTimer = useRef<number | null>(null);
@@ -346,6 +348,21 @@ export default function ResumeSearch() {
       if (stepTimer.current) window.clearInterval(stepTimer.current);
     };
   }, [loading]);
+
+  // Persist no-merge-duplicates toggle
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("resumeSearch.noDedupe");
+      if (saved === "1" || saved === "true") setNoDedupe(true);
+      else if (saved === "0" || saved === "false") setNoDedupe(false);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("resumeSearch.noDedupe", noDedupe ? "1" : "0");
+    } catch {}
+  }, [noDedupe]);
 
   // Share link (encodes current form)
   const shareLink = useMemo(() => {
@@ -372,6 +389,7 @@ export default function ResumeSearch() {
     setLoading(true);
     setError(null);
     setCandidates([]);
+    setRawPayload(null);
     if (debugEnabled) setDebugInfo(null);
 
     try {
@@ -392,6 +410,7 @@ export default function ResumeSearch() {
 
       const raw = await response.json();
       console.debug("HH webhook raw payload:", raw);
+      setRawPayload(raw);
 
       const normalized = normalizeCandidates(raw, {
         noDedupe,
@@ -552,8 +571,46 @@ export default function ResumeSearch() {
               )}
             </form>
           </Form>
-        </CardContent>
+      </CardContent>
       </Card>
+
+      {debugEnabled && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Debug</CardTitle>
+            <CardDescription>Normalization and deduplication stats</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div><span className="font-medium">Dedupe disabled:</span> {String(noDedupe)}</div>
+              {debugInfo && (
+                <>
+                  <div><span className="font-medium">Extracted:</span> {debugInfo.extracted}</div>
+                  <div><span className="font-medium">Kept:</span> {debugInfo.kept}</div>
+                  <div><span className="font-medium">Dropped:</span> {debugInfo.dropped}</div>
+                  <div><span className="font-medium">Kept by URL:</span> {debugInfo.keptByUrl}</div>
+                  <div><span className="font-medium">Dropped by URL:</span> {debugInfo.droppedByUrl}</div>
+                  <div><span className="font-medium">Kept by FP:</span> {debugInfo.keptByFP}</div>
+                  <div><span className="font-medium">Dropped by FP:</span> {debugInfo.droppedByFP}</div>
+                  <div><span className="font-medium">Skipped:</span> {debugInfo.skipped}</div>
+                </>
+              )}
+            </div>
+            <div className="mt-4">
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <Button variant="link" className="p-0">Show raw webhook JSON</Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <pre className="mt-2 max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">
+                    {rawPayload ? JSON.stringify(rawPayload, null, 2) : "No payload"}
+                  </pre>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Results */}
       <section className="mt-8">
