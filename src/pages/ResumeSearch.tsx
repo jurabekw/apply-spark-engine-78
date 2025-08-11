@@ -274,7 +274,7 @@ export default function ResumeSearch() {
 
               <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
-                  {loading ? "Searching HH.ru..." : "Search HH Candidates"}
+                  {loading ? "Searching HH.ru..." : "Search candidates"}
                 </Button>
                 <button
                   type="button"
