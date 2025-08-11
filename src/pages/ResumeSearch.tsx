@@ -164,13 +164,26 @@ export default function ResumeSearch() {
 
       const data = await response.json();
 
+      let candidates: Candidate[] = [];
+
+      // Handle different response formats
       if (data.status === "success" && Array.isArray(data.candidates)) {
-        setCandidates(data.candidates);
-        if (data.candidates.length === 0) {
-          setError("No candidates found matching your criteria. Try adjusting your requirements.");
-        }
+        // Expected wrapper format
+        candidates = data.candidates;
+      } else if (Array.isArray(data)) {
+        // Direct array of candidates
+        candidates = data;
+      } else if (data.title && data.experience && data.education_level) {
+        // Single candidate object from Make.com
+        candidates = [data];
       } else {
-        throw new Error("Invalid response format");
+        console.error("Unexpected response format:", data);
+        throw new Error("Invalid response format. Expected candidate data but received unexpected structure.");
+      }
+
+      setCandidates(candidates);
+      if (candidates.length === 0) {
+        setError("No candidates found matching your criteria. Try adjusting your requirements.");
       }
     } catch (err: any) {
       if (err?.name === "TimeoutError") {
