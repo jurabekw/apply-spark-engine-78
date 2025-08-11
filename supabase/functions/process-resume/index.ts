@@ -206,49 +206,38 @@ serve(async (req) => {
       : null;
     console.log('Detected contact hints:', { emailHint, phoneHint });
     
-    // Enhanced aggressive extraction prompt
-    const prompt = `You are an expert HR data extraction specialist. Extract maximum structured info from the resume text and prefer exact strings copied from the text. Do not hallucinate.
+    // Streamlined extraction prompt
+    const prompt = `Extract candidate data from resume text. Job: "${jobTitle}". Requirements: "${jobRequirements}".
 
-Job title: "${jobTitle}"
-Requirements: "${jobRequirements}"
+Email hint: ${emailHint ?? 'none'}
+Phone hint: ${phoneHint ?? 'none'}
 
-CONTACT HINTS (may be correct):
-- email_hint: ${emailHint ?? 'none'}
-- phone_hint: ${phoneHint ?? 'none'}
+Resume:
+${resumeText.substring(0, 3000)}
 
-RESUME TEXT:
-${resumeText}
-
-STRICT RULES:
-1) Contact: Use the hints only if they also appear in the text; otherwise extract from text. Return null if nothing reliable is present.
-2) Work history: Prioritize explicit company names and titles. Aim for a concise timeline with company → title → dates (if present). Use keywords like Inc, LLC, Ltd, GmbH, Company, or recognizable org names. Avoid generic statements like "no work history" unless nothing at all exists.
-3) Experience years: Derive from ranges/years; make a reasonable estimate if ranges are clear.
-4) Skills: Unique, relevant skills.
-5) Output must be valid JSON only.
-
-Respond with ONLY this JSON object:
+Return JSON:
 {
-  "name": "best guess full name from text",
+  "name": "full name",
   "email": "email or null",
-  "phone": "phone or null",
-  "position": "job title or null",
-  "experience_years": integer or null,
+  "phone": "phone or null", 
+  "position": "job title",
+  "experience_years": number_or_null,
   "skills": ["skill1", "skill2"],
-  "education": "education or null",
-  "work_history": "concise timeline listing companies and roles; include dates when present or 'dates unavailable'",
-  "ai_score": 25-100,
+  "education": "education",
+  "work_history": "company, role, dates",
+  "ai_score": 50,
   "ai_analysis": {
-    "strengths": ["strength1", "strength2"],
-    "weaknesses": ["weakness1", "weakness2"],
-    "match_reasoning": "why the score",
-    "recommendations": "hiring recommendation",
-    "extraction_notes": "note if hints were used or if text was garbled"
+    "strengths": ["strength1"],
+    "weaknesses": ["weakness1"],
+    "match_reasoning": "brief reason",
+    "recommendations": "hire/not hire",
+    "extraction_notes": "brief note"
   }
 }`
 
     console.log('Calling Gemini API with aggressive extraction prompt...')
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,13 +247,13 @@ Respond with ONLY this JSON object:
           {
             parts: [
               {
-                text: `You are an expert resume data extractor. Extract maximum information even from partially readable or garbled text. Be aggressive in your extraction and make educated guesses when needed. ALWAYS respond with valid JSON only.\n\n${prompt}`
+                text: prompt
               }
             ]
           }
         ],
         generationConfig: {
-          temperature: 0.3,
+          temperature: 0.1,
           responseMimeType: "application/json"
         }
       }),
@@ -388,7 +377,7 @@ Respond with ONLY this JSON object:
   "phone": "phone or null"
 }\nResume text:\n${resumeText}\nHints:\n- email_hint: ${emailHint ?? 'none'}\n- phone_hint: ${phoneHint ?? 'none'}\nRules:\n- Prefer exact strings from the text.\n- If hints appear in the text, you may use them.\n- Return valid JSON only.`
       try {
-        const secondRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
+        const secondRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -398,13 +387,13 @@ Respond with ONLY this JSON object:
               {
                 parts: [
                   {
-                    text: `You extract work history and contact info from resumes. Return valid JSON only.\n\n${secondPrompt}`
+                    text: secondPrompt
                   }
                 ]
               }
             ],
             generationConfig: {
-              temperature: 0.2,
+              temperature: 0.1,
               responseMimeType: "application/json"
             }
           }),
