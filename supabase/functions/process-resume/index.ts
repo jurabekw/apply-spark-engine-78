@@ -273,8 +273,20 @@ Respond with ONLY this JSON object:
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('OpenAI API error:', errorText)
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
+      console.error('OpenAI API error:', response.status, errorText)
+      
+      // Handle specific error cases with user-friendly messages
+      if (response.status === 429) {
+        throw new Error('OpenAI API quota exceeded. Please check your API billing and usage limits, or try again later.')
+      } else if (response.status === 401) {
+        throw new Error('OpenAI API authentication failed. Please check your API key configuration.')
+      } else if (response.status === 403) {
+        throw new Error('OpenAI API access forbidden. Please verify your API key permissions.')
+      } else if (response.status >= 500) {
+        throw new Error('OpenAI service temporarily unavailable. Please try again in a few minutes.')
+      } else {
+        throw new Error(`OpenAI API error (${response.status}): ${errorText}`)
+      }
     }
 
     const aiResponse = await response.json()

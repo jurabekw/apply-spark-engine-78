@@ -157,9 +157,22 @@ const UploadSection = () => {
         } else {
           failureCount++;
           failedFiles.push(file.name);
+          // Extract more specific error info for display
+          const errorMsg = result.error || 'Processing failed';
+          let displayError = errorMsg;
+          
+          // Make quota errors more user-friendly
+          if (errorMsg.includes('quota exceeded') || errorMsg.includes('429')) {
+            displayError = 'API quota exceeded - check billing';
+          } else if (errorMsg.includes('authentication') || errorMsg.includes('401')) {
+            displayError = 'API key authentication failed';
+          } else if (errorMsg.includes('temporarily unavailable') || errorMsg.includes('500')) {
+            displayError = 'Service temporarily unavailable';
+          }
+          
           setProcessingProgress(prev => [
             ...prev.slice(0, -1), 
-            `❌ ${file.name} - ${result.error}`
+            `❌ ${file.name} - ${displayError}`
           ]);
         }
       }
@@ -309,6 +322,19 @@ const UploadSection = () => {
               <p className="text-sm text-green-700">
                 Our system will automatically extract candidate information, calculate experience, 
                 identify skills, and provide an AI-powered match score for each resume against your job requirements.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-1">Processing Requirements</h4>
+              <p className="text-sm text-amber-700">
+                Resume processing requires a valid OpenAI API key with available quota. If processing fails due to quota limits, 
+                check your OpenAI billing dashboard or try again later.
               </p>
             </div>
           </div>
