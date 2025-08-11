@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 // Types
 type Candidate = {
@@ -47,6 +50,36 @@ const scoreTone = (n: number) => {
   if (n >= 60) return { bg: "bg-warning", text: "text-warning-foreground" };
   return { bg: "bg-destructive", text: "text-destructive-foreground" };
 };
+
+function normalizeCandidates(payload: any): Candidate[] {
+  try {
+    const data = typeof payload === "string" ? JSON.parse(payload) : payload;
+
+    if (data?.status === "success") {
+      const c = typeof data.candidates === "string" ? JSON.parse(data.candidates) : data.candidates;
+      if (Array.isArray(c)) return c;
+      if (c) return [c];
+      return [];
+    }
+
+    if (Array.isArray(data)) return data;
+
+    if (data?.candidates) {
+      const c = typeof data.candidates === "string" ? JSON.parse(data.candidates) : data.candidates;
+      if (Array.isArray(c)) return c;
+      if (c) return [c];
+      return [];
+    }
+
+    if (data?.title && data?.experience && data?.education_level) return [data];
+
+    if (Array.isArray((data as any)?.result)) return (data as any).result;
+    if (Array.isArray((data as any)?.items)) return (data as any).items;
+  } catch (e) {
+    console.error("Failed to normalize candidates:", e, payload);
+  }
+  return [];
+}
 
 const WEBHOOK_URL = "https://hook.eu2.make.com/rqe1ozj0uxqwb8cf19i1prbwhi8fdalk";
 
@@ -86,6 +119,9 @@ export default function ResumeSearch() {
     }
     link.setAttribute("href", window.location.origin + "/resume-search");
   }, []);
+
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   // Form
   const form = useForm<z.infer<typeof schema>>({
@@ -162,28 +198,31 @@ export default function ResumeSearch() {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const raw = await response.json();
+      console.debug("HH webhook raw payload:", raw);
 
-      let candidates: Candidate[] = [];
+      const normalized = normalizeCandidates(raw);
+      console.debug("Normalized candidates:", { count: normalized.length, first: normalized[0], second: normalized[1] });
 
-      // Handle different response formats
-      if (data.status === "success" && Array.isArray(data.candidates)) {
-        // Expected wrapper format
-        candidates = data.candidates;
-      } else if (Array.isArray(data)) {
-        // Direct array of candidates
-        candidates = data;
-      } else if (data.title && data.experience && data.education_level) {
-        // Single candidate object from Make.com
-        candidates = [data];
-      } else {
-        console.error("Unexpected response format:", data);
-        throw new Error("Invalid response format. Expected candidate data but received unexpected structure.");
+      setCandidates(normalized);
+      if (normalized.length === 0) {
+        setError("No candidates found matching your criteria. Try adjusting your requirements.");
       }
 
-      setCandidates(candidates);
-      if (candidates.length === 0) {
-        setError("No candidates found matching your criteria. Try adjusting your requirements.");
+      if (user?.id) {
+        const { error: dbError } = await supabase.from("hh_searches").insert({
+          user_id: user.id,
+          job_title: values.jobTitle.trim(),
+          required_skills: values.requiredSkills.trim(),
+          experience_level: values.experienceLevel,
+          response: raw,
+          candidate_count: normalized.length,
+        });
+        if (dbError) {
+          console.error("Failed to save hh_searches:", dbError);
+        } else {
+          // toast({ title: "Search saved", description: `Found ${normalized.length} candidates` });
+        }
       }
     } catch (err: any) {
       if (err?.name === "TimeoutError") {
@@ -331,46 +370,49 @@ export default function ResumeSearch() {
         ) : null}
 
         {candidates.length > 0 && (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {candidates.map((c, idx) => {
-              const n = parseScore(c.AI_score);
-              const tone = scoreTone(n);
-              return (
-                <Card key={`${c.alternate_url}-${idx}`} className="transition-shadow hover:shadow-md">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-3">
-                      <CardTitle className="text-xl font-bold leading-tight">{c.title}</CardTitle>
-                      <Badge className={`${tone.bg} ${tone.text} border-transparent`}>{n}%</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="text-sm">
-                      <div>📅 <span className="font-medium">Experience:</span> {c.experience}</div>
-                      <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {c.key_skills?.map((s, i) => (
-                        <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
-                          {s}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="pt-2">
-                      <a
-                        href={c.alternate_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                        aria-label="View resume on HH.ru"
-                      >
-                        View Resume <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+          <>
+            <p className="mb-4 text-sm text-muted-foreground">Found {candidates.length} candidates</p>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {candidates.map((c, idx) => {
+                const n = parseScore(c.AI_score);
+                const tone = scoreTone(n);
+                return (
+                  <Card key={`${c.alternate_url}-${idx}`} className="transition-shadow hover:shadow-md">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-3">
+                        <CardTitle className="text-xl font-bold leading-tight">{c.title}</CardTitle>
+                        <Badge className={`${tone.bg} ${tone.text} border-transparent`}>{n}%</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-sm">
+                        <div>📅 <span className="font-medium">Experience:</span> {c.experience}</div>
+                        <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {c.key_skills?.map((s, i) => (
+                          <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
+                            {s}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="pt-2">
+                        <a
+                          href={c.alternate_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
+                          aria-label="View resume on HH.ru"
+                        >
+                          View Resume <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
     </main>
