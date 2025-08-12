@@ -116,12 +116,19 @@ function normalizeCandidates(payload: any, opts?: {
     const key_skills = Array.isArray(skillsRaw) ? skillsRaw.map((s: any) => String(s)) : typeof skillsRaw === "string" ? skillsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
     const scoreRaw = candidateObj.AI_score ?? candidateObj.ai_score ?? candidateObj.score;
     return {
-      title: String(candidateObj.title ?? candidateObj.position ?? "Candidate"),
+      title: String(candidateObj.title ?? candidateObj.position ?? candidateObj.name ?? "Candidate"),
       experience: String(candidateObj.experience ?? candidateObj.experience_years ?? ""),
       education_level: String(candidateObj.education_level ?? candidateObj.education ?? ""),
       AI_score: scoreRaw != null ? String(scoreRaw) : "0",
       key_skills,
-      alternate_url: String(candidateObj.alternate_url ?? candidateObj.url ?? candidateObj.link ?? "")
+      alternate_url: String(
+        candidateObj.alternate_url ??
+        candidateObj.url ??
+        candidateObj.link ??
+        candidateObj.web_url ??
+        candidateObj.hh_url ??
+        ""
+      )
     };
   };
   const visit = (node: any) => {
@@ -491,43 +498,76 @@ export default function ResumeSearch() {
 
         // Save HH candidates to candidates table so they appear in the main candidate view
         if (normalized.length > 0) {
-          const candidateInserts = normalized.map(candidate => ({
+          // Deduplicate by URL for DB only (UI still shows all)
+          const normUrl = (u: string) => (u || "").trim().replace(/\/$/, "").toLowerCase();
+          const seen = new Set<string>();
+          const uniqueForDb = normalized.filter(c => {
+            const u = normUrl(c.alternate_url);
+            if (!u) return true; // keep if no URL (can't dedupe)
+            if (seen.has(u)) return false;
+            seen.add(u);
+            return true;
+          });
+
+          const toRecord = (candidate: typeof normalized[number]) => ({
             user_id: user.id,
             name: candidate.title || 'HH Candidate',
-            email: null, // HH doesn't provide emails
-            phone: null, // HH doesn't provide phones
+            email: null as any,
+            phone: null as any,
             position: candidate.title || null,
-            experience_years: candidate.experience ? parseInt(candidate.experience.match(/\d+/)?.[0] || '0') || null : null,
+            experience_years: candidate.experience ? (parseInt(candidate.experience.match(/\d+/)?.[0] || '0') || null) : null,
             skills: candidate.key_skills || [],
             education: candidate.education_level || null,
-            work_history: null,
-            resume_file_path: null,
-            original_filename: null,
+            work_history: null as any,
+            resume_file_path: null as any,
+            original_filename: null as any,
             ai_score: parseScore(candidate.AI_score),
             ai_analysis: {
               hh_url: candidate.alternate_url,
               experience: candidate.experience,
               education_level: candidate.education_level,
-              skills: candidate.key_skills
+              skills: candidate.key_skills,
             },
             status: 'new',
-            source: 'hh_search'
-          }));
+            source: 'hh_search',
+          });
 
-          const { error: candidatesError } = await supabase
-            .from('candidates')
-            .insert(candidateInserts);
+          const records = uniqueForDb.map(toRecord);
+          const chunkSize = 50;
+          let inserted = 0;
+          let failed = 0;
 
-          if (candidatesError) {
-            console.error("Failed to save HH candidates:", candidatesError);
-          } else {
-            toast({ 
-              title: "Candidates added", 
-              description: `${normalized.length} HH.ru candidates added to your database`
-            });
-            // Refresh the main candidates view on dashboard
-            window.dispatchEvent(new CustomEvent('candidatesUpdated'));
+          // Helper to insert a single record when a batch fails
+          const insertIndividually = async (batch: any[]) => {
+            for (const rec of batch) {
+              const { error } = await supabase.from('candidates').insert(rec);
+              if (error) {
+                console.error('Insert failed for record:', rec, error);
+                failed += 1;
+              } else {
+                inserted += 1;
+              }
+            }
+          };
+
+          for (let i = 0; i < records.length; i += chunkSize) {
+            const batch = records.slice(i, i + chunkSize);
+            const { error } = await supabase.from('candidates').insert(batch);
+            if (error) {
+              console.warn('Batch insert failed, falling back to per-row inserts:', error);
+              await insertIndividually(batch);
+            } else {
+              inserted += batch.length;
+            }
           }
+
+          toast({
+            title: 'Candidates saved',
+            description: `${inserted}/${records.length} saved. All ${normalized.length} shown in results.`,
+          });
+
+          // Refresh the main candidates view on dashboard
+          window.dispatchEvent(new CustomEvent('candidatesUpdated'));
         }
       }
     } catch (err: any) {
