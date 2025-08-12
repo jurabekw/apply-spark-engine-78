@@ -1,91 +1,53 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Upload, 
-  Users, 
-  FileText, 
-  BarChart3, 
-  CheckCircle, 
-  Star,
-  Zap,
-  Shield,
-  Clock,
-  Brain,
-  Target,
-  TrendingUp
-} from 'lucide-react';
+import { Upload, Users, FileText, BarChart3, CheckCircle, Star, Zap, Shield, Clock, Brain, Target, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 const Landing = () => {
   const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: Brain,
-      title: "AI-Powered Analysis",
-      description: "Advanced AI algorithms analyze resumes and match candidates to job requirements with 95% accuracy."
-    },
-    {
-      icon: Zap,
-      title: "Instant Screening",
-      description: "Process hundreds of resumes in minutes, not hours. Get instant insights and rankings."
-    },
-    {
-      icon: Shield,
-      title: "Bias-Free Hiring",
-      description: "Eliminate unconscious bias with objective, data-driven candidate evaluation."
-    },
-    {
-      icon: Target,
-      title: "Perfect Match",
-      description: "Find the perfect candidate match using our proprietary skill-matching algorithm."
-    },
-    {
-      icon: Clock,
-      title: "Save Time",
-      description: "Reduce hiring time by 70% with automated screening and intelligent candidate ranking."
-    },
-    {
-      icon: TrendingUp,
-      title: "Better Outcomes",
-      description: "Improve hire quality with predictive analytics and performance indicators."
-    }
-  ];
-
-  const benefits = [
-    "Reduce hiring time by up to 70%",
-    "Eliminate unconscious bias in recruitment",
-    "Process 10x more applications efficiently",
-    "Improve candidate quality with AI insights",
-    "Streamline your entire hiring workflow",
-    "Make data-driven hiring decisions"
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Head of HR, TechCorp",
-      content: "TalentSpark transformed our hiring process. We now identify top candidates 3x faster and with much better accuracy.",
-      rating: 5
-    },
-    {
-      name: "Michael Chen",
-      role: "Recruiting Manager, StartupXYZ",
-      content: "The AI-powered screening is incredible. It caught qualified candidates we would have missed with manual review.",
-      rating: 5
-    },
-    {
-      name: "Emily Rodriguez",
-      role: "VP People Operations, GrowthCo",
-      content: "Best investment we've made in HR tech. Our time-to-hire dropped from 45 days to 15 days.",
-      rating: 5
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+  const features = [{
+    icon: Brain,
+    title: "AI-Powered Analysis",
+    description: "Advanced AI algorithms analyze resumes and match candidates to job requirements with 95% accuracy."
+  }, {
+    icon: Zap,
+    title: "Instant Screening",
+    description: "Process hundreds of resumes in minutes, not hours. Get instant insights and rankings."
+  }, {
+    icon: Shield,
+    title: "Bias-Free Hiring",
+    description: "Eliminate unconscious bias with objective, data-driven candidate evaluation."
+  }, {
+    icon: Target,
+    title: "Perfect Match",
+    description: "Find the perfect candidate match using our proprietary skill-matching algorithm."
+  }, {
+    icon: Clock,
+    title: "Save Time",
+    description: "Reduce hiring time by 70% with automated screening and intelligent candidate ranking."
+  }, {
+    icon: TrendingUp,
+    title: "Better Outcomes",
+    description: "Improve hire quality with predictive analytics and performance indicators."
+  }];
+  const benefits = ["Reduce hiring time by up to 70%", "Eliminate unconscious bias in recruitment", "Process 10x more applications efficiently", "Improve candidate quality with AI insights", "Streamline your entire hiring workflow", "Make data-driven hiring decisions"];
+  const testimonials = [{
+    name: "Sarah Johnson",
+    role: "Head of HR, TechCorp",
+    content: "TalentSpark transformed our hiring process. We now identify top candidates 3x faster and with much better accuracy.",
+    rating: 5
+  }, {
+    name: "Michael Chen",
+    role: "Recruiting Manager, StartupXYZ",
+    content: "The AI-powered screening is incredible. It caught qualified candidates we would have missed with manual review.",
+    rating: 5
+  }, {
+    name: "Emily Rodriguez",
+    role: "VP People Operations, GrowthCo",
+    content: "Best investment we've made in HR tech. Our time-to-hire dropped from 45 days to 15 days.",
+    rating: 5
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -128,19 +90,10 @@ const Landing = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            size="lg" 
-            className="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 text-lg"
-            onClick={() => navigate('/auth?tab=signup')}
-          >
+          <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 text-lg" onClick={() => navigate('/auth?tab=signup')}>
             Start Free Trial
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="px-8 py-4 text-lg"
-            onClick={() => navigate('/auth?tab=signin')}
-          >
+          <Button variant="outline" size="lg" className="px-8 py-4 text-lg" onClick={() => navigate('/auth?tab=signin')}>
             Watch Demo
           </Button>
         </div>
@@ -162,8 +115,7 @@ const Landing = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+          {features.map((feature, index) => <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                   <feature.icon className="w-6 h-6 text-indigo-600" />
@@ -175,8 +127,7 @@ const Landing = () => {
                   {feature.description}
                 </CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -193,19 +144,13 @@ const Landing = () => {
               </p>
               
               <div className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-3">
+                {benefits.map((benefit, index) => <div key={index} className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                     <span className="text-gray-700">{benefit}</span>
-                  </div>
-                ))}
+                  </div>)}
               </div>
               
-              <Button 
-                size="lg" 
-                className="mt-8 bg-indigo-600 hover:bg-indigo-700"
-                onClick={() => navigate('/auth?tab=signup')}
-              >
+              <Button size="lg" className="mt-8 bg-indigo-600 hover:bg-indigo-700" onClick={() => navigate('/auth?tab=signup')}>
                 Get Started Today
               </Button>
             </div>
@@ -246,13 +191,10 @@ const Landing = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+          {testimonials.map((testimonial, index) => <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  ))}
+                  {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />)}
                 </div>
                 <CardDescription className="text-gray-700 text-base leading-relaxed">
                   "{testimonial.content}"
@@ -264,8 +206,7 @@ const Landing = () => {
                   <div className="text-sm text-gray-600">{testimonial.role}</div>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -280,20 +221,10 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary"
-              className="px-8 py-4 text-lg"
-              onClick={() => navigate('/auth?tab=signup')}
-            >
+            <Button size="lg" variant="secondary" className="px-8 py-4 text-lg" onClick={() => navigate('/auth?tab=signup')}>
               Start Your Free Trial
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="px-8 py-4 text-lg border-white text-white hover:bg-white hover:text-indigo-600"
-              onClick={() => navigate('/auth?tab=signin')}
-            >
+            <Button size="lg" variant="outline" onClick={() => navigate('/auth?tab=signin')} className="px-8 py-4 text-lg border-white hover:bg-white text-indigo-500">
               Contact Sales
             </Button>
           </div>
@@ -320,8 +251,6 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
