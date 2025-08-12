@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, Filter, Download, Star, ExternalLink } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Candidate {
   title: string;
@@ -22,6 +25,8 @@ interface ResumeSearchTableProps {
 
 const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [minScore, setMinScore] = useState(0);
+  const [onlyWithUrl, setOnlyWithUrl] = useState(false);
 
   const parseScore = (score: string): number => {
     const m = score.match(/\d{1,3}/);
@@ -36,17 +41,64 @@ const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
     return 'text-red-600 font-semibold';
   };
 
-  const filteredCandidates = candidates.filter(candidate => {
-    if (!searchTerm) return true;
-    
+  const escapeCSV = (val: any) => {
+    const s = String(val ?? '');
+    if (/[",\n]/.test(s)) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+
+  const handleExport = () => {
+    const rows = filteredCandidates.map((c) => ({
+      title: c.title,
+      ai_score: parseScore(c.AI_score),
+      experience: c.experience,
+      education: c.education_level,
+      key_skills: (c.key_skills || []).join('; '),
+      url: c.alternate_url,
+    }));
+    const headers = ['Title', 'AI Score', 'Experience', 'Education', 'Key Skills', 'URL'];
+    const csv = [
+      headers.join(','),
+      ...rows.map((r) => [
+        escapeCSV(r.title),
+        r.ai_score,
+        escapeCSV(r.experience),
+        escapeCSV(r.education),
+        escapeCSV(r.key_skills),
+        escapeCSV(r.url),
+      ].join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'candidates.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  const filteredCandidates = candidates.filter((candidate) => {
+    // Text search
     const searchLower = searchTerm.toLowerCase();
     const title = (candidate.title || '').toLowerCase();
     const experience = (candidate.experience || '').toLowerCase();
     const skills = candidate.key_skills || [];
-    
-    return title.includes(searchLower) ||
-           experience.includes(searchLower) ||
-           skills.some(skill => (skill || '').toLowerCase().includes(searchLower));
+    const passesSearch = !searchTerm
+      ? true
+      : title.includes(searchLower) ||
+        experience.includes(searchLower) ||
+        skills.some((skill) => (skill || '').toLowerCase().includes(searchLower));
+
+    // Filters
+    const score = parseScore(candidate.AI_score);
+    if (score < minScore) return false;
+    if (onlyWithUrl && !candidate.alternate_url) return false;
+
+    return passesSearch;
   });
 
   if (loading) {
@@ -77,11 +129,30 @@ const ResumeSearchTable = ({ candidates, loading }: ResumeSearchTableProps) => {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" size="sm">
-              <Filter className="w-4 h-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72" align="end">
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm font-medium mb-2">Minimum AI score: {minScore}%</div>
+                    <Slider value={[minScore]} onValueChange={(v) => setMinScore(v[0] ?? 0)} min={0} max={100} step={5} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="onlyUrl" checked={onlyWithUrl} onCheckedChange={(v) => setOnlyWithUrl(Boolean(v))} />
+                    <label htmlFor="onlyUrl" className="text-sm">Only candidates with URL</label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => { setMinScore(0); setOnlyWithUrl(false); }}>Reset</Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
