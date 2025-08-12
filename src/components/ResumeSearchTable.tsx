@@ -8,6 +8,7 @@ import { Search, Filter, Download, Star, ExternalLink } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import SearchCandidateDetailModal from './SearchCandidateDetailModal';
 interface Candidate {
   title: string;
   experience: string;
@@ -15,6 +16,10 @@ interface Candidate {
   AI_score: string;
   key_skills: string[];
   alternate_url: string;
+  score_reasoning?: string;
+  strengths?: string[];
+  areas_for_improvement?: string[];
+  recommendations?: string;
 }
 interface ResumeSearchTableProps {
   candidates: Candidate[];
@@ -27,6 +32,7 @@ const ResumeSearchTable = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [onlyWithUrl, setOnlyWithUrl] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const parseScore = (score: string): number => {
     const m = score.match(/\d{1,3}/);
     if (!m) return 0;
@@ -52,13 +58,29 @@ const ResumeSearchTable = ({
       experience: c.experience,
       education: c.education_level,
       key_skills: (c.key_skills || []).join('; '),
-      url: c.alternate_url
+      url: c.alternate_url,
+      score_reasoning: c.score_reasoning || '',
+      strengths: (c.strengths || []).join('; '),
+      areas_for_improvement: (c.areas_for_improvement || []).join('; '),
+      recommendations: c.recommendations || '',
     }));
-    const headers = ['Title', 'AI Score', 'Experience', 'Education', 'Key Skills', 'URL'];
-    const csv = [headers.join(','), ...rows.map(r => [escapeCSV(r.title), r.ai_score, escapeCSV(r.experience), escapeCSV(r.education), escapeCSV(r.key_skills), escapeCSV(r.url)].join(','))].join('\n');
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
+    const headers = ['Title', 'AI Score', 'Experience', 'Education', 'Key Skills', 'URL', 'Score Reasoning', 'Strengths', 'Areas for Improvement', 'Recommendations'];
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => [
+        escapeCSV(r.title),
+        r.ai_score,
+        escapeCSV(r.experience),
+        escapeCSV(r.education),
+        escapeCSV(r.key_skills),
+        escapeCSV(r.url),
+        escapeCSV(r.score_reasoning),
+        escapeCSV(r.strengths),
+        escapeCSV(r.areas_for_improvement),
+        escapeCSV(r.recommendations)
+      ].join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -152,6 +174,7 @@ const ResumeSearchTable = ({
                   <TableHead>Education</TableHead>
                   <TableHead>Key Skills</TableHead>
                   <TableHead>Resume</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -194,12 +217,22 @@ const ResumeSearchTable = ({
                           </a>
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedCandidate(candidate)}>
+                          View
+                        </Button>
+                      </TableCell>
                     </TableRow>;
             })}
               </TableBody>
             </Table>
           </div>}
       </CardContent>
+      <SearchCandidateDetailModal
+        candidate={selectedCandidate as any}
+        isOpen={!!selectedCandidate}
+        onClose={() => setSelectedCandidate(null)}
+      />
     </Card>;
-};
-export default ResumeSearchTable;
+  };
+  export default ResumeSearchTable;

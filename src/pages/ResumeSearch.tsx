@@ -28,6 +28,10 @@ type Candidate = {
   AI_score: string;
   key_skills: string[];
   alternate_url: string;
+  score_reasoning?: string;
+  strengths?: string[];
+  areas_for_improvement?: string[];
+  recommendations?: string;
 };
 
 // Debug stats for normalization
@@ -128,7 +132,11 @@ function normalizeCandidates(payload: any, opts?: {
         candidateObj.web_url ??
         candidateObj.hh_url ??
         ""
-      )
+      ),
+      score_reasoning: candidateObj.score_reasoning ?? candidateObj.reasoning ?? candidateObj.ai_reasoning ?? undefined,
+      strengths: Array.isArray(candidateObj.strengths) ? candidateObj.strengths.map((s: any) => String(s)) : undefined,
+      areas_for_improvement: Array.isArray(candidateObj.areas_for_improvement) ? candidateObj.areas_for_improvement.map((s: any) => String(s)) : (Array.isArray(candidateObj.weaknesses) ? candidateObj.weaknesses.map((s: any) => String(s)) : undefined),
+      recommendations: candidateObj.recommendations ?? candidateObj.recommendation ?? undefined,
     };
   };
   const visit = (node: any) => {
@@ -527,6 +535,10 @@ export default function ResumeSearch() {
               experience: candidate.experience,
               education_level: candidate.education_level,
               skills: candidate.key_skills,
+              score_reasoning: (candidate as any).score_reasoning,
+              strengths: (candidate as any).strengths,
+              areas_for_improvement: (candidate as any).areas_for_improvement,
+              recommendations: (candidate as any).recommendations,
             },
             status: 'new',
             source: 'hh_search',

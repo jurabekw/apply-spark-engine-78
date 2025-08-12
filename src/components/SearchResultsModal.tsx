@@ -87,14 +87,18 @@ const normalizeCandidates = (response: any): any[] => {
 
     const key_skills = toSkills(item?.key_skills || item?.skills);
 
-    return {
-      title: toStr(title),
-      experience: toStr(experience),
-      education_level: toStr(education_level),
-      AI_score: toStr(score),
-      key_skills,
-      alternate_url: toStr(url),
-    };
+      return {
+        title: toStr(title),
+        experience: toStr(experience),
+        education_level: toStr(education_level),
+        AI_score: toStr(score),
+        key_skills,
+        alternate_url: toStr(url),
+        score_reasoning: toStr(item?.score_reasoning || item?.reasoning || item?.ai_reasoning),
+        strengths: toSkills(item?.strengths),
+        areas_for_improvement: toSkills(item?.areas_for_improvement || item?.weaknesses),
+        recommendations: toStr(item?.recommendations || item?.recommendation),
+      };
   };
 
   const toCandidate = (obj: any) => (isCandidateLike(obj) ? mapItem(obj) : null);
