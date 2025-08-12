@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Filter, Download, Star, Eye, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Search, Download, Star, Eye, Loader2, Trash2, ExternalLink } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import CandidateDetailModal from './CandidateDetailModal';
 
@@ -14,6 +14,7 @@ const CandidateTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'upload' | 'hh_search'>('all');
   const { candidates, loading, updateCandidateStatus, deleteCandidate, refetch } = useCandidates();
 
   // Listen for candidate updates from HH search
@@ -67,10 +68,16 @@ const CandidateTable = () => {
 
   const term = searchTerm.toLowerCase();
   const filteredCandidates = candidates.filter(candidate => {
+    // Source filter
+    if (sourceFilter !== 'all') {
+      if (sourceFilter === 'upload' && candidate.source !== 'upload') return false;
+      if (sourceFilter === 'hh_search' && candidate.source !== 'hh_search') return false;
+    }
+    // Text search
     const name = (candidate.name || '').toLowerCase();
     const email = (candidate.email || '').toLowerCase();
     const position = (candidate.position || '').toLowerCase();
-    return name.includes(term) || email.includes(term) || position.includes(term);
+    return !term ? true : name.includes(term) || email.includes(term) || position.includes(term);
   });
 
   const formatDate = (dateString: string) => {
@@ -79,6 +86,57 @@ const CandidateTable = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const escapeCSV = (val: any) => {
+    const s = String(val ?? '');
+    if (/[",\n]/.test(s)) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+
+  const handleExport = () => {
+    const rows = filteredCandidates.map((c) => ({
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      position: c.position,
+      ai_score: c.ai_score ?? '',
+      experience_years: c.experience_years ?? '',
+      skills: Array.isArray(c.skills) ? c.skills.join('; ') : '',
+      source: c.source === 'hh_search' ? 'HH.ru' : 'Upload',
+      submitted_at: c.submitted_at || c.created_at,
+      hh_url: (c as any).ai_analysis?.hh_url ?? ''
+    }));
+
+    const headers = ['Name','Email','Phone','Position','AI Score','Experience Years','Skills','Source','Submitted At','HH URL'];
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => [
+        escapeCSV(r.name),
+        escapeCSV(r.email),
+        escapeCSV(r.phone),
+        escapeCSV(r.position),
+        r.ai_score,
+        r.experience_years,
+        escapeCSV(r.skills),
+        escapeCSV(r.source),
+        escapeCSV(r.submitted_at),
+        escapeCSV(r.hh_url)
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const prefix = sourceFilter === 'all' ? 'all' : sourceFilter === 'upload' ? 'uploaded' : 'hh';
+    link.href = url;
+    link.setAttribute('download', `candidates-${prefix}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleStatusChange = async (candidateId: string, newStatus: string) => {
@@ -123,12 +181,13 @@ const CandidateTable = () => {
             <h2 className="text-2xl font-bold text-gray-900">Candidate Database</h2>
             <p className="text-gray-600">Manage and review all candidate submissions</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-            <Button variant="outline">
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-md border p-1">
+              <Button variant={sourceFilter === 'all' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('all')}>All</Button>
+              <Button variant={sourceFilter === 'upload' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('upload')}>Uploaded</Button>
+              <Button variant={sourceFilter === 'hh_search' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('hh_search')}>HH</Button>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={filteredCandidates.length === 0}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
