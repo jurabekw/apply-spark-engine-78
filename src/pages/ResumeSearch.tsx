@@ -753,8 +753,13 @@ export default function ResumeSearch() {
         </Card>}
 
       {/* Results */}
-      <section className="mt-8">
-        {!loading && !error && candidates.length === 0 ? <SearchHistory onRerunSearch={handleRerunSearch} /> : <ResumeSearchTable candidates={candidates} loading={loading} />}
+      <section className="mt-8 space-y-6">
+        {!loading && !error && candidates.length > 0 && (
+          <ResumeSearchTable candidates={candidates} loading={loading} />
+        )}
+        {!loading && !error && (
+          <SearchHistory onRerunSearch={handleRerunSearch} />
+        )}
       </section>
     </main>;
 }
