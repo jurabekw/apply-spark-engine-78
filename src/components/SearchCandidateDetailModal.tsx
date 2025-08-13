@@ -27,7 +27,7 @@ const SearchCandidateDetailModal: React.FC<SearchCandidateDetailModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl sm:max-w-4xl max-h-[80vh] p-0 overflow-hidden">
+      <DialogContent className="w-[92vw] max-w-5xl xl:max-w-6xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b p-6">
           <DialogTitle className="flex items-center justify-between gap-3">
             <span>{candidate?.title || 'Candidate details'}</span>
@@ -41,7 +41,7 @@ const SearchCandidateDetailModal: React.FC<SearchCandidateDetailModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[65vh] p-6">
+        <ScrollArea className="flex-1 p-6">
           <div className="space-y-6 pr-2">
             <section>
               <div className="text-sm text-muted-foreground">AI Score</div>
