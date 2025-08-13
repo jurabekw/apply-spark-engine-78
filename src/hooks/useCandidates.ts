@@ -144,8 +144,17 @@ export const useCandidates = () => {
       )
       .subscribe();
 
+    // Listen for custom events when data is deleted from history components
+    const handleCandidatesDeleted = () => fetchCandidates();
+    const handleSearchesDeleted = () => fetchCandidates();
+    
+    window.addEventListener('candidates-deleted', handleCandidatesDeleted);
+    window.addEventListener('searches-deleted', handleSearchesDeleted);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('candidates-deleted', handleCandidatesDeleted);
+      window.removeEventListener('searches-deleted', handleSearchesDeleted);
     };
   }, [user]);
 

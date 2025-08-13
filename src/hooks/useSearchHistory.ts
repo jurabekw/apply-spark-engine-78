@@ -79,6 +79,9 @@ export const useSearchHistory = () => {
       
       setSearches([]);
 
+      // Trigger a window event to notify dashboard to refresh stats
+      window.dispatchEvent(new CustomEvent('searches-deleted'));
+
       toast({
         title: "All searches deleted",
         description: "Search history has been cleared.",

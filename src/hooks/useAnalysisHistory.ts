@@ -88,6 +88,9 @@ export const useAnalysisHistory = () => {
       setAnalyses([]);
       setTotalCount(0);
 
+      // Trigger a window event to notify dashboard to refresh stats
+      window.dispatchEvent(new CustomEvent('candidates-deleted'));
+
       toast({
         title: "All analyses deleted",
         description: "Analysis history has been cleared.",
