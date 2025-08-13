@@ -39,7 +39,7 @@ const recentSearches = useMemo(() => {
 
   const recentUploads = useMemo(() => {
     return (candidates || [])
-      .filter((c: any) => c && c.created_at)
+      .filter((c: any) => c && c.created_at && (c.source === 'upload' || c.resume_file_path || c.original_filename))
       .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 5);
   }, [candidates]);
