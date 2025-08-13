@@ -11,9 +11,11 @@ import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
 import ResumeSearch from '@/pages/ResumeSearch';
-import { useCandidates } from '@/hooks/useCandidates';
+import { useCandidates, type Candidate } from '@/hooks/useCandidates';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { formatDistanceToNow } from 'date-fns';
+import SearchResultsModal from '@/components/SearchResultsModal';
+import CandidateDetailModal from '@/components/CandidateDetailModal';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,28 +25,24 @@ const Index = () => {
   const { searches, loading: loadingSearches } = useSearchHistory();
   const { candidates, loading: loadingCandidates } = useCandidates();
 
-  const activities = useMemo(() => {
-    const searchItems = (searches || []).map((s) => ({
-      id: s.id,
-      type: 'search' as const,
-      action: `HH Search — ${s.job_title}`,
-      detail: `${s.experience_level} • ${s.required_skills} • ${s.candidate_count} candidates`,
-      date: new Date(s.created_at),
-    }));
+  const [selectedSearch, setSelectedSearch] = useState<any | null>(null);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [candidateModalOpen, setCandidateModalOpen] = useState(false);
 
-    const candidateItems = (candidates || []).map((c: any) => ({
-      id: c.id,
-      type: 'upload' as const,
-      action: `Resume uploaded — ${c.name || c.original_filename || 'Unknown'}`,
-      detail: `${c.position || 'Candidate'} • ${c.status}${typeof c.ai_score === 'number' ? ` • AI Score ${c.ai_score}` : ''}`,
-      date: new Date(c.created_at),
-    }));
+const recentSearches = useMemo(() => {
+    return (searches || [])
+      .filter((s) => s && s.created_at)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5);
+  }, [searches]);
 
-    return [...searchItems, ...candidateItems]
-      .filter((i) => !isNaN(i.date.getTime()))
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 10);
-  }, [searches, candidates]);
+  const recentUploads = useMemo(() => {
+    return (candidates || [])
+      .filter((c: any) => c && c.created_at)
+      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5);
+  }, [candidates]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -157,46 +155,103 @@ const Index = () => {
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {(loadingSearches || loadingCandidates) ? (
-                  <div className="space-y-3">
-                    <div className="h-10 rounded-md bg-muted animate-pulse" />
-                    <div className="h-10 rounded-md bg-muted animate-pulse" />
-                    <div className="h-10 rounded-md bg-muted animate-pulse" />
+<div className="grid lg:grid-cols-2 gap-8">
+              {/* Recent HH Searches */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Recent HH Searches</CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('hh-search')}>
+                      View all
+                    </Button>
                   </div>
-                ) : activities.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No recent activity yet.</div>
-                ) : (
-                  <div className="space-y-4">
-                    {activities.map((activity) => (
-                      <div key={activity.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          {activity.type === 'upload' ? (
-                            <Upload className="w-4 h-4 text-indigo-600 mt-1" />
-                          ) : (
+                </CardHeader>
+                <CardContent>
+                  {loadingSearches ? (
+                    <div className="space-y-3">
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                    </div>
+                  ) : recentSearches.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No HH searches yet.</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentSearches.map((s) => (
+                        <div key={s.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-start gap-3">
                             <Search className="w-4 h-4 text-emerald-600 mt-1" />
-                          )}
-                          <div>
-                            <div className="text-sm font-medium">{activity.action}</div>
-                            <div className="text-xs text-muted-foreground">{activity.detail}</div>
+                            <div>
+                              <div className="text-sm font-medium">HH Search — {s.job_title}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {s.experience_level} • {s.required_skills} • {s.candidate_count} candidates
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">HH Search</Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(s.created_at), { addSuffix: true })}
+                            </span>
+                            <Button size="sm" variant="outline" onClick={() => { setSelectedSearch(s); setSearchModalOpen(true); }}>
+                              View
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{activity.type === 'upload' ? 'Upload' : 'HH Search'}</Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(activity.date, { addSuffix: true })}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Recent Resume Uploads */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Recent Resume Uploads</CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('candidates')}>
+                      View all
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  {loadingCandidates ? (
+                    <div className="space-y-3">
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                    </div>
+                  ) : recentUploads.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No resume uploads yet.</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentUploads.map((c: any) => (
+                        <div key={c.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <Upload className="w-4 h-4 text-indigo-600 mt-1" />
+                            <div>
+                              <div className="text-sm font-medium">Resume uploaded — {c.name || c.original_filename || 'Unknown'}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {(c.position || 'Candidate')} • {c.status}{typeof c.ai_score === 'number' ? ` • AI Score ${c.ai_score}` : ''}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">Upload</Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                            </span>
+                            <Button size="sm" variant="outline" onClick={() => { setSelectedCandidate(c); setCandidateModalOpen(true); }}>
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
 
@@ -222,6 +277,18 @@ const Index = () => {
           </div>
         )}
       </div>
+
+      {/* Detail Modals */}
+      <SearchResultsModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        search={selectedSearch}
+      />
+      <CandidateDetailModal
+        candidate={selectedCandidate}
+        isOpen={candidateModalOpen}
+        onClose={() => setCandidateModalOpen(false)}
+      />
     </div>
   );
 };
