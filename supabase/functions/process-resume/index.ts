@@ -84,37 +84,48 @@ serve(async (req) => {
       throw new Error(`Failed to download file: ${downloadError.message}`)
     }
 
-    // Convert file to base64 for Gemini
+    // Convert file to buffer and extract text
     const arrayBuffer = await fileData.arrayBuffer()
     const pdfBuffer = new Uint8Array(arrayBuffer)
-    const base64Pdf = btoa(String.fromCharCode(...pdfBuffer))
+    const resumeText = await extractTextFromPDF(pdfBuffer)
 
-    console.log('PDF converted to base64, size:', base64Pdf.length)
+    console.log('Resume text extracted, length:', resumeText?.length || 0)
 
-    // Get Gemini API key
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!geminiApiKey) {
-      throw new Error('Gemini API key not configured')
+    if (!resumeText || resumeText.trim().length < 50) {
+      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
     }
 
-    console.log('Calling Gemini 2.5 Pro API for PDF analysis...')
+    // Get OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
+    }
+
+    console.log('Calling OpenAI API for analysis...')
     
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'X-goog-api-key': geminiApiKey,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
+        model: 'gpt-4o-mini',
+        messages: [
           {
-            parts: [
-              {
-                text: `Analyze this resume PDF for the job: "${jobTitle}".
+            role: 'system',
+            content: 'You are an expert HR analyst. Analyze resumes and provide detailed candidate evaluations in JSON format only.'
+          },
+          {
+            role: 'user',
+            content: `Analyze this resume for the job: "${jobTitle}".
 
 Job Requirements: ${jobRequirements}
 
-Please extract candidate information and provide a match score (0-100). Return only valid JSON format:
+Resume text:
+${resumeText}
+
+Extract candidate information and provide a match score (0-100). Return only valid JSON format:
 {
   "name": "full name",
   "email": "email or null",
@@ -132,44 +143,33 @@ Please extract candidate information and provide a match score (0-100). Return o
     "recommendations": "hire recommendation"
   }
 }`
-              },
-              {
-                inline_data: {
-                  mime_type: "application/pdf",
-                  data: base64Pdf
-                }
-              }
-            ]
           }
         ],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 2048,
-          responseMimeType: "application/json"
-        }
+        temperature: 0.1,
+        max_tokens: 2048
       }),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Gemini API error:', response.status, errorText)
+      console.error('OpenAI API error:', response.status, errorText)
       
       // Handle specific error cases with user-friendly messages
       if (response.status === 429) {
-        throw new Error('Gemini API quota exceeded. Please try again later or check your API usage.')
+        throw new Error('OpenAI API quota exceeded. Please try again later or check your API usage.')
       } else if (response.status === 401 || response.status === 403) {
-        throw new Error('Gemini API authentication failed. Please check your API key configuration.')
+        throw new Error('OpenAI API authentication failed. Please check your API key configuration.')
       } else if (response.status >= 500) {
-        throw new Error('Gemini service temporarily unavailable. Please try again in a few minutes.')
+        throw new Error('OpenAI service temporarily unavailable. Please try again in a few minutes.')
       } else {
-        throw new Error(`Gemini API error (${response.status}): ${errorText}`)
+        throw new Error(`OpenAI API error (${response.status}): ${errorText}`)
       }
     }
 
     const aiResponse = await response.json()
-    console.log('Gemini response received successfully')
+    console.log('OpenAI response received successfully')
     
-    const analysisText = aiResponse.candidates[0].content.parts[0].text
+    const analysisText = aiResponse.choices[0].message.content
     console.log('Raw AI response:', analysisText)
 
     // Parse and validate the AI response
@@ -239,7 +239,7 @@ Please extract candidate information and provide a match score (0-100). Return o
       JSON.stringify({ 
         success: true, 
         candidate: candidate,
-        message: 'Resume processed successfully with Gemini AI analysis'
+        message: 'Resume processed successfully with OpenAI analysis'
       }),
       { 
         headers: { 
