@@ -285,6 +285,7 @@ const UploadSectionWithHistory = () => {
   return (
     <div className="space-y-8">
       <UploadSection />
+      {/* Analysis History Section */}
       <AnalysisHistory />
     </div>
   );

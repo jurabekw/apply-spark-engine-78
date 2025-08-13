@@ -11,11 +11,13 @@ import { useAnalysisHistory } from '@/hooks/useAnalysisHistory';
 import CandidateDetailModal from './CandidateDetailModal';
 
 const AnalysisHistory = () => {
+  console.log("AnalysisHistory component is rendering");
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   
   const { analyses, loading, totalCount, deleteAnalysis } = useAnalysisHistory(currentPage, pageSize);
+  console.log("Analysis history data:", { analyses, loading, totalCount });
   
   // State to handle viewing analysis details
   const [isDetailOpen, setIsDetailOpen] = useState(false);
