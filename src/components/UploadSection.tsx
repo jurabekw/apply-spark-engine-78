@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
+import AnalysisHistory from '@/components/AnalysisHistory';
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobRequirements, setJobRequirements] = useState('');
@@ -195,7 +196,8 @@ const UploadSection = () => {
       setIsProcessing(false);
     }
   };
-  return <Card className="w-full">
+  return (
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="w-5 h-5" />
@@ -220,33 +222,45 @@ const UploadSection = () => {
             <Textarea id="requirements" placeholder="Describe the key requirements, skills, and qualifications for this position..." value={jobRequirements} onChange={e => setJobRequirements(e.target.value)} disabled={isProcessing} rows={4} required />
           </div>
 
-          {selectedFiles && selectedFiles.length > 0 && <div className="bg-gray-50 p-4 rounded-lg">
+          {selectedFiles && selectedFiles.length > 0 && (
+            <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium text-gray-900 mb-2">Selected Files ({selectedFiles.length}):</h4>
               <div className="space-y-1">
-                {Array.from(selectedFiles).map((file, index) => <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                {Array.from(selectedFiles).map((file, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
                     <FileText className="w-4 h-4" />
                     {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </div>)}
+                  </div>
+                ))}
               </div>
-            </div>}
+            </div>
+          )}
 
-          {processingProgress.length > 0 && <div className="bg-blue-50 p-4 rounded-lg">
+          {processingProgress.length > 0 && (
+            <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-900 mb-2">Processing Status:</h4>
               <div className="space-y-1 max-h-40 overflow-y-auto">
-                {processingProgress.map((message, index) => <div key={index} className="text-sm text-blue-700 font-mono">
+                {processingProgress.map((message, index) => (
+                  <div key={index} className="text-sm text-blue-700 font-mono">
                     {message}
-                  </div>)}
+                  </div>
+                ))}
               </div>
-            </div>}
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}>
-            {isProcessing ? <>
+            {isProcessing ? (
+              <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Processing Resumes...
-              </> : <>
+              </>
+            ) : (
+              <>
                 <Upload className="w-4 h-4 mr-2" />
                 Process {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
-              </>}
+              </>
+            )}
           </Button>
         </form>
 
@@ -262,9 +276,18 @@ const UploadSection = () => {
             </div>
           </div>
         </div>
-
-        
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
-export default UploadSection;
+
+const UploadSectionWithHistory = () => {
+  return (
+    <div className="space-y-8">
+      <UploadSection />
+      <AnalysisHistory />
+    </div>
+  );
+};
+
+export default UploadSectionWithHistory;
