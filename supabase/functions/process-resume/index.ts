@@ -84,16 +84,12 @@ serve(async (req) => {
       throw new Error(`Failed to download file: ${downloadError.message}`)
     }
 
-    // Convert file to buffer and extract text
+    // Convert file to base64 for Gemini
     const arrayBuffer = await fileData.arrayBuffer()
     const pdfBuffer = new Uint8Array(arrayBuffer)
-    const resumeText = await extractTextFromPDF(pdfBuffer)
+    const base64Pdf = btoa(String.fromCharCode(...pdfBuffer))
 
-    console.log('Resume text extracted, length:', resumeText?.length || 0)
-
-    if (!resumeText || resumeText.trim().length < 50) {
-      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
-    }
+    console.log('PDF converted to base64, size:', base64Pdf.length)
 
     // Get Gemini API key
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
@@ -101,15 +97,24 @@ serve(async (req) => {
       throw new Error('Gemini API key not configured')
     }
 
-    // Simple Gemini analysis prompt
-    const prompt = `Analyze this resume for the job: "${jobTitle}".
+    console.log('Calling Gemini 2.5 Pro API for PDF analysis...')
+    
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent', {
+      method: 'POST',
+      headers: {
+        'X-goog-api-key': geminiApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `Analyze this resume PDF for the job: "${jobTitle}".
 
-Requirements: ${jobRequirements}
+Job Requirements: ${jobRequirements}
 
-Resume text:
-${resumeText}
-
-Extract candidate information and provide a match score (0-100). Return only valid JSON format:
+Please extract candidate information and provide a match score (0-100). Return only valid JSON format:
 {
   "name": "full name",
   "email": "email or null",
@@ -127,21 +132,12 @@ Extract candidate information and provide a match score (0-100). Return only val
     "recommendations": "hire recommendation"
   }
 }`
-
-    console.log('Calling Gemini API for analysis...')
-    
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
-      method: 'POST',
-      headers: {
-        'X-goog-api-key': geminiApiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
+              },
               {
-                text: prompt
+                inline_data: {
+                  mime_type: "application/pdf",
+                  data: base64Pdf
+                }
               }
             ]
           }
