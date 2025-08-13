@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,40 @@ import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
 import ResumeSearch from '@/pages/ResumeSearch';
+import { useCandidates } from '@/hooks/useCandidates';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
+import { formatDistanceToNow } from 'date-fns';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  const { searches, loading: loadingSearches } = useSearchHistory();
+  const { candidates, loading: loadingCandidates } = useCandidates();
+
+  const activities = useMemo(() => {
+    const searchItems = (searches || []).map((s) => ({
+      id: s.id,
+      type: 'search' as const,
+      action: `HH Search — ${s.job_title}`,
+      detail: `${s.experience_level} • ${s.required_skills} • ${s.candidate_count} candidates`,
+      date: new Date(s.created_at),
+    }));
+
+    const candidateItems = (candidates || []).map((c: any) => ({
+      id: c.id,
+      type: 'upload' as const,
+      action: `Resume uploaded — ${c.name || c.original_filename || 'Unknown'}`,
+      detail: `${c.position || 'Candidate'} • ${c.status}${typeof c.ai_score === 'number' ? ` • AI Score ${c.ai_score}` : ''}`,
+      date: new Date(c.created_at),
+    }));
+
+    return [...searchItems, ...candidateItems]
+      .filter((i) => !isNaN(i.date.getTime()))
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 10);
+  }, [searches, candidates]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -133,23 +162,39 @@ const Index = () => {
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { action: 'Processed 15 resumes', time: '2 hours ago', status: 'completed' },
-                    { action: 'Created "Software Engineer" form', time: '5 hours ago', status: 'active' },
-                    { action: 'Exported candidate data', time: '1 day ago', status: 'completed' },
-                  ].map((activity, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">{activity.action}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={activity.status === 'completed' ? 'secondary' : 'default'}>
-                          {activity.status}
-                        </Badge>
-                        <span className="text-sm text-gray-500">{activity.time}</span>
+                {(loadingSearches || loadingCandidates) ? (
+                  <div className="space-y-3">
+                    <div className="h-10 rounded-md bg-muted animate-pulse" />
+                    <div className="h-10 rounded-md bg-muted animate-pulse" />
+                    <div className="h-10 rounded-md bg-muted animate-pulse" />
+                  </div>
+                ) : activities.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No recent activity yet.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {activities.map((activity) => (
+                      <div key={activity.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          {activity.type === 'upload' ? (
+                            <Upload className="w-4 h-4 text-indigo-600 mt-1" />
+                          ) : (
+                            <Search className="w-4 h-4 text-emerald-600 mt-1" />
+                          )}
+                          <div>
+                            <div className="text-sm font-medium">{activity.action}</div>
+                            <div className="text-xs text-muted-foreground">{activity.detail}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{activity.type === 'upload' ? 'Upload' : 'HH Search'}</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(activity.date, { addSuffix: true })}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
