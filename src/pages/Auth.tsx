@@ -26,6 +26,10 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [company, setCompany] = useState('');
 
+  // Signup confirmation state
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
+
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab && (tab === 'signin' || tab === 'signup')) {
@@ -85,11 +89,11 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
+        title: "Verification email sent",
+        description: `We sent a verification link to ${signupEmail}. Please check your inbox.`,
       });
-      
-      setActiveTab('signin');
+      setVerificationSent(true);
+      setVerificationEmail(signupEmail);
     } catch (error: any) {
       toast({
         title: "Sign up failed",
@@ -172,75 +176,90 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup" className="space-y-4 mt-6">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full-name">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="full-name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
+                {verificationSent ? (
+                  <div className="space-y-4 text-center">
+                    <div className="mx-auto w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-white" />
                     </div>
+                    <h3 className="text-xl font-semibold">Check your email</h3>
+                    <p className="text-muted-foreground">
+                      We sent a verification link to {verificationEmail}. Please open your inbox and follow the link to finish signing up.
+                    </p>
+                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => setActiveTab('signin')}>
+                      Go to Sign In
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Company</Label>
-                    <div className="relative">
-                      <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="company"
-                        type="text"
-                        placeholder="Enter your company name"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        className="pl-10"
-                      />
+                ) : (
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="full-name">Full Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="full-name"
+                          type="text"
+                          placeholder="Enter your full name"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Company</Label>
+                      <div className="relative">
+                        <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="company"
+                          type="text"
+                          placeholder="Enter your company name"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="Create a password"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        className="pl-10"
-                        required
-                        minLength={6}
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          placeholder="Enter your email"
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700"
-                    disabled={loading}
-                  >
-                    {loading ? 'Creating Account...' : 'Create Account'}
-                  </Button>
-                </form>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          placeholder="Create a password"
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                          minLength={6}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                      disabled={loading}
+                    >
+                      {loading ? 'Creating Account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
