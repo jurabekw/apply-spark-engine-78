@@ -152,7 +152,7 @@ const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="w-[92vw] max-w-5xl xl:max-w-6xl h-[85vh] min-h-0 p-0 overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex flex-col gap-1">
             <span>Search Results</span>
@@ -165,7 +165,7 @@ const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps
         </DialogHeader>
 
         {candidates.length > 0 ? (
-          <div className="max-h-[70vh] overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6">
             <ResumeSearchTable candidates={candidates as any[]} />
           </div>
         ) : (
