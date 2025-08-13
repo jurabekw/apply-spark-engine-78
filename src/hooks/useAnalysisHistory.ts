@@ -15,7 +15,7 @@ interface AnalysisHistory {
   source: string;
 }
 
-export const useAnalysisHistory = (page: number = 1, pageSize: number = 10) => {
+export const useAnalysisHistory = () => {
   const [analyses, setAnalyses] = useState<AnalysisHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -26,25 +26,17 @@ export const useAnalysisHistory = (page: number = 1, pageSize: number = 10) => {
     if (!user) return;
     
     try {
-      // Get total count
-      const { count, error: countError } = await supabase
-        .from('candidates')
-        .select('*', { count: 'exact', head: true })
-        .eq('source', 'upload');
-
-      if (countError) throw countError;
-      setTotalCount(count || 0);
-
-      // Get paginated data
+      // Get all data without pagination
       const { data, error } = await supabase
         .from('candidates')
-        .select('id, name, original_filename, position, status, ai_score, ai_analysis, created_at, source')
+        .select('*')
         .eq('source', 'upload')
         .order('created_at', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .limit(100);
 
       if (error) throw error;
       setAnalyses(data || []);
+      setTotalCount(data?.length || 0);
     } catch (error) {
       console.error('Error fetching analysis history:', error);
       toast({
@@ -83,15 +75,43 @@ export const useAnalysisHistory = (page: number = 1, pageSize: number = 10) => {
     }
   };
 
+  const deleteAllAnalyses = async () => {
+    try {
+      const { error } = await supabase
+        .from('candidates')
+        .delete()
+        .eq('source', 'upload')
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      
+      setAnalyses([]);
+      setTotalCount(0);
+
+      toast({
+        title: "All analyses deleted",
+        description: "Analysis history has been cleared.",
+      });
+    } catch (error) {
+      console.error('Error deleting all analyses:', error);
+      toast({
+        title: "Error deleting analyses",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchAnalysisHistory();
-  }, [user, page]);
+  }, [user]);
 
   return {
     analyses,
     loading,
     totalCount,
     deleteAnalysis,
+    deleteAllAnalyses,
     refetch: fetchAnalysisHistory,
   };
 };

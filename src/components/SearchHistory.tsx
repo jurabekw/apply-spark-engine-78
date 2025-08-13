@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Eye, Trash2, Clock } from 'lucide-react';
+import { Search, Eye, Trash2, Clock, Trash } from 'lucide-react';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import SearchResultsModal from './SearchResultsModal';
 
@@ -16,7 +16,7 @@ interface SearchHistoryProps {
 
 const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { searches, loading, deleteSearch } = useSearchHistory();
+  const { searches, loading, deleteSearch, deleteAllSearches } = useSearchHistory();
 
   // State to handle viewing saved results
   const [isResultsOpen, setIsResultsOpen] = useState(false);
@@ -84,17 +84,46 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
               <Clock className="w-5 h-5 text-muted-foreground" />
               <CardTitle>Search History ({filteredSearches.length})</CardTitle>
             </div>
-            {searches.length > 0 && (
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Search history..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {searches.length > 0 && (
+                <>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="gap-2">
+                        <Trash className="w-4 h-4" />
+                        Delete All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete All Search History</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete all search history? This action cannot be undone and will remove all {searches.length} entries.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={deleteAllSearches}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          Delete All
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <div className="relative w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search history..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>

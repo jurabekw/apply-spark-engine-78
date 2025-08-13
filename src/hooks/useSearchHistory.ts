@@ -68,6 +68,31 @@ export const useSearchHistory = () => {
     }
   };
 
+  const deleteAllSearches = async () => {
+    try {
+      const { error } = await supabase
+        .from('hh_searches')
+        .delete()
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      
+      setSearches([]);
+
+      toast({
+        title: "All searches deleted",
+        description: "Search history has been cleared.",
+      });
+    } catch (error) {
+      console.error('Error deleting all searches:', error);
+      toast({
+        title: "Error deleting searches",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchSearchHistory();
   }, [user]);
@@ -76,6 +101,7 @@ export const useSearchHistory = () => {
     searches,
     loading,
     deleteSearch,
+    deleteAllSearches,
     refetch: fetchSearchHistory,
   };
 };
