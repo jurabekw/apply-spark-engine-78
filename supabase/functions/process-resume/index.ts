@@ -91,13 +91,21 @@ serve(async (req) => {
       try {
         const parsedContent = JSON.parse(webhookResult.content)
         candidatesData = [parsedContent] // Single candidate
+        console.log('Parsed candidate data from webhook content:', parsedContent)
       } catch (parseError) {
         console.error('Failed to parse webhook content:', parseError)
+        console.error('Raw content:', webhookResult.content)
         throw new Error('Invalid JSON in webhook response content')
       }
     } else if (webhookResult.status === 'success' && Array.isArray(webhookResult.candidates)) {
       candidatesData = webhookResult.candidates
+      console.log('Using candidates array from webhook:', candidatesData)
+    } else if (Array.isArray(webhookResult)) {
+      // Handle case where webhook returns array directly
+      candidatesData = webhookResult
+      console.log('Using direct array from webhook:', candidatesData)
     } else {
+      console.error('Unexpected webhook response format:', JSON.stringify(webhookResult, null, 2))
       throw new Error('Invalid response format from Make.com webhook')
     }
 
