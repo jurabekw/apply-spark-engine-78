@@ -17,13 +17,11 @@ serve(async (req) => {
       jobRequirements, 
       jobTitle, 
       userId, 
-      resumeFilePath,
-      originalFilename 
+      uploadedResumes 
     } = await req.json()
 
-    console.log('Processing resume for job:', jobTitle)
-    console.log('Original filename:', originalFilename)
-    console.log('Storage path:', resumeFilePath)
+    console.log('Processing resumes for job:', jobTitle)
+    console.log('Number of resumes:', uploadedResumes?.length)
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -32,19 +30,24 @@ serve(async (req) => {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Generate signed URL for the uploaded resume
-    console.log('Generating signed URL for resume...')
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-      .from('resumes')
-      .createSignedUrl(resumeFilePath, 3600) // 1 hour expiry
+    // Generate signed URLs for all uploaded resumes
+    console.log('Generating signed URLs for all resumes...')
+    const resumeUrls = []
+    
+    for (const resume of uploadedResumes) {
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from('resumes')
+        .createSignedUrl(resume.filePath, 3600) // 1 hour expiry
 
-    if (signedUrlError) {
-      console.error('Error generating signed URL:', signedUrlError)
-      throw new Error(`Failed to generate signed URL: ${signedUrlError.message}`)
+      if (signedUrlError) {
+        console.error('Error generating signed URL:', signedUrlError)
+        throw new Error(`Failed to generate signed URL: ${signedUrlError.message}`)
+      }
+
+      resumeUrls.push(signedUrlData.signedUrl)
     }
-
-    const resumeUrl = signedUrlData.signedUrl
-    console.log('Generated signed URL successfully')
+    
+    console.log(`Generated ${resumeUrls.length} signed URLs successfully`)
 
     // Generate unique analysis ID
     const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -53,7 +56,7 @@ serve(async (req) => {
     const webhookPayload = {
       job_title: jobTitle,
       job_requirements: jobRequirements,
-      resume_urls: [resumeUrl],
+      resume_urls: resumeUrls,
       analysis_id: analysisId,
       user_id: userId
     }
@@ -80,13 +83,33 @@ serve(async (req) => {
     const webhookResult = await webhookResponse.json()
     console.log('Make.com webhook response:', JSON.stringify(webhookResult, null, 2))
 
-    if (webhookResult.status !== 'success' || !webhookResult.candidates || !Array.isArray(webhookResult.candidates)) {
+    // Handle different response formats from Make.com
+    let candidatesData = []
+    
+    if (webhookResult.role === 'assistant' && webhookResult.content) {
+      // Parse the content field which contains JSON string
+      try {
+        const parsedContent = JSON.parse(webhookResult.content)
+        candidatesData = [parsedContent] // Single candidate
+      } catch (parseError) {
+        console.error('Failed to parse webhook content:', parseError)
+        throw new Error('Invalid JSON in webhook response content')
+      }
+    } else if (webhookResult.status === 'success' && Array.isArray(webhookResult.candidates)) {
+      candidatesData = webhookResult.candidates
+    } else {
       throw new Error('Invalid response format from Make.com webhook')
     }
 
+    console.log('Processing candidates data:', candidatesData)
+
     // Process candidates from Make.com response
     const candidates = []
-    for (const candidateData of webhookResult.candidates) {
+    for (let i = 0; i < candidatesData.length; i++) {
+      const candidateData = candidatesData[i]
+      const resumeIndex = Math.min(i, uploadedResumes.length - 1) // Handle case where more candidates than resumes
+      const currentResume = uploadedResumes[resumeIndex]
+      
       console.log('Processing candidate:', candidateData.candidate_name)
 
       // Parse experience years (handle string format)
@@ -110,7 +133,7 @@ serve(async (req) => {
       // Prepare candidate data for database
       const finalCandidateData = {
         user_id: userId,
-        name: candidateData.candidate_name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
+        name: candidateData.candidate_name || currentResume.originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
         email: candidateData.email || null,
         phone: null, // Not provided in Make.com response format
         position: null, // Not provided in Make.com response format
@@ -118,8 +141,8 @@ serve(async (req) => {
         skills: Array.isArray(candidateData.key_skills) ? candidateData.key_skills : [],
         education: null, // Not provided in Make.com response format
         work_history: null, // Not provided in Make.com response format
-        resume_file_path: resumeFilePath,
-        original_filename: originalFilename,
+        resume_file_path: currentResume.filePath,
+        original_filename: currentResume.originalFilename,
         ai_score: aiScore,
         ai_analysis: {
           strengths: [],

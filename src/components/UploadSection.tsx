@@ -50,59 +50,79 @@ const UploadSection = () => {
       setSelectedFiles(dataTransfer.files);
     }
   };
-  const processResume = async (file: File) => {
-    try {
-      // Generate unique filename using our utility
-      const filename = generateUniqueFilename(file.name, user?.id || 'anonymous');
-      const filePath = `${user?.id}/${filename}`;
-      console.log(`Uploading file: ${file.name} (${file.size} bytes) to ${filePath}`);
+  const uploadAllResumes = async (files: File[]) => {
+    const uploadedResumes = [];
+    
+    for (const file of files) {
+      try {
+        // Generate unique filename using our utility
+        const filename = generateUniqueFilename(file.name, user?.id || 'anonymous');
+        const filePath = `${user?.id}/${filename}`;
+        console.log(`Uploading file: ${file.name} (${file.size} bytes) to ${filePath}`);
 
-      // Upload file to Supabase storage
-      const {
-        error: uploadError
-      } = await supabase.storage.from('resumes').upload(filePath, file);
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw new Error(`Failed to upload file: ${uploadError.message}`);
+        // Upload file to Supabase storage
+        const { error: uploadError } = await supabase.storage.from('resumes').upload(filePath, file);
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Failed to upload file: ${uploadError.message}`);
+        }
+        console.log('File uploaded successfully');
+
+        uploadedResumes.push({
+          filePath,
+          originalFilename: file.name
+        });
+      } catch (error) {
+        console.error('Error uploading resume:', error);
+        // Clean up any uploaded files on error
+        for (const uploaded of uploadedResumes) {
+          await supabase.storage.from('resumes').remove([uploaded.filePath]);
+        }
+        throw error;
       }
-      console.log('File uploaded successfully, now processing with AI...');
+    }
+    
+    return uploadedResumes;
+  };
 
-      // Process resume with AI - the edge function will handle PDF text extraction
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('process-resume', {
+  const processAllResumes = async (uploadedResumes: Array<{filePath: string, originalFilename: string}>) => {
+    try {
+      console.log('Processing all resumes with AI...');
+
+      // Process all resumes with AI via Make.com webhook
+      const { data, error } = await supabase.functions.invoke('process-resume', {
         body: {
           jobRequirements,
           jobTitle,
           userId: user?.id,
-          resumeFilePath: filePath,
-          originalFilename: file.name
+          uploadedResumes
         }
       });
+      
       if (error) {
         console.error('Processing error:', error);
-        // Clean up uploaded file on processing error
-        await supabase.storage.from('resumes').remove([filePath]);
-        throw new Error(error.message || 'Failed to process resume');
+        // Clean up uploaded files on processing error
+        for (const resume of uploadedResumes) {
+          await supabase.storage.from('resumes').remove([resume.filePath]);
+        }
+        throw new Error(error.message || 'Failed to process resumes');
       }
+      
       if (!data.success) {
-        // Clean up uploaded file on processing failure
-        await supabase.storage.from('resumes').remove([filePath]);
+        // Clean up uploaded files on processing failure
+        for (const resume of uploadedResumes) {
+          await supabase.storage.from('resumes').remove([resume.filePath]);
+        }
         throw new Error(data.error || 'Resume processing failed');
       }
+      
       return {
         success: true,
-        filename: file.name,
-        candidate: data.candidate
+        candidates: data.candidates
       };
     } catch (error) {
-      console.error('Error processing resume:', error);
-      return {
-        success: false,
-        filename: file.name,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
+      console.error('Error processing resumes:', error);
+      throw error;
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,61 +143,31 @@ const UploadSection = () => {
       });
       return;
     }
+    
     setIsProcessing(true);
     setProcessingProgress([]);
     const files = Array.from(selectedFiles);
-    let successCount = 0;
-    let failureCount = 0;
-    const failedFiles: string[] = [];
+    
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        setProcessingProgress(prev => [...prev, `Processing ${file.name}...`]);
-        const result = await processResume(file);
-        if (result.success) {
-          successCount++;
-          setProcessingProgress(prev => [...prev.slice(0, -1), `✅ ${file.name} - Processed successfully`]);
-        } else {
-          failureCount++;
-          failedFiles.push(file.name);
-          // Extract more specific error info for display
-          const errorMsg = result.error || 'Processing failed';
-          let displayError = errorMsg;
-
-          // Make quota errors more user-friendly
-          if (errorMsg.includes('quota exceeded') || errorMsg.includes('429')) {
-            displayError = 'API quota exceeded - try again later';
-          } else if (errorMsg.includes('authentication') || errorMsg.includes('401') || errorMsg.includes('403')) {
-            displayError = 'API key authentication failed';
-          } else if (errorMsg.includes('temporarily unavailable') || errorMsg.includes('500')) {
-            displayError = 'Service temporarily unavailable';
-          }
-          setProcessingProgress(prev => [...prev.slice(0, -1), `❌ ${file.name} - ${displayError}`]);
-        }
-      }
-
-      // Show final results
-      if (successCount > 0 && failureCount === 0) {
+      // Step 1: Upload all resumes
+      setProcessingProgress(['Uploading all resumes...']);
+      const uploadedResumes = await uploadAllResumes(files);
+      setProcessingProgress(prev => [...prev, `✅ Uploaded ${uploadedResumes.length} resume${uploadedResumes.length > 1 ? 's' : ''}`]);
+      
+      // Step 2: Process all resumes together
+      setProcessingProgress(prev => [...prev, 'Analyzing resumes with AI...']);
+      const result = await processAllResumes(uploadedResumes);
+      
+      if (result.success) {
+        const candidateCount = result.candidates?.length || 0;
+        setProcessingProgress(prev => [...prev, `✅ Successfully processed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''}`]);
+        
         toast({
           title: "Processing Complete!",
-          description: `Successfully processed ${successCount} resume${successCount > 1 ? 's' : ''}.`
+          description: `Successfully analyzed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''} from ${files.length} resume${files.length > 1 ? 's' : ''}.`
         });
-      } else if (successCount > 0 && failureCount > 0) {
-        toast({
-          title: "Partial Success",
-          description: `Processed ${successCount} resume${successCount > 1 ? 's' : ''} successfully. ${failureCount} failed.`,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Processing Failed",
-          description: `Failed to process all ${failureCount} resume${failureCount > 1 ? 's' : ''}. Please check the files and try again.`,
-          variant: "destructive"
-        });
-      }
-
-      // Reset form on success
-      if (successCount > 0) {
+        
+        // Reset form on success
         setSelectedFiles(null);
         setJobTitle('');
         setJobRequirements('');
@@ -186,10 +176,24 @@ const UploadSection = () => {
         if (fileInput) fileInput.value = '';
       }
     } catch (error) {
-      console.error('Batch processing error:', error);
+      console.error('Processing error:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      let displayError = errorMsg;
+      // Make errors more user-friendly
+      if (errorMsg.includes('quota exceeded') || errorMsg.includes('429')) {
+        displayError = 'API quota exceeded - try again later';
+      } else if (errorMsg.includes('authentication') || errorMsg.includes('401') || errorMsg.includes('403')) {
+        displayError = 'API key authentication failed';
+      } else if (errorMsg.includes('temporarily unavailable') || errorMsg.includes('500')) {
+        displayError = 'Service temporarily unavailable';
+      }
+      
+      setProcessingProgress(prev => [...prev, `❌ ${displayError}`]);
+      
       toast({
-        title: "Processing Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Processing Failed",
+        description: displayError,
         variant: "destructive"
       });
     } finally {
