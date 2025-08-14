@@ -6,47 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Simple PDF text extraction
-const extractTextFromPDF = async (pdfBuffer: Uint8Array): Promise<string> => {
-  console.log('Starting PDF text extraction, buffer size:', pdfBuffer.length);
-  
-  try {
-    // Convert buffer to string for parsing
-    const pdfString = new TextDecoder('latin1').decode(pdfBuffer);
-    let extractedText = '';
-    
-    // Extract text from parentheses (most common text storage)
-    const parenthesesMatches = pdfString.match(/\(([^)]{2,})\)/g) || [];
-    for (const match of parenthesesMatches) {
-      let text = match.slice(1, -1); // Remove parentheses
-      // Handle escape sequences
-      text = text.replace(/\\n/g, ' ').replace(/\\r/g, ' ').replace(/\\t/g, ' ');
-      text = text.replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\');
-      if (text.length > 1 && /[A-Za-z0-9@.]/.test(text)) {
-        extractedText += text + ' ';
-      }
-    }
-    
-    // Clean and normalize extracted text
-    let cleanedText = extractedText
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s@.\-+()]/g, ' ')
-      .trim();
-    
-    console.log('Extracted text length:', cleanedText.length);
-    
-    if (cleanedText.length < 50) {
-      return 'Could not extract sufficient text from PDF.';
-    }
-    
-    return cleanedText;
-    
-  } catch (error) {
-    console.error('PDF text extraction error:', error);
-    return 'PDF text extraction failed.';
-  }
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -73,173 +32,128 @@ serve(async (req) => {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Download the PDF file from storage
-    console.log('Downloading PDF file from storage...')
-    const { data: fileData, error: downloadError } = await supabase.storage
+    // Generate signed URL for the uploaded resume
+    console.log('Generating signed URL for resume...')
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from('resumes')
-      .download(resumeFilePath)
+      .createSignedUrl(resumeFilePath, 3600) // 1 hour expiry
 
-    if (downloadError) {
-      console.error('Error downloading file:', downloadError)
-      throw new Error(`Failed to download file: ${downloadError.message}`)
+    if (signedUrlError) {
+      console.error('Error generating signed URL:', signedUrlError)
+      throw new Error(`Failed to generate signed URL: ${signedUrlError.message}`)
     }
 
-    // Convert file to buffer and extract text
-    const arrayBuffer = await fileData.arrayBuffer()
-    const pdfBuffer = new Uint8Array(arrayBuffer)
-    const resumeText = await extractTextFromPDF(pdfBuffer)
+    const resumeUrl = signedUrlData.signedUrl
+    console.log('Generated signed URL successfully')
 
-    console.log('Resume text extracted, length:', resumeText?.length || 0)
+    // Generate unique analysis ID
+    const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    if (!resumeText || resumeText.trim().length < 50) {
-      throw new Error('Could not extract sufficient text from the PDF. Please ensure the file contains selectable text and is not a scanned image.')
+    // Prepare payload for Make.com webhook
+    const webhookPayload = {
+      job_title: jobTitle,
+      job_requirements: jobRequirements,
+      resume_urls: [resumeUrl],
+      analysis_id: analysisId,
+      user_id: userId
     }
 
-    // Get OpenAI API key
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
-    }
+    console.log('Calling Make.com webhook for analysis...')
+    console.log('Payload:', JSON.stringify(webhookPayload, null, 2))
 
-    console.log('Calling OpenAI API for analysis...')
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call Make.com webhook
+    const webhookResponse = await fetch('https://hook.eu2.make.com/nzl6q7ixhxglium9j8h2p3reqdtx4rax', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert HR analyst. Analyze resumes and provide detailed candidate evaluations in JSON format only.'
-          },
-          {
-            role: 'user',
-            content: `Analyze this resume for the job: "${jobTitle}".
-
-Job Requirements: ${jobRequirements}
-
-Resume text:
-${resumeText}
-
-Extract candidate information and provide a match score (0-100). Return only valid JSON format:
-{
-  "name": "full name",
-  "email": "email or null",
-  "phone": "phone or null", 
-  "position": "current/desired position",
-  "experience_years": number_or_null,
-  "skills": ["skill1", "skill2"],
-  "education": "education background",
-  "work_history": "work experience summary",
-  "ai_score": 75,
-  "ai_analysis": {
-    "strengths": ["key strengths"],
-    "weaknesses": ["areas for improvement"],
-    "match_reasoning": "why this score",
-    "recommendations": "hire recommendation"
-  }
-}`
-          }
-        ],
-        temperature: 0.1,
-        max_tokens: 2048
-      }),
+      body: JSON.stringify(webhookPayload),
+      signal: AbortSignal.timeout(90000) // 90 seconds timeout
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('OpenAI API error:', response.status, errorText)
-      
-      // Handle specific error cases with user-friendly messages
-      if (response.status === 429) {
-        throw new Error('OpenAI API quota exceeded. Please try again later or check your API usage.')
-      } else if (response.status === 401 || response.status === 403) {
-        throw new Error('OpenAI API authentication failed. Please check your API key configuration.')
-      } else if (response.status >= 500) {
-        throw new Error('OpenAI service temporarily unavailable. Please try again in a few minutes.')
-      } else {
-        throw new Error(`OpenAI API error (${response.status}): ${errorText}`)
+    if (!webhookResponse.ok) {
+      const errorText = await webhookResponse.text()
+      console.error('Make.com webhook error:', webhookResponse.status, errorText)
+      throw new Error(`Make.com webhook failed (${webhookResponse.status}): ${errorText}`)
+    }
+
+    const webhookResult = await webhookResponse.json()
+    console.log('Make.com webhook response:', JSON.stringify(webhookResult, null, 2))
+
+    if (webhookResult.status !== 'success' || !webhookResult.candidates || !Array.isArray(webhookResult.candidates)) {
+      throw new Error('Invalid response format from Make.com webhook')
+    }
+
+    // Process candidates from Make.com response
+    const candidates = []
+    for (const candidateData of webhookResult.candidates) {
+      console.log('Processing candidate:', candidateData.candidate_name)
+
+      // Parse experience years (handle string format)
+      let experienceYears = null
+      if (candidateData.total_experience_years) {
+        const parsed = parseFloat(candidateData.total_experience_years)
+        if (!isNaN(parsed)) {
+          experienceYears = Math.floor(parsed)
+        }
       }
-    }
 
-    const aiResponse = await response.json()
-    console.log('OpenAI response received successfully')
-    
-    const analysisText = aiResponse.choices[0].message.content
-    console.log('Raw AI response:', analysisText)
-
-    // Parse and validate the AI response
-    let candidateData
-    try {
-      const cleanedText = analysisText.replace(/```json\s*|\s*```/g, '').trim()
-      candidateData = JSON.parse(cleanedText)
-      console.log('Successfully parsed candidate data:', candidateData)
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', analysisText)
-      throw new Error('Failed to parse AI analysis response')
-    }
-
-    // Simple data validation and preparation
-    const finalData = {
-      name: candidateData.name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
-      email: candidateData.email === 'null' ? null : candidateData.email,
-      phone: candidateData.phone === 'null' ? null : candidateData.phone,
-      position: candidateData.position || null,
-      experience_years: candidateData.experience_years || null,
-      skills: Array.isArray(candidateData.skills) ? candidateData.skills : [],
-      education: candidateData.education || null,
-      work_history: candidateData.work_history || null,
-      ai_score: candidateData.ai_score || 50,
-      ai_analysis: candidateData.ai_analysis || {
-        strengths: ['Resume processed'],
-        weaknesses: ['Standard processing'],
-        match_reasoning: 'Basic analysis completed',
-        recommendations: 'Review required'
+      // Parse AI score
+      let aiScore = 50
+      if (candidateData.ai_score) {
+        const parsed = parseInt(candidateData.ai_score)
+        if (!isNaN(parsed)) {
+          aiScore = Math.max(0, Math.min(100, parsed))
+        }
       }
-    }
 
-    console.log('Processed candidate data:', finalData)
-
-    // Insert candidate into database
-    console.log('Inserting candidate into database...')
-    const { data: candidate, error: dbError } = await supabase
-      .from('candidates')
-      .insert({
+      // Prepare candidate data for database
+      const finalCandidateData = {
         user_id: userId,
-        name: finalData.name,
-        email: finalData.email,
-        phone: finalData.phone,
-        position: finalData.position,
-        experience_years: finalData.experience_years,
-        skills: finalData.skills,
-        education: finalData.education,
-        work_history: finalData.work_history,
+        name: candidateData.candidate_name || originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
+        email: candidateData.email || null,
+        phone: null, // Not provided in Make.com response format
+        position: null, // Not provided in Make.com response format
+        experience_years: experienceYears,
+        skills: Array.isArray(candidateData.key_skills) ? candidateData.key_skills : [],
+        education: null, // Not provided in Make.com response format
+        work_history: null, // Not provided in Make.com response format
         resume_file_path: resumeFilePath,
         original_filename: originalFilename,
-        ai_score: finalData.ai_score,
-        ai_analysis: finalData.ai_analysis,
+        ai_score: aiScore,
+        ai_analysis: {
+          strengths: [],
+          weaknesses: Array.isArray(candidateData.areas_for_improvement) ? candidateData.areas_for_improvement : [],
+          match_reasoning: candidateData.score_reasoning || 'Analysis completed via Make.com',
+          recommendations: Array.isArray(candidateData.recommendations) ? candidateData.recommendations : []
+        },
         status: 'new',
         source: 'upload'
-      })
-      .select()
-      .single()
+      }
 
-    if (dbError) {
-      console.error('Database error:', dbError)
-      throw new Error(`Database error: ${dbError.message}`)
+      // Insert candidate into database
+      console.log('Inserting candidate into database:', finalCandidateData.name)
+      const { data: candidate, error: dbError } = await supabase
+        .from('candidates')
+        .insert(finalCandidateData)
+        .select()
+        .single()
+
+      if (dbError) {
+        console.error('Database error for candidate:', finalCandidateData.name, dbError)
+        throw new Error(`Database error: ${dbError.message}`)
+      }
+
+      candidates.push(candidate)
+      console.log('Candidate created successfully:', candidate.id)
     }
-
-    console.log('Candidate created successfully:', candidate.id)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        candidate: candidate,
-        message: 'Resume processed successfully with OpenAI analysis'
+        candidates: candidates,
+        analysis_id: analysisId,
+        message: `Successfully processed ${candidates.length} candidate(s) via Make.com analysis`
       }),
       { 
         headers: { 
