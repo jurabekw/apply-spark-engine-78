@@ -135,6 +135,17 @@ export const useBatchHistory = () => {
 
   useEffect(() => {
     fetchBatchHistory();
+    
+    // Listen for analysis completion to refresh data
+    const handleAnalysisCompleted = () => {
+      fetchBatchHistory();
+    };
+    
+    window.addEventListener('analysis-completed', handleAnalysisCompleted);
+    
+    return () => {
+      window.removeEventListener('analysis-completed', handleAnalysisCompleted);
+    };
   }, [user]);
 
   return {

@@ -207,6 +207,9 @@ const UploadSection = () => {
         // Reset file input
         const fileInput = document.getElementById('resume-files') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+        
+        // Trigger refresh of analysis history
+        window.dispatchEvent(new CustomEvent('analysis-completed'));
       }
     } catch (error) {
       console.error('Processing error:', error);
