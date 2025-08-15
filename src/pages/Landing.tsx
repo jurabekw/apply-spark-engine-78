@@ -141,14 +141,6 @@ const Landing = () => {
           >
             Start Free Trial
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="px-10 py-6 text-lg border-border/50 hover:bg-muted/50"
-            onClick={() => navigate('/resume-search')}
-          >
-            Try Candidate Search
-          </Button>
         </div>
 
         <p className="text-sm text-muted-foreground">
