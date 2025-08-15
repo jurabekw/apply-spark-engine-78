@@ -89,7 +89,9 @@ const StatsCards = () => {
               </div>
             </div>
             <div className={`relative p-3 rounded-xl bg-gradient-to-br ${stat.bgGradient} group-hover:scale-110 transition-transform duration-200`}>
-              <stat.icon className={`w-6 h-6 bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`} />
+              <div className={`relative z-10 w-6 h-6 bg-gradient-to-br ${stat.gradient} rounded-lg flex items-center justify-center`}>
+                <stat.icon className="w-4 h-4 text-white" />
+              </div>
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-10 rounded-xl group-hover:opacity-20 transition-opacity`}></div>
             </div>
           </CardHeader>
