@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Settings, User, Bell, LogOut, Search, Sparkles } from 'lucide-react';
+import { Settings, User, Bell, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -17,17 +18,8 @@ const Header = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Brand */}
-          <Link to="/dashboard" className="flex items-center gap-3 hover-lift">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur opacity-75 animate-pulse-ring"></div>
-            </div>
-            <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">TalentSpark</h1>
-              <p className="text-xs text-muted-foreground font-medium">AI-Powered Recruitment</p>
-            </div>
+          <Link to="/dashboard" className="hover-lift">
+            <Logo size="md" variant="light" />
           </Link>
 
           {/* Center Search - Desktop Only */}

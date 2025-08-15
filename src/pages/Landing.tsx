@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, CheckCircle, Star, Zap, Shield, Clock, Brain, Target, TrendingUp, Search, Database, Filter, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '@/components/Logo';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -99,17 +100,7 @@ const Landing = () => {
       {/* Header */}
       <header className="bg-surface/80 backdrop-blur-sm shadow-subtle border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-heading font-bold text-lg">TS</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                TalentSpark
-              </h1>
-              <p className="text-xs text-muted-foreground">AI-Powered Recruitment Platform</p>
-            </div>
-          </div>
+          <Logo size="md" variant="light" />
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate('/auth?tab=signin')}>
@@ -356,7 +347,7 @@ const Landing = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="px-10 py-6 text-lg border-white/30 hover:bg-white/10 text-white"
+              className="px-10 py-6 text-lg border-white/30 hover:bg-white/10 text-white hover:text-white"
               onClick={() => navigate('/auth?tab=signin')}
             >
               Contact Sales
@@ -369,17 +360,9 @@ const Landing = () => {
       <footer className="bg-slate-900 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-4 mb-6 md:mb-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-heading font-bold text-xl">TS</span>
-              </div>
-              <div>
-                <div className="text-2xl font-heading font-bold">TalentSpark</div>
-                <div className="text-sm text-slate-400">AI-Powered Recruitment Platform</div>
-              </div>
-            </div>
+            <Logo size="lg" variant="dark" />
             
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-slate-400 mt-4 md:mt-0">
               © 2024 TalentSpark. All rights reserved.
             </div>
           </div>
