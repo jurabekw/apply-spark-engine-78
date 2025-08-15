@@ -1,12 +1,61 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
-// Import PDF text extraction library
-import { readPdf } from "https://deno.land/x/pdf_reader@v1.1.0/mod.ts"
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// PDF text extraction function
+function extractPDFText(rawPdfText: string): string {
+  const textParts: string[] = []
+  
+  // PDF text extraction patterns
+  const patterns = [
+    // Common PDF text operators
+    /\((.*?)\)\s*(?:Tj|TJ)/g,
+    /(?:Tj|TJ)\s*\((.*?)\)/g,
+    // Text between parentheses in PDF streams
+    /\(([^)]+)\)/g,
+    // Text in brackets
+    /\[([^\]]+)\]/g,
+    // Text between BT and ET operators
+    /BT\s+.*?\s+\((.*?)\)\s+.*?ET/gs,
+    // Font definitions with text
+    /\/F\d+\s+\d+\s+Tf\s+\((.*?)\)/g,
+    // Simple quoted strings
+    /"([^"]+)"/g,
+    /'([^']+)'/g,
+  ]
+  
+  patterns.forEach(pattern => {
+    const matches = [...rawPdfText.matchAll(pattern)]
+    matches.forEach(match => {
+      if (match[1] && match[1].length > 1) {
+        let cleaned = match[1]
+          .replace(/\\[rn]/g, ' ')
+          .replace(/\\(.)/g, '$1')
+          .replace(/[^\w\s@.-]/g, ' ')
+          .trim()
+        
+        if (cleaned.length > 2 && /[a-zA-Z]/.test(cleaned)) {
+          textParts.push(cleaned)
+        }
+      }
+    })
+  })
+  
+  // If no text found with patterns, try simple extraction
+  if (textParts.length === 0) {
+    const words = rawPdfText
+      .replace(/[^\w\s@.-]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 2 && /[a-zA-Z]/.test(word))
+    
+    textParts.push(...words.slice(0, 100)) // Limit to first 100 words
+  }
+  
+  return textParts.join(' ').trim()
 }
 
 serve(async (req) => {
@@ -57,16 +106,16 @@ serve(async (req) => {
         try {
           // Convert blob to Uint8Array for PDF processing
           const arrayBuffer = await fileData.arrayBuffer()
-          const uint8Array = new Uint8Array(arrayBuffer)
+          const decoder = new TextDecoder('utf-8', { fatal: false })
+          const rawText = decoder.decode(arrayBuffer)
           
-          // Use the PDF reader library to extract text
-          const pdfText = await readPdf(uint8Array)
-          extractedText = pdfText.trim()
+          // Extract readable text from PDF using common patterns
+          extractedText = extractPDFText(rawText)
           
-          console.log(`PDF library extracted ${extractedText.length} characters from ${resume.originalFilename}`)
+          console.log(`PDF extraction completed - ${extractedText.length} characters from ${resume.originalFilename}`)
           
         } catch (pdfError) {
-          console.warn(`PDF library failed for ${resume.originalFilename}, trying fallback:`, pdfError)
+          console.warn(`PDF extraction failed for ${resume.originalFilename}, using fallback:`, pdfError)
           
           // Fallback: Simple text extraction for text-based PDFs
           try {
