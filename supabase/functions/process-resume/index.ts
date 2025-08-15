@@ -116,48 +116,37 @@ serve(async (req) => {
     
     console.log('Make.com webhook response:', JSON.stringify(webhookResult, null, 2))
 
-    // Handle different response formats from Make.com
+    // Expect the exact same format as HH search (status + candidates array)
     let candidatesData = []
     
     console.log('Webhook result type:', typeof webhookResult)
     console.log('Webhook result keys:', Object.keys(webhookResult))
     
-    if (webhookResult.candidates && Array.isArray(webhookResult.candidates)) {
+    // Use the proven HH search format: { status: "success", candidates: [...] }
+    if (webhookResult.status === "success" && webhookResult.candidates && Array.isArray(webhookResult.candidates)) {
       candidatesData = webhookResult.candidates
-      console.log('Format 1: Using candidates array from webhook:', candidatesData.length, 'candidates')
-    } else if (Array.isArray(webhookResult)) {
-      candidatesData = webhookResult
-      console.log('Format 2: Using direct array from webhook:', candidatesData.length, 'candidates')
-    } else if (webhookResult.candidate_name || webhookResult.name) {
-      // New Format: Direct candidate object from Make.com
-      candidatesData = [webhookResult]
-      console.log('Format 3: Using direct candidate object from webhook:', candidatesData[0].candidate_name || candidatesData[0].name)
-    } else if (webhookResult.role === 'assistant' && webhookResult.content) {
-      // Legacy Format: Parse the content field which contains JSON string
-      try {
-        const parsedContent = JSON.parse(webhookResult.content)
-        candidatesData = Array.isArray(parsedContent) ? parsedContent : [parsedContent]
-        console.log('Format 4: Parsed candidate data from webhook content:', candidatesData.length, 'candidates')
-      } catch (parseError) {
-        console.error('Failed to parse webhook content:', parseError)
-        // Return success even if we can't parse candidate data
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: 'Files sent to Make.com for processing. Data will be processed asynchronously.',
-            batch_id: batchId,
-            files_sent: fileUrls.length
-          }),
-          { 
-            headers: { 
-              ...corsHeaders, 
-              'Content-Type': 'application/json' 
-            } 
-          }
-        )
-      }
+      console.log('Using HH search format from webhook:', candidatesData.length, 'candidates')
     } else {
-      console.log('Format 5: No recognized candidate data format found in webhook response')
+      console.log('Expected HH search format not found. Expected: { status: "success", candidates: [...] }')
+      console.log('Actual webhook response structure:', JSON.stringify(webhookResult, null, 2))
+      
+      // Return error to help debug Make.com configuration
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid webhook format. Expected { status: "success", candidates: [...] } like HH search',
+          received_format: typeof webhookResult,
+          received_keys: Object.keys(webhookResult || {}),
+          batch_id: batchId
+        }),
+        { 
+          status: 400,
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      )
     }
 
     // If we have candidate data, process it immediately
@@ -184,55 +173,57 @@ serve(async (req) => {
       const batchRecordId = batchData.id
       console.log('Created batch record with ID:', batchRecordId)
 
-      // Process candidates from Make.com response
+      // Process candidates using HH search format mapping
       const candidates = []
       for (let i = 0; i < candidatesData.length; i++) {
         const candidateData = candidatesData[i]
         const resumeIndex = Math.min(i, uploadedResumes.length - 1)
         const currentResume = uploadedResumes[resumeIndex]
         
-        console.log('Processing candidate:', candidateData.candidate_name || candidateData.name)
+        console.log('Processing candidate:', candidateData.title)
 
-        // Parse experience years
+        // Parse experience years from experience text (HH search format)
         let experienceYears = null
-        if (candidateData.total_experience_years || candidateData.experience_years) {
-          const exp = candidateData.total_experience_years || candidateData.experience_years
-          const parsed = parseFloat(exp.toString())
-          if (!isNaN(parsed)) {
-            experienceYears = Math.floor(parsed)
+        if (candidateData.experience) {
+          // Extract numbers from experience text like "7 лет" or "5 years"
+          const expMatch = candidateData.experience.match(/(\d+(?:\.\d+)?)/);
+          if (expMatch) {
+            const parsed = parseFloat(expMatch[1])
+            if (!isNaN(parsed)) {
+              experienceYears = Math.floor(parsed)
+            }
           }
         }
 
-        // Parse AI score
+        // Parse AI score (HH search format)
         let aiScore = 50
-        if (candidateData.ai_score || candidateData.score) {
-          const score = candidateData.ai_score || candidateData.score
-          const parsed = parseInt(score.toString())
+        if (candidateData.AI_score) {
+          const parsed = parseInt(candidateData.AI_score.toString())
           if (!isNaN(parsed)) {
             aiScore = Math.max(0, Math.min(100, parsed))
           }
         }
 
-        // Prepare candidate data for database
+        // Prepare candidate data for database using HH search field mapping
         const finalCandidateData = {
           user_id: userId,
           batch_id: batchRecordId,
-          name: candidateData.candidate_name || candidateData.name || currentResume.originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
+          name: candidateData.title || currentResume.originalFilename.replace('.pdf', '').replace(/[_-]/g, ' '),
           email: candidateData.email || null,
           phone: candidateData.phone || null,
-          position: candidateData.position || null,
+          position: candidateData.title || null,
           experience_years: experienceYears,
-          skills: Array.isArray(candidateData.key_skills || candidateData.skills) ? (candidateData.key_skills || candidateData.skills) : [],
-          education: candidateData.education || null,
-          work_history: candidateData.work_history || null,
+          skills: Array.isArray(candidateData.key_skills) ? candidateData.key_skills : [],
+          education: candidateData.education_level || null,
+          work_history: candidateData.experience || null,
           resume_file_path: currentResume.filePath,
           original_filename: currentResume.originalFilename,
           ai_score: aiScore,
           ai_analysis: {
             strengths: Array.isArray(candidateData.strengths) ? candidateData.strengths : [],
-            weaknesses: Array.isArray(candidateData.areas_for_improvement || candidateData.weaknesses) ? (candidateData.areas_for_improvement || candidateData.weaknesses) : [],
-            match_reasoning: candidateData.score_reasoning || candidateData.reasoning || 'Analysis completed via Make.com',
-            recommendations: Array.isArray(candidateData.recommendations) ? candidateData.recommendations : []
+            weaknesses: Array.isArray(candidateData.areas_for_improvement) ? candidateData.areas_for_improvement : [],
+            match_reasoning: candidateData.score_reasoning || 'Analysis completed via Make.com',
+            recommendations: candidateData.recommendations ? [candidateData.recommendations] : []
           },
           status: 'new',
           source: 'upload'
