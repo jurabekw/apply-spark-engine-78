@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download, Search, ArrowRight, TrendingUp, Clock, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from '@/components/Header';
+
 import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
@@ -70,7 +70,7 @@ const recentSearches = useMemo(() => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      
       
       <div className="container mx-auto px-6 py-8">
         {/* Modern Tab Navigation */}
