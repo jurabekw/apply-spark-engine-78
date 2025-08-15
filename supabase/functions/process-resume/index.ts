@@ -154,27 +154,33 @@ serve(async (req) => {
     console.log('Webhook result type:', typeof webhookResult)
     console.log('Webhook result keys:', Object.keys(webhookResult))
     
-    // Check both original and normalized results for HH search format
-    const checkForCandidates = (result) => {
-      if (result && result.status === "success" && result.candidates && Array.isArray(result.candidates)) {
-        return result.candidates;
+    // Extract candidates from normalized result (array of [key, value] pairs)
+    if (Array.isArray(normalizedResult)) {
+      for (const entry of normalizedResult) {
+        if (Array.isArray(entry) && entry.length >= 2) {
+          const candidateObject = entry[1]; // The actual data is at index 1
+          if (candidateObject && candidateObject.status === "success" && candidateObject.candidates) {
+            candidatesData.push(...candidateObject.candidates);
+          }
+        }
       }
-      return null;
-    };
-
-    candidatesData = checkForCandidates(webhookResult) || checkForCandidates(normalizedResult) || [];
+    }
+    
+    // Fallback: check original webhook result for direct format
+    if (candidatesData.length === 0 && webhookResult && webhookResult.status === "success" && webhookResult.candidates) {
+      candidatesData = webhookResult.candidates;
+    }
     
     if (candidatesData.length > 0) {
-      console.log('Using HH search format from webhook:', candidatesData.length, 'candidates')
+      console.log('Successfully extracted candidates:', candidatesData.length, 'candidates')
     } else {
-      console.log('Expected HH search format not found. Expected: { status: "success", candidates: [...] }')
+      console.log('No candidates found in webhook response')
       console.log('Actual webhook response structure:', JSON.stringify(webhookResult, null, 2))
       
-      // Return error to help debug Make.com configuration
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid webhook format. Expected { status: "success", candidates: [...] } like HH search',
+        JSON.stringify({
+          success: false,
+          error: 'No candidates found in webhook response',
           received_format: typeof webhookResult,
           received_keys: Object.keys(webhookResult || {}),
           normalized_result: normalizedResult,
