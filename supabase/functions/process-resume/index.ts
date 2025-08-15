@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
+// Import PDF text extraction library
+import { readPdf } from "https://deno.land/x/pdf_reader@v1.1.0/mod.ts"
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -48,77 +51,61 @@ serve(async (req) => {
 
         console.log(`Extracting text from ${resume.originalFilename}...`)
         
-        // Convert blob to buffer for text extraction
-        const arrayBuffer = await fileData.arrayBuffer()
-        
+        // Extract text using proper PDF library
         let extractedText = ''
         
         try {
-          // Convert ArrayBuffer to Uint8Array
+          // Convert blob to Uint8Array for PDF processing
+          const arrayBuffer = await fileData.arrayBuffer()
           const uint8Array = new Uint8Array(arrayBuffer)
           
-          // Look for PDF text objects using proper PDF parsing
-          // PDFs store text between BT (Begin Text) and ET (End Text) operators
-          let text = ''
-          for (let i = 0; i < uint8Array.length - 2; i++) {
-            // Look for "BT" (Begin Text) markers
-            if (uint8Array[i] === 66 && uint8Array[i + 1] === 84) { // "BT"
-              let j = i + 2
-              // Find the matching "ET" (End Text)
-              while (j < uint8Array.length - 1) {
-                if (uint8Array[j] === 69 && uint8Array[j + 1] === 84) { // "ET"
-                  break
-                }
-                j++
-              }
-              
-              // Extract text between BT and ET
-              const textBlock = uint8Array.slice(i + 2, j)
-              const decoded = new TextDecoder('utf-8', { fatal: false }).decode(textBlock)
-              
-              // Extract text from PDF operators - look for text in parentheses and brackets
-              const textMatches = decoded.match(/[\(\[](.*?)[\)\]]/g)
-              if (textMatches) {
-                textMatches.forEach(match => {
-                  const cleanText = match.replace(/[\(\)\[\]]/g, '').trim()
-                  if (cleanText.length > 1 && /[a-zA-Z]/.test(cleanText)) {
-                    text += cleanText + ' '
-                  }
-                })
-              }
-            }
-          }
+          // Use the PDF reader library to extract text
+          const pdfText = await readPdf(uint8Array)
+          extractedText = pdfText.trim()
           
-          // If BT/ET method didn't work, try alternative extraction
-          if (!text.trim()) {
+          console.log(`PDF library extracted ${extractedText.length} characters from ${resume.originalFilename}`)
+          
+        } catch (pdfError) {
+          console.warn(`PDF library failed for ${resume.originalFilename}, trying fallback:`, pdfError)
+          
+          // Fallback: Simple text extraction for text-based PDFs
+          try {
+            const arrayBuffer = await fileData.arrayBuffer()
             const decoder = new TextDecoder('utf-8', { fatal: false })
-            const fullText = decoder.decode(uint8Array)
+            const rawText = decoder.decode(arrayBuffer)
             
-            // Look for strings that appear to be readable text
-            const patterns = [
-              /\(([^)]+)\)/g,  // Text in parentheses
-              /\[([^\]]+)\]/g,  // Text in square brackets
-              />([^<]+)</g,     // Text between angle brackets
-              /\s([A-Za-z][A-Za-z\s]{3,})\s/g // Standalone words
+            // Extract readable text patterns
+            const textPatterns = [
+              /(?:Tj|TJ)\s*\((.*?)\)/g,  // PDF text operators
+              /\((.*?)\)\s*(?:Tj|TJ)/g,  // Reverse pattern
+              /BT\s+.*?\s+\((.*?)\)\s+.*?ET/gs,  // Between BT/ET blocks
+              /\/F\d+\s+\d+\s+Tf\s+\((.*?)\)/g,  // Font definitions with text
             ]
             
-            let extractedWords = []
-            patterns.forEach(pattern => {
-              const matches = fullText.match(pattern)
-              if (matches) {
-                matches.forEach(match => {
-                  const clean = match.replace(/[^\w\s]/g, ' ').trim()
-                  if (clean.length > 2 && /[a-zA-Z]/.test(clean)) {
-                    extractedWords.push(clean)
+            let extractedParts = []
+            textPatterns.forEach(pattern => {
+              const matches = [...rawText.matchAll(pattern)]
+              matches.forEach(match => {
+                if (match[1] && match[1].length > 2) {
+                  const cleaned = match[1]
+                    .replace(/\\[rn]/g, ' ')
+                    .replace(/\\(.)/g, '$1')
+                    .trim()
+                  if (cleaned.length > 2 && /[a-zA-Z]/.test(cleaned)) {
+                    extractedParts.push(cleaned)
                   }
-                })
-              }
+                }
+              })
             })
             
-            text = extractedWords.join(' ')
+            extractedText = extractedParts.join(' ').trim()
+            console.log(`Fallback extracted ${extractedText.length} characters from ${resume.originalFilename}`)
+            
+          } catch (fallbackError) {
+            console.warn(`All extraction methods failed for ${resume.originalFilename}:`, fallbackError)
+            extractedText = ''
           }
-          
-          extractedText = text.trim()
+        }
           
           // Fallback if no text extracted
           if (!extractedText) {
