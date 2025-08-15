@@ -116,15 +116,55 @@ serve(async (req) => {
     
     console.log('Make.com webhook response:', JSON.stringify(webhookResult, null, 2))
 
+    // Normalize response data using the same logic as HH candidate search
+    const normalizeResponse = (data) => {
+      function visit(obj) {
+        if (Array.isArray(obj)) {
+          return obj.map(visit);
+        } else if (obj && typeof obj === 'object') {
+          const values = Object.values(obj);
+          const transformedValues = values.map(visit);
+          
+          // If all values are strings, try to parse them as JSON
+          if (values.every(v => typeof v === 'string')) {
+            const parsedValues = transformedValues.map(value => {
+              try {
+                return JSON.parse(value);
+              } catch {
+                return value;
+              }
+            });
+            return parsedValues.length === 1 ? parsedValues[0] : parsedValues;
+          }
+          
+          return transformedValues.length === 1 ? transformedValues[0] : transformedValues;
+        }
+        return obj;
+      }
+      return visit(data);
+    };
+
+    // Apply normalization to handle Make.com's wrapped format
+    const normalizedResult = normalizeResponse(webhookResult);
+    console.log('Normalized webhook result:', JSON.stringify(normalizedResult, null, 2));
+
     // Expect the exact same format as HH search (status + candidates array)
     let candidatesData = []
     
     console.log('Webhook result type:', typeof webhookResult)
     console.log('Webhook result keys:', Object.keys(webhookResult))
     
-    // Use the proven HH search format: { status: "success", candidates: [...] }
-    if (webhookResult.status === "success" && webhookResult.candidates && Array.isArray(webhookResult.candidates)) {
-      candidatesData = webhookResult.candidates
+    // Check both original and normalized results for HH search format
+    const checkForCandidates = (result) => {
+      if (result && result.status === "success" && result.candidates && Array.isArray(result.candidates)) {
+        return result.candidates;
+      }
+      return null;
+    };
+
+    candidatesData = checkForCandidates(webhookResult) || checkForCandidates(normalizedResult) || [];
+    
+    if (candidatesData.length > 0) {
       console.log('Using HH search format from webhook:', candidatesData.length, 'candidates')
     } else {
       console.log('Expected HH search format not found. Expected: { status: "success", candidates: [...] }')
@@ -137,6 +177,7 @@ serve(async (req) => {
           error: 'Invalid webhook format. Expected { status: "success", candidates: [...] } like HH search',
           received_format: typeof webhookResult,
           received_keys: Object.keys(webhookResult || {}),
+          normalized_result: normalizedResult,
           batch_id: batchId
         }),
         { 
