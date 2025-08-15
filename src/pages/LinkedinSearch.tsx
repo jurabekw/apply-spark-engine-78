@@ -160,16 +160,18 @@ const LinkedinSearch = () => {
     try {
       console.log('Sending search request to n8n webhook...');
       
-      // Send request to n8n webhook
-      const webhookResponse = await fetch('https://sadasd1.app.n8n.cloud/webhook/792bf888-4084-42c8-a476-a3fc059d0618', {
-        method: 'POST',
+      // Prepare query parameters
+      const queryParams = new URLSearchParams({
+        job_title: data.job_title,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Send GET request to n8n webhook
+      const webhookResponse = await fetch(`https://sadasd1.app.n8n.cloud/webhook-test/792bf888-4084-42c8-a476-a3fc059d0618?${queryParams.toString()}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          job_title: data.job_title,
-          timestamp: new Date().toISOString(),
-        }),
       });
 
       if (!webhookResponse.ok) {
