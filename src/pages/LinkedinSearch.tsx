@@ -43,6 +43,45 @@ const LinkedinSearch = () => {
   const normalizeCandidates = (response: any): any[] => {
     if (!response) return [];
 
+    // Preprocess webhook response format: check for output arrays containing JSON strings
+    let processedResponse = response;
+    
+    // Handle case where response is an array containing objects with 'output' property
+    if (Array.isArray(response)) {
+      let allCandidates: any[] = [];
+      
+      for (const item of response) {
+        if (item && typeof item === 'object' && item.output && Array.isArray(item.output)) {
+          // Parse each JSON string in the output array
+          for (const jsonString of item.output) {
+            if (typeof jsonString === 'string') {
+              try {
+                // Clean the JSON string (remove extra whitespace/newlines)
+                const cleanedJson = jsonString.trim();
+                const parsedObject = JSON.parse(cleanedJson);
+                
+                // Extract candidates from the parsed object
+                if (parsedObject.candidates && Array.isArray(parsedObject.candidates)) {
+                  allCandidates.push(...parsedObject.candidates);
+                } else if (Array.isArray(parsedObject)) {
+                  allCandidates.push(...parsedObject);
+                } else {
+                  allCandidates.push(parsedObject);
+                }
+              } catch (error) {
+                console.warn('Failed to parse JSON string in output array:', error, jsonString);
+              }
+            }
+          }
+        } else {
+          // If item doesn't have output property, add it directly
+          allCandidates.push(item);
+        }
+      }
+      
+      processedResponse = allCandidates;
+    }
+
     const toStr = (val: any): string => {
       if (typeof val === 'string') return val;
       if (typeof val === 'object') return JSON.stringify(val);
@@ -118,7 +157,7 @@ const LinkedinSearch = () => {
       return candidates;
     };
 
-    const rawCandidates = extractCandidates(response);
+    const rawCandidates = extractCandidates(processedResponse);
 
     return rawCandidates.map((candidate, index) => ({
       title: toStr(candidate.title || candidate.name || `Candidate ${index + 1}`),
