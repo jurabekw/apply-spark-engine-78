@@ -44,11 +44,7 @@ serve(async (req) => {
           .from('resumes')
           .getPublicUrl(resume.filePath)
 
-        fileUrls.push({
-          filename: resume.originalFilename,
-          url: data.publicUrl,
-          filePath: resume.filePath
-        })
+        fileUrls.push(data.publicUrl)
         
         console.log(`Got URL for ${resume.originalFilename}: ${data.publicUrl}`)
         
