@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Download, Star, Eye, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Search, Download, Star, Eye, Loader2, Trash2, ExternalLink, Filter, ArrowUpDown, MoreHorizontal, User, Users, Mail, MapPin, Calendar, Award } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import CandidateDetailModal from './CandidateDetailModal';
 
@@ -29,29 +29,31 @@ const CandidateTable = () => {
     };
   }, [refetch]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'shortlisted':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'interviewed':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'reviewing':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'hired':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: // 'new'
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'shortlisted': return 'success';
+      case 'interviewed': return 'brand';
+      case 'reviewing': return 'warning';
+      case 'rejected': return 'destructive';
+      case 'hired': return 'default';
+      default: return 'secondary';
     }
   };
 
   const getScoreColor = (score: number | undefined) => {
-    if (!score) return 'text-gray-400';
-    if (score >= 85) return 'text-green-600 font-semibold';
-    if (score >= 70) return 'text-blue-600 font-semibold';
-    if (score >= 60) return 'text-yellow-600 font-semibold';
-    return 'text-red-600 font-semibold';
+    if (!score) return 'text-muted-foreground';
+    if (score >= 85) return 'text-success';
+    if (score >= 70) return 'text-brand';
+    if (score >= 60) return 'text-warning';
+    return 'text-destructive';
+  };
+
+  const getScoreLabel = (score: number | undefined) => {
+    if (!score) return 'No score';
+    if (score >= 85) return 'Excellent';
+    if (score >= 70) return 'Good';
+    if (score >= 60) return 'Fair';
+    return 'Poor';
   };
 
   const getStatusLabel = (status: string) => {
@@ -154,18 +156,18 @@ const CandidateTable = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Candidate Database</h2>
-            <p className="text-gray-600">Manage and review all candidate submissions</p>
+            <h2 className="text-3xl font-heading font-bold text-foreground">Candidate Database</h2>
+            <p className="text-muted-foreground">Manage and review all candidate submissions</p>
           </div>
         </div>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-              <span className="ml-2 text-gray-600">Loading candidates...</span>
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">Loading candidates...</span>
             </div>
           </CardContent>
         </Card>
@@ -175,209 +177,274 @@ const CandidateTable = () => {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-6 animate-fade-in">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Candidate Database</h2>
-            <p className="text-gray-600">Manage and review all candidate submissions</p>
+            <h2 className="text-3xl font-heading font-bold text-foreground">Candidate Database</h2>
+            <p className="text-muted-foreground">Manage and review all candidate submissions</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-md border p-1">
-              <Button variant={sourceFilter === 'all' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('all')}>All</Button>
-              <Button variant={sourceFilter === 'upload' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('upload')}>Uploaded</Button>
-              <Button variant={sourceFilter === 'hh_search' ? 'default' : 'ghost'} size="sm" onClick={() => setSourceFilter('hh_search')}>HH</Button>
+          
+          <div className="flex items-center gap-3">
+            {/* Source Filter Pills */}
+            <div className="inline-flex bg-muted rounded-lg p-1">
+              <Button 
+                variant={sourceFilter === 'all' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setSourceFilter('all')}
+                className={sourceFilter === 'all' ? 'shadow-sm' : ''}
+              >
+                All
+              </Button>
+              <Button 
+                variant={sourceFilter === 'upload' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setSourceFilter('upload')}
+                className={sourceFilter === 'upload' ? 'shadow-sm' : ''}
+              >
+                Uploaded
+              </Button>
+              <Button 
+                variant={sourceFilter === 'hh_search' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setSourceFilter('hh_search')}
+                className={sourceFilter === 'hh_search' ? 'shadow-sm' : ''}
+              >
+                HH Search
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={handleExport} disabled={filteredCandidates.length === 0}>
+            
+            <Button variant="outline" onClick={handleExport} disabled={filteredCandidates.length === 0}>
               <Download className="w-4 h-4 mr-2" />
-              Export
+              Export CSV
             </Button>
           </div>
         </div>
 
-        <Card>
+        {/* Search */}
+        <Card className="border-border/50">
+          <CardContent className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Search candidates by name, email, or position..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 h-12 text-base"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Results */}
+        <Card className="border-border/50">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>All Candidates ({filteredCandidates.length})</CardTitle>
-              <div className="relative w-72">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search candidates..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                Candidates ({filteredCandidates.length})
+              </CardTitle>
+              {filteredCandidates.length > 0 && (
+                <Badge variant="secondary" className="px-3 py-1">
+                  {sourceFilter === 'all' ? 'All Sources' : sourceFilter === 'upload' ? 'Uploaded' : 'HH Search'}
+                </Badge>
+              )}
             </div>
           </CardHeader>
+          
           <CardContent>
             {filteredCandidates.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="w-16 h-16 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                    No candidates found
-                  </h3>
-                  <p className="text-gray-500">
-                    {candidates.length === 0 
-                      ? "Upload some resumes to get started with AI-powered candidate screening."
-                      : "Try adjusting your search terms."
-                    }
-                  </p>
+              <div className="text-center py-12 animate-fade-in">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="w-8 h-8 text-muted-foreground" />
                 </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  No candidates found
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {candidates.length === 0 
+                    ? "Upload some resumes or search HH candidates to get started with AI-powered screening."
+                    : "Try adjusting your search terms or filters."
+                  }
+                </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Candidate</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>AI Score</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead>Key Skills</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Submitted</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCandidates.map((candidate) => (
-                      <TableRow key={candidate.id} className="hover:bg-gray-50">
-                        <TableCell>
-                          <div>
-                            <div className="font-medium text-gray-900">{candidate.name}</div>
-                            <div className="text-sm text-gray-500">{candidate.email}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {candidate.position || 'Not specified'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className={getScoreColor(candidate.ai_score)}>
-                              {candidate.ai_score ? `${candidate.ai_score}%` : 'N/A'}
-                            </span>
-                            {candidate.ai_score && candidate.ai_score >= 85 && (
-                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+              <div className="space-y-4">
+                {filteredCandidates.map((candidate, index) => (
+                  <div 
+                    key={candidate.id} 
+                    className="group p-6 bg-gradient-to-r from-card to-card/50 border border-border/50 rounded-xl hover-lift transition-all duration-200 hover:border-primary/20 animate-slide-up"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      {/* Candidate Info */}
+                      <div className="flex items-start gap-4 flex-1">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center border-2 border-primary/20">
+                          <User className="w-6 h-6 text-primary" />
+                        </div>
+                        
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <div>
+                              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                                {candidate.name || 'Unknown Candidate'}
+                              </h3>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {candidate.email || 'No email provided'}
+                              </p>
+                            </div>
+                            
+                            {/* AI Score Badge */}
+                            {candidate.ai_score && (
+                              <div className="flex items-center gap-2">
+                                <div className={`text-right ${getScoreColor(candidate.ai_score)}`}>
+                                  <div className="text-lg font-bold">{candidate.ai_score}%</div>
+                                  <div className="text-xs">{getScoreLabel(candidate.ai_score)}</div>
+                                </div>
+                                {candidate.ai_score >= 85 && (
+                                  <Award className="w-5 h-5 text-warning" />
+                                )}
+                              </div>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(candidate.status)}>
-                            {getStatusLabel(candidate.status)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {candidate.experience_years ? `${candidate.experience_years} years` : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {candidate.skills && candidate.skills.length > 0 ? (
+                          
+                          {/* Meta Info */}
+                          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
+                            {candidate.position && (
+                              <div className="flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                {candidate.position}
+                              </div>
+                            )}
+                            {candidate.experience_years && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {candidate.experience_years} years
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(candidate.submitted_at || candidate.created_at)}
+                            </div>
+                          </div>
+                          
+                          {/* Skills & Status Row */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={getStatusVariant(candidate.status)} className="font-medium">
+                              {getStatusLabel(candidate.status)}
+                            </Badge>
+                            
+                            <Badge 
+                              variant={candidate.source === 'hh_search' ? 'brand' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {candidate.source === 'hh_search' ? 'HH.ru' : 'Uploaded'}
+                            </Badge>
+                            
+                            {candidate.skills && candidate.skills.length > 0 && (
                               <>
-                                {candidate.skills.slice(0, 2).map((skill, index) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">
+                                {candidate.skills.slice(0, 3).map((skill, skillIndex) => (
+                                  <Badge key={skillIndex} variant="outline" className="text-xs">
                                     {skill}
                                   </Badge>
                                 ))}
-                                {candidate.skills.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{candidate.skills.length - 2}
+                                {candidate.skills.length > 3 && (
+                                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                                    +{candidate.skills.length - 3} more
                                   </Badge>
                                 )}
                               </>
-                            ) : (
-                              <span className="text-gray-400 text-sm">No skills listed</span>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={candidate.source === 'hh_search' ? 'default' : 'secondary'}
-                            className={candidate.source === 'hh_search' ? 'bg-blue-100 text-blue-800' : ''}
-                          >
-                            {candidate.source === 'hh_search' ? 'HH.ru' : 'Upload'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-500">
-                          {formatDate(candidate.submitted_at || candidate.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 lg:flex-col lg:items-stretch lg:w-32">
+                        <Button 
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleViewCandidate(candidate)}
+                          className="flex-1 lg:flex-none"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Details
+                        </Button>
+                        
+                        <div className="flex gap-1">
+                          {candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url && (
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleViewCandidate(candidate)}
-                              title="View candidate details, AI analysis, and resume"
+                              asChild
+                              className="text-muted-foreground hover:text-brand"
                             >
-                              <Eye className="w-4 h-4" />
+                              <a 
+                                href={candidate.ai_analysis.hh_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                title="View on HH.ru"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
                             </Button>
-                            {candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url && (
+                          )}
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                asChild
-                                title="View profile on HH.ru"
+                                className="text-muted-foreground hover:text-destructive"
                               >
-                                <a 
-                                  href={candidate.ai_analysis.hh_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                </a>
+                                <Trash2 className="w-4 h-4" />
                               </Button>
-                            )}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data{candidate.source === 'upload' ? ' including their resume' : ''}.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteCandidate(candidate.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data{candidate.source === 'upload' ? ' including their resume' : ''}.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteCandidate(candidate.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Connected Status */}
         {candidates.length > 0 && (
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <h3 className="font-semibold text-green-900 mb-2">
-                  Real Data Connected
-                </h3>
-                <p className="text-sm text-green-700">
-                  This table shows actual candidate data from your database. Click the eye icon to view detailed AI analysis, 
-                  score reasoning, and resume documents for each candidate.
-                </p>
+          <Card className="bg-gradient-to-r from-success/5 to-emerald-500/5 border-success/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                <div>
+                  <h4 className="font-semibold text-success">
+                    Live Database Connected
+                  </h4>
+                  <p className="text-sm text-success/80">
+                    Displaying {candidates.length} candidates with real-time AI analysis and scoring
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

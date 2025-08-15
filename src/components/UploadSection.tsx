@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, FileText, Loader2, CheckCircle, AlertCircle, X, Plus, CloudUpload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,39 +16,72 @@ const UploadSection = () => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState<string[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
+  const [isDragOver, setIsDragOver] = useState(false);
+  
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const validateAndSetFiles = (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
+    
+    if (pdfFiles.length !== fileArray.length) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select only PDF files.",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (pdfFiles.length > 10) {
+      toast({
+        title: "Too many files",
+        description: "Please select maximum 10 files at once.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    const dataTransfer = new DataTransfer();
+    pdfFiles.forEach(file => dataTransfer.items.add(file));
+    setSelectedFiles(dataTransfer.files);
+    return true;
+  };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      // Filter for PDF files only
-      const pdfFiles = Array.from(files).filter(file => file.type === 'application/pdf');
-      if (pdfFiles.length !== files.length) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select only PDF files.",
-          variant: "destructive"
-        });
-        return;
-      }
-      if (pdfFiles.length > 10) {
-        toast({
-          title: "Too many files",
-          description: "Please select maximum 10 files at once.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create a new FileList-like object with only PDF files
-      const dataTransfer = new DataTransfer();
-      pdfFiles.forEach(file => dataTransfer.items.add(file));
-      setSelectedFiles(dataTransfer.files);
+      validateAndSetFiles(files);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      validateAndSetFiles(files);
+    }
+  };
+
+  const removeFile = (indexToRemove: number) => {
+    if (!selectedFiles) return;
+    
+    const remainingFiles = Array.from(selectedFiles).filter((_, index) => index !== indexToRemove);
+    const dataTransfer = new DataTransfer();
+    remainingFiles.forEach(file => dataTransfer.items.add(file));
+    setSelectedFiles(dataTransfer.files.length > 0 ? dataTransfer.files : null);
   };
   const uploadAllResumes = async (files: File[]) => {
     const uploadedResumes = [];
@@ -201,87 +234,195 @@ const UploadSection = () => {
     }
   };
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="w-5 h-5" />
-          Upload & Process Resumes
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="job-title">Job Title</Label>
-              <Input id="job-title" placeholder="e.g., Senior Frontend Developer" value={jobTitle} onChange={e => setJobTitle(e.target.value)} disabled={isProcessing} required />
+    <div className="space-y-8 animate-fade-in">
+      {/* Modern Upload Card */}
+      <Card className="border-border/50 bg-gradient-to-br from-card to-card/50">
+        <CardHeader className="pb-6">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-gradient-to-br from-primary to-accent rounded-xl">
+              <CloudUpload className="w-6 h-6 text-white" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="resume-files">Resume Files (PDF only)</Label>
-              <Input id="resume-files" type="file" multiple accept=".pdf" onChange={handleFileSelect} disabled={isProcessing} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="requirements">Job Requirements & Skills</Label>
-            <Textarea id="requirements" placeholder="Describe the key requirements, skills, and qualifications for this position..." value={jobRequirements} onChange={e => setJobRequirements(e.target.value)} disabled={isProcessing} rows={4} required />
-          </div>
-
-          {selectedFiles && selectedFiles.length > 0 && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Selected Files ({selectedFiles.length}):</h4>
-              <div className="space-y-1">
-                {Array.from(selectedFiles).map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                    <FileText className="w-4 h-4" />
-                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </div>
-                ))}
+            Resume Upload & Analysis
+          </CardTitle>
+          <p className="text-muted-foreground">
+            Upload multiple resumes and get instant AI-powered candidate analysis
+          </p>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Job Details */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="job-title" className="text-sm font-medium">Position Title</Label>
+                <Input 
+                  id="job-title" 
+                  placeholder="e.g., Senior Frontend Developer" 
+                  value={jobTitle} 
+                  onChange={e => setJobTitle(e.target.value)} 
+                  disabled={isProcessing} 
+                  required 
+                  className="h-12"
+                />
+              </div>
+              
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Requirements & Skills</Label>
+                <Textarea 
+                  placeholder="Describe key requirements, skills, and qualifications..." 
+                  value={jobRequirements} 
+                  onChange={e => setJobRequirements(e.target.value)} 
+                  disabled={isProcessing} 
+                  rows={3} 
+                  required 
+                  className="resize-none"
+                />
               </div>
             </div>
-          )}
 
-          {processingProgress.length > 0 && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Processing Status:</h4>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {processingProgress.map((message, index) => (
-                  <div key={index} className="text-sm text-blue-700 font-mono">
-                    {message}
-                  </div>
-                ))}
+            {/* Modern Dropzone */}
+            <div 
+              className={`relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 ${
+                isDragOver 
+                  ? 'border-primary bg-primary/5 scale-[1.02]' 
+                  : selectedFiles?.length 
+                    ? 'border-success bg-success/5' 
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <input 
+                id="resume-files" 
+                type="file" 
+                multiple 
+                accept=".pdf" 
+                onChange={handleFileSelect} 
+                disabled={isProcessing} 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              
+              <div className="text-center">
+                <div className={`inline-flex p-4 rounded-full mb-4 transition-colors ${
+                  isDragOver ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+                }`}>
+                  <Upload className="w-8 h-8" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium text-foreground">
+                    {isDragOver ? 'Drop files here' : 'Drag & drop PDF files'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    or <Button variant="link" className="p-0 h-auto text-primary">browse files</Button>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF files only • Maximum 10 files • Up to 10MB each
+                  </p>
+                </div>
               </div>
             </div>
-          )}
 
-          <Button type="submit" className="w-full" disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}>
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing Resumes...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Process {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
-              </>
+            {/* Selected Files Preview */}
+            {selectedFiles && selectedFiles.length > 0 && (
+              <Card className="bg-success/5 border-success/20">
+                <CardContent className="p-4">
+                  <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-success" />
+                    Selected Files ({selectedFiles.length})
+                  </h4>
+                  <div className="grid gap-3">
+                    {Array.from(selectedFiles).map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-card rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
+                            <FileText className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          disabled={isProcessing}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </Button>
-        </form>
 
-        <div className="mt-6 p-4 bg-green-50 rounded-lg">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-green-900 mb-1">AI-Powered Analysis</h4>
-              <p className="text-sm text-green-700">
-                Our system will automatically extract candidate information, calculate experience, 
-                identify skills, and provide an AI-powered match score for each resume against your job requirements.
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            {/* Processing Status */}
+            {processingProgress.length > 0 && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <h4 className="font-medium text-primary mb-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing Status
+                  </h4>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {processingProgress.map((message, index) => (
+                      <div key={index} className="text-sm font-mono text-primary/80 flex items-start gap-2">
+                        <div className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                        {message}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              size="lg"
+              className="w-full h-12" 
+              disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                  Analyzing Resumes...
+                </>
+              ) : (
+                <>
+                  <CloudUpload className="w-5 h-5 mr-3" />
+                  Analyze {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
+                </>
+              )}
+            </Button>
+          </form>
+
+          {/* Feature Highlight */}
+          <Card className="bg-gradient-to-br from-success/5 to-emerald-500/5 border-success/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-gradient-to-br from-success to-emerald-500 rounded-xl">
+                  <CheckCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">AI-Powered Analysis</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Our advanced AI extracts candidate information, calculates experience metrics, 
+                    identifies key skills, and provides intelligent match scores based on your specific job requirements.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
