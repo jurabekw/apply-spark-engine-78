@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
-import { PDFExtract } from "https://esm.sh/pdf.js-extract@0.2.1"
+import { getTextExtractor } from "https://esm.sh/office-text-extractor@2.0.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,7 +34,6 @@ serve(async (req) => {
     // Extract text from all uploaded PDFs
     console.log('Extracting text from all PDFs...')
     const resumeTexts = []
-    const pdfExtract = new PDFExtract()
     
     for (const resume of uploadedResumes) {
       try {
@@ -48,26 +47,46 @@ serve(async (req) => {
           throw new Error(`Failed to download file: ${downloadError.message}`)
         }
 
-        // Convert blob to buffer for PDF parsing
-        const arrayBuffer = await fileData.arrayBuffer()
-        const buffer = new Uint8Array(arrayBuffer)
-        
         console.log(`Extracting text from ${resume.originalFilename}...`)
         
-        // Extract text from PDF
-        const pdfData = await pdfExtract.extractBuffer(buffer)
+        // Convert blob to buffer for text extraction
+        const arrayBuffer = await fileData.arrayBuffer()
+        
+        // Extract text using office-text-extractor
+        const extractor = getTextExtractor()
         let extractedText = ''
         
-        if (pdfData && pdfData.pages) {
-          extractedText = pdfData.pages
-            .map(page => page.content.map(item => item.str).join(' '))
-            .join('\n')
+        try {
+          extractedText = await extractor.extractText({
+            input: new Uint8Array(arrayBuffer),
+            type: 'buffer'
+          })
+        } catch (extractError) {
+          console.warn(`Text extraction failed for ${resume.originalFilename}, trying alternative method:`, extractError)
+          
+          // Fallback: Basic text extraction attempt
+          const textDecoder = new TextDecoder('utf-8', { fatal: false })
+          const rawText = textDecoder.decode(arrayBuffer)
+          
+          // Look for readable text patterns in the raw content
+          const textMatches = rawText.match(/[a-zA-Z0-9\s\.,\-@]+/g)
+          if (textMatches && textMatches.length > 0) {
+            extractedText = textMatches.join(' ').trim()
+          } else {
+            extractedText = `Unable to extract readable text from ${resume.originalFilename}`
+          }
         }
         
         if (!extractedText.trim()) {
           console.warn(`No text extracted from ${resume.originalFilename}`)
           extractedText = `Unable to extract text from ${resume.originalFilename}`
         }
+        
+        // Clean up extracted text
+        extractedText = extractedText
+          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+          .replace(/\n\s*\n/g, '\n') // Remove empty lines
+          .trim()
         
         resumeTexts.push({
           filename: resume.originalFilename,
