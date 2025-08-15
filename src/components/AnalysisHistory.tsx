@@ -5,17 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Eye, Trash2, Clock, FileText, Trash } from 'lucide-react';
-import { useAnalysisHistory } from '@/hooks/useAnalysisHistory';
-import CandidateDetailModal from './CandidateDetailModal';
+import { Search, Eye, Trash2, Clock, FileText, Trash, Users } from 'lucide-react';
+import { useBatchHistory } from '@/hooks/useBatchHistory';
+import BatchHistoryModal from './BatchHistoryModal';
 
 const AnalysisHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { analyses, loading, totalCount, deleteAnalysis, deleteAllAnalyses } = useAnalysisHistory();
+  const { batches, loading, deleteBatch, deleteAllBatches } = useBatchHistory();
   
-  // State to handle viewing analysis details
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedAnalysis, setSelectedAnalysis] = useState<any>(null);
+  // State to handle viewing batch details
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<any>(null);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -33,15 +33,14 @@ const AnalysisHistory = () => {
     return 'text-red-600 bg-red-50';
   };
 
-  const filteredAnalyses = analyses.filter(analysis =>
-    (analysis.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (analysis.original_filename || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (analysis.position || '').toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBatches = batches.filter(batch =>
+    batch.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    batch.job_requirements.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleViewDetails = (analysis: any) => {
-    setSelectedAnalysis(analysis);
-    setIsDetailOpen(true);
+  const handleViewBatch = (batch: any) => {
+    setSelectedBatch(batch);
+    setIsBatchModalOpen(true);
   };
 
   if (loading) {
@@ -63,11 +62,11 @@ const AnalysisHistory = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-muted-foreground" />
-              <CardTitle>Analysis History ({filteredAnalyses.length})</CardTitle>
+              <Users className="w-5 h-5 text-muted-foreground" />
+              <CardTitle>Batch Analysis History ({filteredBatches.length})</CardTitle>
             </div>
             <div className="flex items-center gap-2">
-              {analyses.length > 0 && (
+              {batches.length > 0 && (
                 <>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -78,15 +77,15 @@ const AnalysisHistory = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete All Analysis History</AlertDialogTitle>
+                        <AlertDialogTitle>Delete All Batch History</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete all analysis history? This action cannot be undone and will remove all {analyses.length} entries.
+                          Are you sure you want to delete all batch history? This action cannot be undone and will remove all {batches.length} batches and their candidates.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={deleteAllAnalyses}
+                          onClick={deleteAllBatches}
                           className="bg-destructive hover:bg-destructive/90"
                         >
                           Delete All
@@ -109,15 +108,15 @@ const AnalysisHistory = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredAnalyses.length === 0 ? (
+          {filteredBatches.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                {analyses.length === 0 ? 'No analysis history yet' : 'No matching analyses'}
+                {batches.length === 0 ? 'No batch history yet' : 'No matching batches'}
               </h3>
               <p className="text-muted-foreground text-sm">
-                {analyses.length === 0 
-                  ? "Your analysis history will appear here after you upload your first resume."
+                {batches.length === 0 
+                  ? "Your batch history will appear here after you upload your first resume batch."
                   : "Try adjusting your search terms."
                 }
               </p>
@@ -127,64 +126,41 @@ const AnalysisHistory = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Candidate Name</TableHead>
-                    <TableHead>Original Filename</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>AI Score</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Job Title</TableHead>
+                    <TableHead>Candidates</TableHead>
+                    <TableHead>Job Requirements</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAnalyses.map((analysis) => (
-                    <TableRow key={analysis.id} className="hover:bg-muted/50">
+                  {filteredBatches.map((batch) => (
+                    <TableRow key={batch.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="font-medium">
-                          {analysis.name || 'Unknown Candidate'}
+                          {batch.job_title}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm text-muted-foreground">
-                          {analysis.original_filename || 'N/A'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {analysis.position ? (
-                          <Badge variant="secondary" className="text-xs">
-                            {analysis.position}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {typeof analysis.ai_score === 'number' ? (
-                          <Badge 
-                            variant="secondary" 
-                            className={`text-xs ${getScoreColor(analysis.ai_score)}`}
-                          >
-                            {analysis.ai_score}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {analysis.status}
+                        <Badge variant="secondary" className="text-xs">
+                          {batch.total_candidates} candidates
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-muted-foreground max-w-xs truncate">
+                          {batch.job_requirements}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {formatDate(analysis.created_at)}
+                        {formatDate(batch.created_at)}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleViewDetails(analysis)}
-                            title="View analysis details"
+                            onClick={() => handleViewBatch(batch)}
+                            title="View batch details"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -200,15 +176,15 @@ const AnalysisHistory = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Analysis</AlertDialogTitle>
+                                <AlertDialogTitle>Delete Batch</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this analysis? This action cannot be undone.
+                                  Are you sure you want to delete this batch and all its candidates? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => deleteAnalysis(analysis.id)}
+                                  onClick={() => deleteBatch(batch.id)}
                                   className="bg-destructive hover:bg-destructive/90"
                                 >
                                   Delete
@@ -227,10 +203,10 @@ const AnalysisHistory = () => {
         </CardContent>
       </Card>
 
-      <CandidateDetailModal
-        candidate={selectedAnalysis}
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
+      <BatchHistoryModal
+        batch={selectedBatch}
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
       />
     </>
   );
