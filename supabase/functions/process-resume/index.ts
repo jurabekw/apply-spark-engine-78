@@ -119,18 +119,25 @@ serve(async (req) => {
     // Handle different response formats from Make.com
     let candidatesData = []
     
+    console.log('Webhook result type:', typeof webhookResult)
+    console.log('Webhook result keys:', Object.keys(webhookResult))
+    
     if (webhookResult.candidates && Array.isArray(webhookResult.candidates)) {
       candidatesData = webhookResult.candidates
-      console.log('Using candidates array from webhook:', candidatesData)
+      console.log('Format 1: Using candidates array from webhook:', candidatesData.length, 'candidates')
     } else if (Array.isArray(webhookResult)) {
       candidatesData = webhookResult
-      console.log('Using direct array from webhook:', candidatesData)
+      console.log('Format 2: Using direct array from webhook:', candidatesData.length, 'candidates')
+    } else if (webhookResult.candidate_name || webhookResult.name) {
+      // New Format: Direct candidate object from Make.com
+      candidatesData = [webhookResult]
+      console.log('Format 3: Using direct candidate object from webhook:', candidatesData[0].candidate_name || candidatesData[0].name)
     } else if (webhookResult.role === 'assistant' && webhookResult.content) {
-      // Parse the content field which contains JSON string
+      // Legacy Format: Parse the content field which contains JSON string
       try {
         const parsedContent = JSON.parse(webhookResult.content)
         candidatesData = Array.isArray(parsedContent) ? parsedContent : [parsedContent]
-        console.log('Parsed candidate data from webhook content:', candidatesData)
+        console.log('Format 4: Parsed candidate data from webhook content:', candidatesData.length, 'candidates')
       } catch (parseError) {
         console.error('Failed to parse webhook content:', parseError)
         // Return success even if we can't parse candidate data
@@ -149,6 +156,8 @@ serve(async (req) => {
           }
         )
       }
+    } else {
+      console.log('Format 5: No recognized candidate data format found in webhook response')
     }
 
     // If we have candidate data, process it immediately
