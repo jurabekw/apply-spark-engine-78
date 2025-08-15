@@ -11,6 +11,7 @@ import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
 import ResumeSearch from '@/pages/ResumeSearch';
+import LinkedinSearch from '@/pages/LinkedinSearch';
 import { useCandidates, type Candidate } from '@/hooks/useCandidates';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { formatDistanceToNow } from 'date-fns';
@@ -79,6 +80,7 @@ const recentSearches = useMemo(() => {
               { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
               { id: 'upload', label: 'Upload Resumes', icon: Upload },
               { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
+              { id: 'linkedin-search', label: 'LinkedIn Search', icon: Users },
               { id: 'candidates', label: 'Candidates', icon: Users },
               { id: 'forms', label: 'Application Forms', icon: FileText },
             ].map(({ id, label, icon: Icon }) => (
@@ -287,6 +289,8 @@ const recentSearches = useMemo(() => {
         {activeTab === 'upload' && <UploadSection />}
         
         {activeTab === 'hh-search' && <ResumeSearch />}
+        
+        {activeTab === 'linkedin-search' && <LinkedinSearch />}
         
         {activeTab === 'candidates' && <CandidateTable />}
         

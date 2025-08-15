@@ -197,6 +197,39 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_searches: {
+        Row: {
+          candidate_count: number
+          created_at: string
+          experience_level: string
+          id: string
+          job_title: string
+          required_skills: string
+          response: Json
+          user_id: string
+        }
+        Insert: {
+          candidate_count?: number
+          created_at?: string
+          experience_level: string
+          id?: string
+          job_title: string
+          required_skills: string
+          response: Json
+          user_id: string
+        }
+        Update: {
+          candidate_count?: number
+          created_at?: string
+          experience_level?: string
+          id?: string
+          job_title?: string
+          required_skills?: string
+          response?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
