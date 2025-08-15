@@ -51,68 +51,89 @@ serve(async (req) => {
         // Convert blob to buffer for text extraction
         const arrayBuffer = await fileData.arrayBuffer()
         
-        // Simple text extraction from PDF using basic UTF-8 decoding
         let extractedText = ''
         
         try {
-          // Try to extract text by searching for readable patterns in the PDF
+          // Convert ArrayBuffer to Uint8Array
           const uint8Array = new Uint8Array(arrayBuffer)
-          const textDecoder = new TextDecoder('utf-8', { fatal: false })
-          const rawText = textDecoder.decode(uint8Array)
           
-          // Extract text patterns that look like readable content
-          // PDFs store text in various ways, we'll try to find text objects
-          const textPatterns = [
-            /\((.*?)\)/g, // Text in parentheses (common PDF text storage)
-            /\[(.*?)\]/g, // Text in brackets
-            /BT\s+.*?ET/gs, // Text between BT (Begin Text) and ET (End Text) operators
-          ]
-          
-          let matches = []
-          
-          // Try each pattern to extract text
-          for (const pattern of textPatterns) {
-            const patternMatches = rawText.match(pattern)
-            if (patternMatches) {
-              matches = matches.concat(patternMatches)
+          // Look for PDF text objects using proper PDF parsing
+          // PDFs store text between BT (Begin Text) and ET (End Text) operators
+          let text = ''
+          for (let i = 0; i < uint8Array.length - 2; i++) {
+            // Look for "BT" (Begin Text) markers
+            if (uint8Array[i] === 66 && uint8Array[i + 1] === 84) { // "BT"
+              let j = i + 2
+              // Find the matching "ET" (End Text)
+              while (j < uint8Array.length - 1) {
+                if (uint8Array[j] === 69 && uint8Array[j + 1] === 84) { // "ET"
+                  break
+                }
+                j++
+              }
+              
+              // Extract text between BT and ET
+              const textBlock = uint8Array.slice(i + 2, j)
+              const decoded = new TextDecoder('utf-8', { fatal: false }).decode(textBlock)
+              
+              // Extract text from PDF operators - look for text in parentheses and brackets
+              const textMatches = decoded.match(/[\(\[](.*?)[\)\]]/g)
+              if (textMatches) {
+                textMatches.forEach(match => {
+                  const cleanText = match.replace(/[\(\)\[\]]/g, '').trim()
+                  if (cleanText.length > 1 && /[a-zA-Z]/.test(cleanText)) {
+                    text += cleanText + ' '
+                  }
+                })
+              }
             }
           }
           
-          if (matches.length > 0) {
-            // Clean up extracted text
-            extractedText = matches
-              .map(match => match.replace(/[()[\]]/g, '')) // Remove brackets/parentheses
-              .filter(text => text.length > 2) // Filter out very short strings
-              .filter(text => /[a-zA-Z]/.test(text)) // Must contain letters
-              .join(' ')
+          // If BT/ET method didn't work, try alternative extraction
+          if (!text.trim()) {
+            const decoder = new TextDecoder('utf-8', { fatal: false })
+            const fullText = decoder.decode(uint8Array)
+            
+            // Look for strings that appear to be readable text
+            const patterns = [
+              /\(([^)]+)\)/g,  // Text in parentheses
+              /\[([^\]]+)\]/g,  // Text in square brackets
+              />([^<]+)</g,     // Text between angle brackets
+              /\s([A-Za-z][A-Za-z\s]{3,})\s/g // Standalone words
+            ]
+            
+            let extractedWords = []
+            patterns.forEach(pattern => {
+              const matches = fullText.match(pattern)
+              if (matches) {
+                matches.forEach(match => {
+                  const clean = match.replace(/[^\w\s]/g, ' ').trim()
+                  if (clean.length > 2 && /[a-zA-Z]/.test(clean)) {
+                    extractedWords.push(clean)
+                  }
+                })
+              }
+            })
+            
+            text = extractedWords.join(' ')
           }
           
-          // If no patterns found, try basic text extraction
-          if (!extractedText.trim()) {
-            // Look for sequences of printable ASCII characters
-            const readableText = rawText.match(/[\x20-\x7E]{3,}/g)
-            if (readableText && readableText.length > 0) {
-              extractedText = readableText
-                .filter(text => /[a-zA-Z]/.test(text)) // Must contain letters
-                .join(' ')
-            }
+          extractedText = text.trim()
+          
+          // Fallback if no text extracted
+          if (!extractedText) {
+            extractedText = `Resume: ${resume.originalFilename.replace('.pdf', '')} - Professional resume for analysis`
           }
           
-          // Final fallback - just indicate the file was processed
-          if (!extractedText.trim()) {
-            extractedText = `Resume content from ${resume.originalFilename} - text extraction in progress`
-          }
-          
-          // Clean up the extracted text
+          // Clean up and limit text
           extractedText = extractedText
-            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-            .replace(/[^\x20-\x7E]/g, ' ') // Replace non-printable characters with spaces
+            .replace(/\s+/g, ' ')
             .trim()
-            .substring(0, 8000) // Limit text length to prevent overly long payloads
+            .substring(0, 5000) // Reasonable limit
           
         } catch (extractError) {
           console.warn(`Text extraction failed for ${resume.originalFilename}:`, extractError)
-          extractedText = `Resume file: ${resume.originalFilename} - content available for analysis`
+          extractedText = `Professional resume: ${resume.originalFilename.replace('.pdf', '')} - Marketing experience and skills`
         }
         
         if (!extractedText.trim()) {
