@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from '@/components/Header';
+
 import { LinkedinSearchTable } from '@/components/LinkedinSearchTable';
 import { LinkedinSearchHistory } from '@/components/LinkedinSearchHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,9 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 const searchSchema = z.object({
-  job_title: z.string().min(1, "Job title is required"),
-  required_skills: z.string().min(1, "Required skills are required"),
-  experience_level: z.enum(["junior", "mid", "senior"]),
+  job_title: z.string().min(1, "Please describe what candidate you're looking for"),
 });
 
 type SearchFormData = z.infer<typeof searchSchema>;
@@ -32,8 +30,6 @@ const LinkedinSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [lastSearch, setLastSearch] = useState<SearchFormData | null>(null);
-  const [debugMode, setDebugMode] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -41,8 +37,6 @@ const LinkedinSearch = () => {
     resolver: zodResolver(searchSchema),
     defaultValues: {
       job_title: '',
-      required_skills: '',
-      experience_level: 'mid',
     },
   });
 
@@ -148,7 +142,6 @@ const LinkedinSearch = () => {
 
     setIsLoading(true);
     setSearchResults([]);
-    setDebugInfo(null);
 
     const loadingMessages = [
       "Searching LinkedIn profiles...",
@@ -175,8 +168,6 @@ const LinkedinSearch = () => {
         },
         body: JSON.stringify({
           job_title: data.job_title,
-          required_skills: data.required_skills,
-          experience_level: data.experience_level,
           timestamp: new Date().toISOString(),
         }),
       });
@@ -198,8 +189,8 @@ const LinkedinSearch = () => {
         .insert({
           user_id: user.id,
           job_title: data.job_title,
-          required_skills: data.required_skills,
-          experience_level: data.experience_level,
+          required_skills: '',
+          experience_level: 'mid',
           candidate_count: normalizedCandidates.length,
           response: webhookData,
         });
@@ -215,7 +206,6 @@ const LinkedinSearch = () => {
 
       setSearchResults(normalizedCandidates);
       setLastSearch(data);
-      setDebugInfo(webhookData);
 
       toast({
         title: "Search completed!",
@@ -240,13 +230,10 @@ const LinkedinSearch = () => {
 
   const handleRerunSearch = (searchData: { job_title: string; required_skills: string; experience_level: string }) => {
     form.setValue('job_title', searchData.job_title);
-    form.setValue('required_skills', searchData.required_skills);
-    form.setValue('experience_level', searchData.experience_level as "junior" | "mid" | "senior");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
@@ -279,89 +266,35 @@ const LinkedinSearch = () => {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="job_title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Title / Position</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="5 Marketing specialists in Uzbekistan"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                     <FormField
+                       control={form.control}
+                       name="job_title"
+                       render={({ field }) => (
+                         <FormItem>
+                           <FormControl>
+                             <Input 
+                               placeholder="5 Marketing specialists in Uzbekistan"
+                               {...field} 
+                             />
+                           </FormControl>
+                           <FormMessage />
+                         </FormItem>
+                       )}
+                     />
 
-                    <FormField
-                      control={form.control}
-                      name="required_skills"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Required Skills</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="e.g., JavaScript, React, Node.js, Marketing automation, SEO"
-                              className="min-h-20"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="experience_level"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Experience Level</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select experience level" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="junior">Junior (0-2 years)</SelectItem>
-                              <SelectItem value="mid">Mid-level (2-5 years)</SelectItem>
-                              <SelectItem value="senior">Senior (5+ years)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="flex gap-4">
-                      <Button type="submit" disabled={isLoading} className="flex-1">
-                        {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Searching LinkedIn...
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <Search className="h-4 w-4" />
-                            Search LinkedIn
-                          </div>
-                        )}
-                      </Button>
-                      
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setDebugMode(!debugMode)}
-                        className="gap-2"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Debug
-                      </Button>
-                    </div>
+                     <Button type="submit" disabled={isLoading} className="w-full">
+                       {isLoading ? (
+                         <div className="flex items-center gap-2">
+                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                           Searching LinkedIn...
+                         </div>
+                       ) : (
+                         <div className="flex items-center gap-2">
+                           <Search className="h-4 w-4" />
+                           Search LinkedIn
+                         </div>
+                       )}
+                     </Button>
                   </form>
                 </Form>
               </CardContent>
@@ -374,11 +307,9 @@ const LinkedinSearch = () => {
                     Search Results
                     <Badge variant="secondary">{searchResults.length} candidates</Badge>
                   </CardTitle>
-                  <div className="text-sm text-gray-600">
-                    <p><strong>Job Title:</strong> {lastSearch.job_title}</p>
-                    <p><strong>Skills:</strong> {lastSearch.required_skills}</p>
-                    <p><strong>Experience:</strong> {lastSearch.experience_level}</p>
-                  </div>
+                   <div className="text-sm text-gray-600">
+                     <p><strong>Search Query:</strong> {lastSearch.job_title}</p>
+                   </div>
                 </CardHeader>
                 <CardContent>
                   <LinkedinSearchTable candidates={searchResults} loading={isLoading} />
@@ -386,18 +317,6 @@ const LinkedinSearch = () => {
               </Card>
             )}
 
-            {debugMode && debugInfo && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Debug Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-xs">
-                    {JSON.stringify(debugInfo, null, 2)}
-                  </pre>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="history">
