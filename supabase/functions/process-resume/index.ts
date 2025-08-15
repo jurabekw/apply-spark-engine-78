@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
+import { PDFExtract } from "https://esm.sh/pdf.js-extract@0.2.1"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,6 +34,7 @@ serve(async (req) => {
     // Extract text from all uploaded PDFs
     console.log('Extracting text from all PDFs...')
     const resumeTexts = []
+    const pdfExtract = new PDFExtract()
     
     for (const resume of uploadedResumes) {
       try {
@@ -46,30 +48,40 @@ serve(async (req) => {
           throw new Error(`Failed to download file: ${downloadError.message}`)
         }
 
-        // For now, we'll create a signed URL and send that to Make.com
-        // Make.com will handle the PDF text extraction
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from('resumes')
-          .createSignedUrl(resume.filePath, 3600) // 1 hour expiry
-
-        if (signedUrlError) {
-          console.error('Error generating signed URL:', signedUrlError)
-          throw new Error(`Failed to generate signed URL: ${signedUrlError.message}`)
+        // Convert blob to buffer for PDF parsing
+        const arrayBuffer = await fileData.arrayBuffer()
+        const buffer = new Uint8Array(arrayBuffer)
+        
+        console.log(`Extracting text from ${resume.originalFilename}...`)
+        
+        // Extract text from PDF
+        const pdfData = await pdfExtract.extractBuffer(buffer)
+        let extractedText = ''
+        
+        if (pdfData && pdfData.pages) {
+          extractedText = pdfData.pages
+            .map(page => page.content.map(item => item.str).join(' '))
+            .join('\n')
+        }
+        
+        if (!extractedText.trim()) {
+          console.warn(`No text extracted from ${resume.originalFilename}`)
+          extractedText = `Unable to extract text from ${resume.originalFilename}`
         }
         
         resumeTexts.push({
           filename: resume.originalFilename,
-          url: signedUrlData.signedUrl,
+          text: extractedText,
           filePath: resume.filePath
         })
         
-        console.log(`Created signed URL for ${resume.originalFilename}`)
+        console.log(`Successfully extracted ${extractedText.length} characters from ${resume.originalFilename}`)
       } catch (error) {
         console.error(`Error processing ${resume.originalFilename}:`, error)
         // Continue with other resumes even if one fails
         resumeTexts.push({
           filename: resume.originalFilename,
-          url: `Error processing ${resume.originalFilename}`,
+          text: `Error extracting text from ${resume.originalFilename}: ${error.message}`,
           filePath: resume.filePath
         })
       }
@@ -84,7 +96,10 @@ serve(async (req) => {
     const webhookPayload = {
       job_title: jobTitle,
       job_requirements: jobRequirements,
-      resume_urls: resumeTexts.map(r => r.url),
+      resume_texts: resumeTexts.map(r => ({
+        filename: r.filename,
+        text: r.text
+      })),
       batch_id: batchId,
       user_id: userId
     }
