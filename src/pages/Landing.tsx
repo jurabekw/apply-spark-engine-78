@@ -327,7 +327,7 @@ const Landing = () => {
             and discovered top talent with TalentSpark's AI-powered platform.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex justify-center">
             <Button 
               size="lg" 
               variant="secondary" 
@@ -335,14 +335,6 @@ const Landing = () => {
               onClick={() => navigate('/auth?tab=signup')}
             >
               Start Your Free Trial
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="px-10 py-6 text-lg border-white/30 hover:bg-white/10 text-white hover:text-white"
-              onClick={() => navigate('/auth?tab=signin')}
-            >
-              Contact Sales
             </Button>
           </div>
         </div>
