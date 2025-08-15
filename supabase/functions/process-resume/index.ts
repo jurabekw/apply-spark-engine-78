@@ -106,45 +106,45 @@ serve(async (req) => {
             extractedText = ''
           }
         }
-          
-          // Fallback if no text extracted
-          if (!extractedText) {
-            extractedText = `Resume: ${resume.originalFilename.replace('.pdf', '')} - Professional resume for analysis`
-          }
-          
-          // Clean up and limit text
-          extractedText = extractedText
-            .replace(/\s+/g, ' ')
-            .trim()
-            .substring(0, 5000) // Reasonable limit
-          
-        } catch (extractError) {
-          console.warn(`Text extraction failed for ${resume.originalFilename}:`, extractError)
-          extractedText = `Professional resume: ${resume.originalFilename.replace('.pdf', '')} - Marketing experience and skills`
+        
+        // Fallback if no text extracted
+        if (!extractedText) {
+          extractedText = `Resume: ${resume.originalFilename.replace('.pdf', '')} - Professional resume for analysis`
         }
         
-        if (!extractedText.trim()) {
-          console.warn(`No text extracted from ${resume.originalFilename}`)
-          extractedText = `Resume file: ${resume.originalFilename} - ready for processing`
-        }
-        
-        resumeTexts.push({
-          filename: resume.originalFilename,
-          text: extractedText,
-          filePath: resume.filePath
-        })
-        
-        console.log(`Successfully processed ${resume.originalFilename} - extracted ${extractedText.length} characters`)
-      } catch (error) {
-        console.error(`Error processing ${resume.originalFilename}:`, error)
-        // Continue with other resumes even if one fails
-        resumeTexts.push({
-          filename: resume.originalFilename,
-          text: `Resume file: ${resume.originalFilename} - processing completed`,
-          filePath: resume.filePath
-        })
+        // Clean up and limit text
+        extractedText = extractedText
+          .replace(/\s+/g, ' ')
+          .trim()
+          .substring(0, 5000) // Reasonable limit
+          
+      } catch (extractError) {
+        console.warn(`Text extraction failed for ${resume.originalFilename}:`, extractError)
+        extractedText = `Professional resume: ${resume.originalFilename.replace('.pdf', '')} - Marketing experience and skills`
       }
+      
+      if (!extractedText.trim()) {
+        console.warn(`No text extracted from ${resume.originalFilename}`)
+        extractedText = `Resume file: ${resume.originalFilename} - ready for processing`
+      }
+      
+      resumeTexts.push({
+        filename: resume.originalFilename,
+        text: extractedText,
+        filePath: resume.filePath
+      })
+      
+      console.log(`Successfully processed ${resume.originalFilename} - extracted ${extractedText.length} characters`)
+    } catch (error) {
+      console.error(`Error processing ${resume.originalFilename}:`, error)
+      // Continue with other resumes even if one fails
+      resumeTexts.push({
+        filename: resume.originalFilename,
+        text: `Resume file: ${resume.originalFilename} - processing completed`,
+        filePath: resume.filePath
+      })
     }
+  }
     
     console.log(`Processed ${resumeTexts.length} PDFs successfully`)
 
