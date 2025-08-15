@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download, Search } from 'lucide-react';
+import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download, Search, ArrowRight, TrendingUp, Clock, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import UploadSection from '@/components/UploadSection';
@@ -52,12 +52,12 @@ const recentSearches = useMemo(() => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-sm">HR</span>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-ring">
+            <div className="w-6 h-6 bg-white rounded-full"></div>
           </div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -68,134 +68,156 @@ const recentSearches = useMemo(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {[
-            { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-            { id: 'upload', label: 'Upload Resumes', icon: Upload },
-            { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
-            { id: 'candidates', label: 'Candidates', icon: Users },
-            { id: 'forms', label: 'Application Forms', icon: FileText },
-          ].map(({ id, label, icon: Icon }) => (
-            <Button
-              key={id}
-              variant={activeTab === id ? 'default' : 'outline'}
-              onClick={() => setActiveTab(id)}
-              className="flex items-center gap-2"
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Button>
-          ))}
+      <div className="container mx-auto px-6 py-8">
+        {/* Modern Tab Navigation */}
+        <div className="bg-card rounded-xl border border-border/50 p-2 mb-8 shadow-sm">
+          <div className="flex flex-wrap gap-1">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+              { id: 'upload', label: 'Upload Resumes', icon: Upload },
+              { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
+              { id: 'candidates', label: 'Candidates', icon: Users },
+              { id: 'forms', label: 'Application Forms', icon: FileText },
+            ].map(({ id, label, icon: Icon }) => (
+              <Button
+                key={id}
+                variant={activeTab === id ? 'default' : 'ghost'}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-2 relative ${
+                  activeTab === id 
+                    ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md' 
+                    : 'hover:bg-muted'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{label}</span>
+                {activeTab === id && (
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
+                )}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Content based on active tab */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start mb-8 animate-fade-in">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  HR Screening Dashboard
+                <h1 className="text-4xl font-heading font-bold text-foreground mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Welcome Back
                 </h1>
-                <p className="text-gray-600">
-                  Automate candidate screening with AI-powered resume analysis
+                <p className="text-lg text-muted-foreground">
+                  Your AI-powered recruitment dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
-              <Badge variant="secondary" className="px-3 py-1">
-                Welcome back, {user.email}!
+              <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
+                <Clock className="w-4 h-4 mr-2" />
+                Online
               </Badge>
             </div>
 
             <StatsCards />
 
-            <div className="grid lg:grid-cols-2 gap-8">
-              <Card className="hover:shadow-lg transition-shadow duration-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="w-5 h-5 text-indigo-600" />
-                    Quick Upload
-                  </CardTitle>
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="group bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 hover-lift animate-slide-up">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 bg-gradient-to-br from-primary to-accent rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <CardTitle className="text-xl">Quick Upload</CardTitle>
                   <CardDescription>
-                    Upload multiple resumes and get instant AI analysis
+                    Upload multiple resumes and get instant AI analysis with detailed scoring
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button 
                     onClick={() => setActiveTab('upload')} 
-                    className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    variant="default"
+                    className="w-full"
                   >
                     Start Screening Process
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow duration-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-emerald-600" />
-                    Application Forms
-                  </CardTitle>
+              <Card className="group bg-gradient-to-br from-success/5 to-emerald-400/5 border-success/20 hover-lift animate-slide-up" style={{ animationDelay: '100ms' }}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 bg-gradient-to-br from-success to-emerald-500 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Search className="w-6 h-6 text-white" />
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-success transition-colors" />
+                  </div>
+                  <CardTitle className="text-xl">HH Search</CardTitle>
                   <CardDescription>
-                    Create custom forms for candidate submissions
+                    Search external candidate databases with AI-powered matching
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button 
-                    onClick={() => setActiveTab('forms')} 
-                    variant="outline" 
+                    onClick={() => setActiveTab('hh-search')} 
+                    variant="success"
                     className="w-full"
                   >
-                    Build New Form
+                    Search Candidates
                   </Button>
                 </CardContent>
               </Card>
             </div>
 
-<div className="grid lg:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-6">
               {/* Recent HH Searches */}
-              <Card>
+              <Card className="animate-slide-up" style={{ animationDelay: '200ms' }}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Recent HH Searches</CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setActiveTab('hh-search')}>
-                      View all
+                    <CardTitle className="flex items-center gap-2">
+                      <Search className="w-5 h-5 text-success" />
+                      Recent HH Searches
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('hh-search')} className="text-success hover:text-success">
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {loadingSearches ? (
                     <div className="space-y-3">
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+                      ))}
                     </div>
                   ) : recentSearches.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">No HH searches yet.</div>
+                    <div className="text-center py-6">
+                      <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No searches yet</p>
+                    </div>
                   ) : (
-                    <div className="space-y-4">
-                      {recentSearches.map((s) => (
-                        <div key={s.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <Search className="w-4 h-4 text-emerald-600 mt-1" />
-                            <div>
-                              <div className="text-sm font-medium">HH Search — {s.job_title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {s.experience_level} • {s.required_skills} • {s.candidate_count} candidates
+                    <div className="space-y-3">
+                      {recentSearches.map((s, i) => (
+                        <div key={s.id} className="group p-4 bg-muted/30 hover:bg-muted/50 rounded-lg border border-border/50 hover:border-success/30 transition-all duration-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground mb-1">{s.job_title}</div>
+                              <div className="text-xs text-muted-foreground mb-2">
+                                {s.experience_level} • {s.required_skills}
                               </div>
+                              <Badge variant="success" className="text-xs">{s.candidate_count} found</Badge>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary">HH Search</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(s.created_at), { addSuffix: true })}
-                            </span>
-                            <Button size="sm" variant="outline" onClick={() => { setSelectedSearch(s); setSearchModalOpen(true); }}>
-                              View
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(s.created_at), { addSuffix: true })}
+                              </span>
+                              <Button size="xs" variant="ghost" onClick={() => { setSelectedSearch(s); setSearchModalOpen(true); }}>
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -205,45 +227,52 @@ const recentSearches = useMemo(() => {
               </Card>
 
               {/* Recent Resume Uploads */}
-              <Card>
+              <Card className="animate-slide-up" style={{ animationDelay: '300ms' }}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Recent Resume Uploads</CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setActiveTab('candidates')}>
-                      View all
+                    <CardTitle className="flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-primary" />
+                      Recent Uploads
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('candidates')} className="text-primary hover:text-primary">
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {loadingCandidates ? (
                     <div className="space-y-3">
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
-                      <div className="h-10 rounded-md bg-muted animate-pulse" />
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+                      ))}
                     </div>
                   ) : recentUploads.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">No resume uploads yet.</div>
+                    <div className="text-center py-6">
+                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No uploads yet</p>
+                    </div>
                   ) : (
-                    <div className="space-y-4">
-                      {recentUploads.map((c: any) => (
-                        <div key={c.id} className="flex justify-between items-start p-3 bg-muted/50 rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <Upload className="w-4 h-4 text-indigo-600 mt-1" />
-                            <div>
-                              <div className="text-sm font-medium">Resume uploaded — {c.name || c.original_filename || 'Unknown'}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {(c.position || 'Candidate')} • {c.status}{typeof c.ai_score === 'number' ? ` • AI Score ${c.ai_score}` : ''}
+                    <div className="space-y-3">
+                      {recentUploads.map((c: any, i) => (
+                        <div key={c.id} className="group p-4 bg-muted/30 hover:bg-muted/50 rounded-lg border border-border/50 hover:border-primary/30 transition-all duration-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground mb-1">{c.name || c.original_filename || 'Unknown'}</div>
+                              <div className="text-xs text-muted-foreground mb-2">
+                                {c.position || 'Candidate'} • {c.status}
                               </div>
+                              {typeof c.ai_score === 'number' && (
+                                <Badge variant="brand" className="text-xs">{c.ai_score}% match</Badge>
+                              )}
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary">Upload</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
-                            </span>
-                            <Button size="sm" variant="outline" onClick={() => { setSelectedCandidate(c); setCandidateModalOpen(true); }}>
-                              View
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                              </span>
+                              <Button size="xs" variant="ghost" onClick={() => { setSelectedCandidate(c); setCandidateModalOpen(true); }}>
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))}

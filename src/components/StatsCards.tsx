@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, TrendingUp, Clock } from 'lucide-react';
+import { Users, FileText, TrendingUp, Clock, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import { useJobPostings } from '@/hooks/useJobPostings';
 
@@ -24,52 +24,77 @@ const StatsCards = () => {
       value: totalCandidates.toString(),
       description: 'All candidates in database',
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      gradient: 'from-blue-500 to-blue-600',
+      bgGradient: 'from-blue-50 to-blue-100',
+      change: '+12%',
+      trend: 'up' as const,
     },
     {
-      title: 'Active Job Postings',
+      title: 'Active Positions',
       value: jobPostings.filter(j => j.status === 'active').length.toString(),
       description: 'Currently open positions',
       icon: FileText,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      gradient: 'from-emerald-500 to-emerald-600',
+      bgGradient: 'from-emerald-50 to-emerald-100',
+      change: '+3',
+      trend: 'up' as const,
     },
     {
       title: 'Average AI Score',
       value: `${averageScore}%`,
-      description: 'Average candidate match score',
+      description: 'Candidate match quality',
       icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      gradient: 'from-primary to-accent',
+      bgGradient: 'from-primary/10 to-accent/10',
+      change: '+5%',
+      trend: 'up' as const,
     },
     {
       title: 'This Week',
       value: recentCandidates.toString(),
-      description: 'New candidates this week',
+      description: 'New candidates added',
       icon: Clock,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      gradient: 'from-amber-500 to-orange-500',
+      bgGradient: 'from-amber-50 to-orange-100',
+      change: recentCandidates > 5 ? '+↗' : '+2',
+      trend: recentCandidates > 5 ? 'up' : 'steady' as const,
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {stat.title}
-            </CardTitle>
-            <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+        <Card 
+          key={index} 
+          className="group cursor-pointer border-border/50 bg-gradient-to-br from-card to-card/50 hover-lift animate-fade-in"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {stat.title}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-heading font-bold text-foreground">
+                  {stat.value}
+                </span>
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                  stat.trend === 'up' 
+                    ? 'bg-success/10 text-success' 
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  {stat.trend === 'up' && <ArrowUp className="w-3 h-3" />}
+                  {stat.change}
+                </div>
+              </div>
+            </div>
+            <div className={`relative p-3 rounded-xl bg-gradient-to-br ${stat.bgGradient} group-hover:scale-110 transition-transform duration-200`}>
+              <stat.icon className={`w-6 h-6 bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-10 rounded-xl group-hover:opacity-20 transition-opacity`}></div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
-              {stat.value}
-            </div>
-            <p className="text-sm text-gray-500">
+          <CardContent className="pt-2">
+            <p className="text-sm text-muted-foreground">
               {stat.description}
             </p>
           </CardContent>
