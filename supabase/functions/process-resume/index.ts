@@ -135,16 +135,16 @@ serve(async (req) => {
       })
       
       console.log(`Successfully processed ${resume.originalFilename} - extracted ${extractedText.length} characters`)
-    } catch (error) {
-      console.error(`Error processing ${resume.originalFilename}:`, error)
-      // Continue with other resumes even if one fails
-      resumeTexts.push({
-        filename: resume.originalFilename,
-        text: `Resume file: ${resume.originalFilename} - processing completed`,
-        filePath: resume.filePath
-      })
+      } catch (error) {
+        console.error(`Error processing ${resume.originalFilename}:`, error)
+        // Continue with other resumes even if one fails
+        resumeTexts.push({
+          filename: resume.originalFilename,
+          text: `Resume file: ${resume.originalFilename} - processing completed`,
+          filePath: resume.filePath
+        })
+      }
     }
-  }
     
     console.log(`Processed ${resumeTexts.length} PDFs successfully`)
 
@@ -351,6 +351,6 @@ serve(async (req) => {
           'Content-Type': 'application/json' 
         } 
       }
-    )
+    );
   }
 })
