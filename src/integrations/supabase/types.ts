@@ -14,10 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_batches: {
+        Row: {
+          created_at: string
+          id: string
+          job_requirements: string
+          job_title: string
+          total_candidates: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_requirements: string
+          job_title: string
+          total_candidates?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_requirements?: string
+          job_title?: string
+          total_candidates?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       candidates: {
         Row: {
           ai_analysis: Json | null
           ai_score: number | null
+          batch_id: string | null
           cover_letter: string | null
           created_at: string
           education: string | null
@@ -40,6 +71,7 @@ export type Database = {
         Insert: {
           ai_analysis?: Json | null
           ai_score?: number | null
+          batch_id?: string | null
           cover_letter?: string | null
           created_at?: string
           education?: string | null
@@ -62,6 +94,7 @@ export type Database = {
         Update: {
           ai_analysis?: Json | null
           ai_score?: number | null
+          batch_id?: string | null
           cover_letter?: string | null
           created_at?: string
           education?: string | null
