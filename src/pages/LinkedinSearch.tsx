@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { LinkedinSearchTable } from '@/components/LinkedinSearchTable';
+import ResumeSearchTable from '@/components/ResumeSearchTable';
 import { LinkedinSearchHistory } from '@/components/LinkedinSearchHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
@@ -40,203 +40,169 @@ const LinkedinSearch = () => {
     },
   });
 
-  const normalizeCandidates = (response: any): any[] => {
-    if (!response) return [];
-
-    console.log('Raw webhook response:', response);
-    console.log('Response type:', typeof response);
-
-    let processedResponse = response;
+  // Use the proven normalization logic from HH Search
+  const normalizeCandidates = (payload: any): any[] => {
+    const results: any[] = [];
     
-    // Handle case where response is a string containing multiple JSON objects separated by tabs/newlines
-    if (typeof response === 'string') {
-      console.log('Processing string response...');
-      try {
-        // Split by tab characters first (most likely separator for your webhook)
-        let jsonObjects = response.split('\t').filter(part => part.trim());
-        
-        // If no tabs, try splitting by double newlines
-        if (jsonObjects.length === 1) {
-          jsonObjects = response.split('\n\n').filter(part => part.trim());
-        }
-        
-        // If still one part, try splitting by single newlines
-        if (jsonObjects.length === 1) {
-          jsonObjects = response.split('\n').filter(part => part.trim());
-        }
-        
-        console.log('Found JSON objects:', jsonObjects.length);
-        
-        let allCandidates: any[] = [];
-        
-        for (const jsonStr of jsonObjects) {
-          try {
-            const trimmed = jsonStr.trim();
-            if (trimmed) {
-              console.log('Parsing JSON object:', trimmed.substring(0, 100) + '...');
-              const parsed = JSON.parse(trimmed);
-              
-              if (parsed.candidates && Array.isArray(parsed.candidates)) {
-                console.log(`Found ${parsed.candidates.length} candidates in this object`);
-                allCandidates.push(...parsed.candidates);
-              }
-            }
-          } catch (error) {
-            console.warn('Failed to parse JSON object:', error, jsonStr.substring(0, 100));
-          }
-        }
-        
-        console.log('Total candidates extracted:', allCandidates.length);
-        
-        if (allCandidates.length > 0) {
-          processedResponse = allCandidates;
-        }
-      } catch (error) {
-        console.warn('Failed to process string response:', error);
-      }
-    }
-    
-    // Handle case where response is an array containing objects with 'output' property
-    else if (Array.isArray(response)) {
-      console.log('Processing array response...');
-      let allCandidates: any[] = [];
-      
-      for (const item of response) {
-        if (item && typeof item === 'object' && item.output) {
-          if (Array.isArray(item.output)) {
-            // Handle array of JSON strings
-            for (const jsonString of item.output) {
-              if (typeof jsonString === 'string') {
-                try {
-                  const cleanedJson = jsonString.trim();
-                  const parsedObject = JSON.parse(cleanedJson);
-                  
-                  if (parsedObject.candidates && Array.isArray(parsedObject.candidates)) {
-                    allCandidates.push(...parsedObject.candidates);
-                  } else if (Array.isArray(parsedObject)) {
-                    allCandidates.push(...parsedObject);
-                  } else {
-                    allCandidates.push(parsedObject);
-                  }
-                } catch (error) {
-                  console.warn('Failed to parse JSON string in output array:', error, jsonString);
-                }
-              }
-            }
-          } else if (typeof item.output === 'string') {
-            // Handle single JSON string (your webhook format)
-            try {
-              const parsed = JSON.parse(item.output);
-              if (parsed.candidates && Array.isArray(parsed.candidates)) {
-                allCandidates.push(...parsed.candidates);
-              }
-            } catch (error) {
-              console.warn('Failed to parse output string:', error);
-            }
-          }
-        } else {
-          allCandidates.push(item);
-        }
-      }
-      
-      processedResponse = allCandidates;
-    }
-    
-    // Handle case where response is a single object with candidates property
-    else if (response && typeof response === 'object' && !Array.isArray(response)) {
-      console.log('Processing object response...');
-      if (response.candidates && Array.isArray(response.candidates)) {
-        processedResponse = response.candidates;
-      } else if (response.title || response.name || response.AI_score) {
-        processedResponse = [response];
-      }
-    }
-
-    const toStr = (val: any): string => {
-      if (typeof val === 'string') return val;
-      if (typeof val === 'object') return JSON.stringify(val);
-      return String(val || '');
+    const toArray = (val: any): any[] => {
+      if (!val) return [];
+      return Array.isArray(val) ? val : [val];
     };
-
-    const toArray = (val: any): string[] => {
-      if (Array.isArray(val)) return val.map(toStr);
-      if (typeof val === 'string') {
-        try {
-          const parsed = JSON.parse(val);
-          return Array.isArray(parsed) ? parsed.map(toStr) : [val];
-        } catch {
-          return val.split(',').map(s => s.trim()).filter(Boolean);
-        }
-      }
-      return val ? [toStr(val)] : [];
-    };
-
+    
     const parseMaybeJson = (val: any): any => {
-      if (typeof val === 'string') {
+      if (typeof val === "string") {
         try {
           return JSON.parse(val);
         } catch {
-          return val;
+          // Try NDJSON
+          const lines = val.split("\n").map(l => l.trim()).filter(Boolean);
+          if (lines.length > 1) {
+            const parsed = lines.map(l => {
+              try {
+                return JSON.parse(l);
+              } catch {
+                return null;
+              }
+            }).filter(Boolean);
+            return parsed.length ? parsed : val;
+          }
         }
       }
       return val;
     };
-
-    const toSkills = (val: any): string[] => {
-      const parsed = parseMaybeJson(val);
-      if (Array.isArray(parsed)) return parsed.map(toStr);
-      if (typeof parsed === 'string') {
-        return parsed.split(/[,;]/).map(s => s.trim()).filter(Boolean);
-      }
-      return [];
-    };
-
+    
     const isCandidateLike = (obj: any): boolean => {
-      return obj && (
-        obj.hasOwnProperty('title') ||
-        obj.hasOwnProperty('name') ||
-        obj.hasOwnProperty('AI_score') ||
-        obj.hasOwnProperty('ai_score') ||
-        obj.hasOwnProperty('score')
-      );
+      if (!obj || typeof obj !== "object") return false;
+      return Boolean(obj.title || obj.name || obj.alternate_url || obj.linkedin_url || obj.AI_score || obj.ai_score || obj.experience || obj.key_skills);
     };
-
-    const extractCandidates = (obj: any, path: string = ''): any[] => {
-      if (!obj || typeof obj !== 'object') return [];
-
-      let candidates: any[] = [];
-
-      if (Array.isArray(obj)) {
-        obj.forEach((item, index) => {
-          if (isCandidateLike(item)) {
-            candidates.push(item);
+    
+    const toCandidate = (obj: any): any | null => {
+      if (!obj || typeof obj !== "object") return null;
+      
+      // Handle nested payload structures from webhook
+      const candidateObj = obj.content?.data ?? obj.content ?? obj.output?.data ?? obj.output ?? obj.data ?? obj;
+      
+      // For LinkedIn webhook, handle the case where output is a JSON string
+      let actualCandidate = candidateObj;
+      if (typeof candidateObj.output === 'string') {
+        try {
+          const parsed = JSON.parse(candidateObj.output);
+          if (parsed.candidates && Array.isArray(parsed.candidates)) {
+            // Return the first candidate from the parsed output
+            actualCandidate = parsed.candidates[0] || candidateObj;
           } else {
-            candidates.push(...extractCandidates(item, `${path}[${index}]`));
+            actualCandidate = parsed;
           }
-        });
-      } else {
-        if (isCandidateLike(obj)) {
-          candidates.push(obj);
-        } else {
-          Object.entries(obj).forEach(([key, value]) => {
-            candidates.push(...extractCandidates(value, path ? `${path}.${key}` : key));
-          });
+        } catch {
+          actualCandidate = candidateObj;
+        }
+      }
+      
+      if (!isCandidateLike(actualCandidate)) return null;
+      
+      const skillsRaw = (actualCandidate.key_skills ?? actualCandidate.skills) as any;
+      const key_skills = Array.isArray(skillsRaw) 
+        ? skillsRaw.map((s: any) => String(s)) 
+        : typeof skillsRaw === "string" 
+          ? skillsRaw.split(",").map(s => s.trim()).filter(Boolean) 
+          : [];
+      
+      const scoreRaw = actualCandidate.AI_score ?? actualCandidate.ai_score ?? actualCandidate.score;
+      
+      return {
+        title: String(actualCandidate.title ?? actualCandidate.name ?? "LinkedIn Candidate"),
+        experience: String(actualCandidate.experience ?? actualCandidate.experience_years ?? ""),
+        education_level: String(actualCandidate.education_level ?? actualCandidate.education ?? ""),
+        AI_score: scoreRaw != null ? String(scoreRaw) : "0",
+        key_skills,
+        alternate_url: String(
+          actualCandidate.alternate_url ??
+          actualCandidate.linkedin_url ??
+          actualCandidate.url ??
+          actualCandidate.link ??
+          actualCandidate.profile_url ??
+          ""
+        ),
+        score_reasoning: actualCandidate.score_reasoning ?? actualCandidate.reasoning ?? actualCandidate.ai_reasoning ?? undefined,
+        strengths: Array.isArray(actualCandidate.strengths) ? actualCandidate.strengths.map((s: any) => String(s)) : undefined,
+        areas_for_improvement: Array.isArray(actualCandidate.areas_for_improvement) ? actualCandidate.areas_for_improvement.map((s: any) => String(s)) : undefined,
+        recommendations: actualCandidate.recommendations ?? actualCandidate.recommendation ?? undefined,
+      };
+    };
+    
+    const visit = (node: any) => {
+      if (!node) return;
+      node = parseMaybeJson(node);
+      
+      if (Array.isArray(node)) {
+        node.forEach(visit);
+        return;
+      }
+      
+      if (typeof node !== "object") return;
+
+      // Handle LinkedIn webhook specific structure
+      if (node.output && typeof node.output === 'string') {
+        try {
+          const parsed = JSON.parse(node.output);
+          if (parsed.candidates && Array.isArray(parsed.candidates)) {
+            parsed.candidates.forEach(visit);
+            return;
+          }
+          visit(parsed);
+          return;
+        } catch {
+          // Continue with normal processing
         }
       }
 
-      return candidates;
+      // Common top-level shapes
+      if (node.status === "success" && node.candidates) {
+        toArray(parseMaybeJson(node.candidates)).forEach(visit);
+        return;
+      }
+      if (node.candidates) {
+        toArray(parseMaybeJson(node.candidates)).forEach(visit);
+        return;
+      }
+      if (Array.isArray((node as any).bundles)) {
+        (node as any).bundles.forEach((b: any) => visit(b));
+        return;
+      }
+      if (Array.isArray((node as any).result)) {
+        (node as any).result.forEach(visit);
+        return;
+      }
+      if (Array.isArray((node as any).items)) {
+        (node as any).items.forEach(visit);
+        return;
+      }
+
+      // Try to interpret current node as a candidate
+      const cand = toCandidate(node);
+      if (cand) {
+        results.push(cand);
+        return;
+      }
+
+      // Objects with numeric keys or nested collections
+      const values = Object.values(node);
+      if (values.length) values.forEach(visit);
     };
-
-    const rawCandidates = extractCandidates(processedResponse);
-
-    return rawCandidates.map((candidate, index) => ({
-      title: toStr(candidate.title || candidate.name || `Candidate ${index + 1}`),
-      experience: toStr(candidate.experience || candidate.experience_level || candidate.seniority || ''),
-      AI_score: toStr(candidate.AI_score || candidate.ai_score || candidate.score || '0'),
-      key_skills: toSkills(candidate.key_skills || candidate.skills || candidate.technologies || []),
-      alternate_url: toStr(candidate.alternate_url || candidate.linkedin_url || candidate.profile_url || candidate.url || ''),
-      raw_data: candidate
-    }));
+    
+    try {
+      visit(payload);
+    } catch (e) {
+      console.error("Failed to normalize LinkedIn candidates:", e, payload);
+    }
+    
+    console.log('LinkedIn normalization results:', {
+      input: payload,
+      extracted: results.length,
+      candidates: results
+    });
+    
+    return results;
   };
 
   const onSubmit = async (data: SearchFormData) => {
@@ -313,6 +279,90 @@ const LinkedinSearch = () => {
           description: "Search completed but couldn't save to history.",
           variant: "destructive",
         });
+      }
+
+      // Save LinkedIn candidates to candidates table like HH Search does
+      if (normalizedCandidates.length > 0) {
+        const parseScore = (score: string): number => {
+          const m = score.match(/\d{1,3}/);
+          if (!m) return 0;
+          return Math.min(100, parseInt(m[0]!, 10));
+        };
+
+        // Deduplicate by URL for DB only
+        const normUrl = (u: string) => (u || "").trim().replace(/\/$/, "").toLowerCase();
+        const seen = new Set<string>();
+        const uniqueForDb = normalizedCandidates.filter(c => {
+          const u = normUrl(c.alternate_url);
+          if (!u) return true; // keep if no URL (can't dedupe)
+          if (seen.has(u)) return false;
+          seen.add(u);
+          return true;
+        });
+
+        const toRecord = (candidate: typeof normalizedCandidates[number]) => ({
+          user_id: user.id,
+          name: candidate.title || 'LinkedIn Candidate',
+          email: null as any,
+          phone: null as any,
+          position: candidate.title || null,
+          experience_years: candidate.experience ? (parseInt(candidate.experience.match(/\d+/)?.[0] || '0') || null) : null,
+          skills: candidate.key_skills || [],
+          education: candidate.education_level || null,
+          work_history: null as any,
+          resume_file_path: null as any,
+          original_filename: null as any,
+          ai_score: parseScore(candidate.AI_score),
+          ai_analysis: {
+            linkedin_url: candidate.alternate_url,
+            experience: candidate.experience,
+            education_level: candidate.education_level,
+            skills: candidate.key_skills,
+            score_reasoning: candidate.score_reasoning,
+            strengths: candidate.strengths,
+            areas_for_improvement: candidate.areas_for_improvement,
+            recommendations: candidate.recommendations,
+          },
+          status: 'new',
+          source: 'linkedin_search',
+        });
+
+        const records = uniqueForDb.map(toRecord);
+        const chunkSize = 50;
+        let inserted = 0;
+        let failed = 0;
+
+        // Helper to insert a single record when a batch fails
+        const insertIndividually = async (batch: any[]) => {
+          for (const rec of batch) {
+            const { error } = await supabase.from('candidates').insert(rec);
+            if (error) {
+              console.error('Insert failed for record:', rec, error);
+              failed += 1;
+            } else {
+              inserted += 1;
+            }
+          }
+        };
+
+        for (let i = 0; i < records.length; i += chunkSize) {
+          const batch = records.slice(i, i + chunkSize);
+          const { error } = await supabase.from('candidates').insert(batch);
+          if (error) {
+            console.warn('Batch insert failed, falling back to per-row inserts:', error);
+            await insertIndividually(batch);
+          } else {
+            inserted += batch.length;
+          }
+        }
+
+        toast({
+          title: 'LinkedIn candidates saved',
+          description: `${inserted}/${records.length} saved. All ${normalizedCandidates.length} shown in results.`,
+        });
+
+        // Refresh the main candidates view on dashboard
+        window.dispatchEvent(new CustomEvent('candidatesUpdated'));
       }
 
       setSearchResults(normalizedCandidates);
@@ -423,7 +473,7 @@ const LinkedinSearch = () => {
                    </div>
                 </CardHeader>
                 <CardContent>
-                  <LinkedinSearchTable candidates={searchResults} loading={isLoading} />
+                  <ResumeSearchTable candidates={searchResults} loading={isLoading} />
                 </CardContent>
               </Card>
             )}
