@@ -102,23 +102,36 @@ const LinkedinSearch = () => {
       let allCandidates: any[] = [];
       
       for (const item of response) {
-        if (item && typeof item === 'object' && item.output && Array.isArray(item.output)) {
-          for (const jsonString of item.output) {
-            if (typeof jsonString === 'string') {
-              try {
-                const cleanedJson = jsonString.trim();
-                const parsedObject = JSON.parse(cleanedJson);
-                
-                if (parsedObject.candidates && Array.isArray(parsedObject.candidates)) {
-                  allCandidates.push(...parsedObject.candidates);
-                } else if (Array.isArray(parsedObject)) {
-                  allCandidates.push(...parsedObject);
-                } else {
-                  allCandidates.push(parsedObject);
+        if (item && typeof item === 'object' && item.output) {
+          if (Array.isArray(item.output)) {
+            // Handle array of JSON strings
+            for (const jsonString of item.output) {
+              if (typeof jsonString === 'string') {
+                try {
+                  const cleanedJson = jsonString.trim();
+                  const parsedObject = JSON.parse(cleanedJson);
+                  
+                  if (parsedObject.candidates && Array.isArray(parsedObject.candidates)) {
+                    allCandidates.push(...parsedObject.candidates);
+                  } else if (Array.isArray(parsedObject)) {
+                    allCandidates.push(...parsedObject);
+                  } else {
+                    allCandidates.push(parsedObject);
+                  }
+                } catch (error) {
+                  console.warn('Failed to parse JSON string in output array:', error, jsonString);
                 }
-              } catch (error) {
-                console.warn('Failed to parse JSON string in output array:', error, jsonString);
               }
+            }
+          } else if (typeof item.output === 'string') {
+            // Handle single JSON string (your webhook format)
+            try {
+              const parsed = JSON.parse(item.output);
+              if (parsed.candidates && Array.isArray(parsed.candidates)) {
+                allCandidates.push(...parsed.candidates);
+              }
+            } catch (error) {
+              console.warn('Failed to parse output string:', error);
             }
           }
         } else {
