@@ -144,7 +144,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Job Title</TableHead>
+                    <TableHead>Search Query</TableHead>
                     <TableHead>Required Skills</TableHead>
                     <TableHead>Experience Level</TableHead>
                     <TableHead>Results</TableHead>
