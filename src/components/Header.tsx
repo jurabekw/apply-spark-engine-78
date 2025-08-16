@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Settings, User, Bell, LogOut, Search } from 'lucide-react';
+import { Settings, User, Bell, LogOut, Search, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
@@ -35,6 +35,14 @@ const Header = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Analytics */}
+            <Link to="/analytics">
+              <Button variant="ghost" size="sm" className="hidden sm:flex">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
+            </Link>
+            
             {/* Mobile Search Button */}
             <Button variant="ghost" size="icon" className="md:hidden">
               <Search className="w-4 h-4" />
