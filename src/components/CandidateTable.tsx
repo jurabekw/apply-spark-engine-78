@@ -386,6 +386,24 @@ const CandidateTable = () => {
                         </Button>
                         
                         <div className="flex gap-1">
+                          {candidate.source === 'linkedin_search' && candidate.ai_analysis?.linkedin_url && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              asChild
+                              className="text-muted-foreground hover:text-blue-600"
+                            >
+                              <a 
+                                href={candidate.ai_analysis.linkedin_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                title="View LinkedIn Profile"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            </Button>
+                          )}
+                          
                           {candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url && (
                             <Button 
                               variant="ghost" 
