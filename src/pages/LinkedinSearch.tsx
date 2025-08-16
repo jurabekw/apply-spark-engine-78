@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
-import { LinkedinSearchHistory } from '@/components/LinkedinSearchHistory';
+import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
@@ -135,20 +135,28 @@ const LinkedinSearch = () => {
       node = parseMaybeJson(node);
       
       if (Array.isArray(node)) {
-        node.forEach(visit);
+        // Handle array of objects with output properties (LinkedIn webhook format)
+        node.forEach(item => {
+          if (item && typeof item === 'object' && item.output) {
+            try {
+              const parsed = JSON.parse(item.output);
+              visit(parsed);
+            } catch {
+              visit(item);
+            }
+          } else {
+            visit(item);
+          }
+        });
         return;
       }
       
       if (typeof node !== "object") return;
 
-      // Handle LinkedIn webhook specific structure
+      // Handle single object with output property
       if (node.output && typeof node.output === 'string') {
         try {
           const parsed = JSON.parse(node.output);
-          if (parsed.candidates && Array.isArray(parsed.candidates)) {
-            parsed.candidates.forEach(visit);
-            return;
-          }
           visit(parsed);
           return;
         } catch {

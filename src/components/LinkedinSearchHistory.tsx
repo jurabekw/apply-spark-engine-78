@@ -1,29 +1,32 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Eye, RotateCcw, Search, Trash } from 'lucide-react';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Search, Eye, Trash2, Clock, Trash } from 'lucide-react';
 import { useLinkedinSearchHistory } from '@/hooks/useLinkedinSearchHistory';
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LinkedinSearchResultsModal } from './LinkedinSearchResultsModal';
 
 interface LinkedinSearchHistoryProps {
   onRerunSearch?: (search: { job_title: string; required_skills: string; experience_level: string }) => void;
 }
 
-const getExperienceLevelLabel = (level: string): string => {
-  switch (level) {
-    case 'junior': return 'Junior (0-2 years)';
-    case 'mid': return 'Mid-level (2-5 years)';
-    case 'senior': return 'Senior (5+ years)';
-    default: return level || 'Not specified';
-  }
+const getExperienceLevelLabel = (level: string) => {
+  const labels = {
+    'noExperience': 'No Experience',
+    'between1And3': '1-3 Years', 
+    'between3And6': '3-6 Years',
+    'moreThan6': '6+ Years',
+    'junior': 'Junior (0-2 years)',
+    'mid': 'Mid-level (2-5 years)',
+    'senior': 'Senior (5+ years)'
+  };
+  return labels[level as keyof typeof labels] || level;
 };
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -33,11 +36,18 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ onRerunSearch }) => {
+const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
   const { searches, loading, deleteSearch, deleteAllSearches } = useLinkedinSearchHistory();
-  const [searchFilter, setSearchFilter] = useState('');
+
+  // State to handle viewing saved results
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
   const [selectedSearch, setSelectedSearch] = useState<any>(null);
-  const [showResultsModal, setShowResultsModal] = useState(false);
+
+  const filteredSearches = searches.filter(search =>
+    search.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    search.required_skills.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleRerunSearch = (search: any) => {
     if (onRerunSearch) {
@@ -51,81 +61,86 @@ export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ on
 
   const handleViewResults = (search: any) => {
     setSelectedSearch(search);
-    setShowResultsModal(true);
+    setIsResultsOpen(true);
   };
 
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>LinkedIn Search History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <span className="ml-2 text-muted-foreground">Loading search history...</span>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const filteredSearches = searches.filter(search =>
-    search.job_title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    search.required_skills.toLowerCase().includes(searchFilter.toLowerCase())
-  );
-
   return (
     <>
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle>LinkedIn Search History</CardTitle>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search history..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  className="pl-10 w-full sm:w-64"
-                />
-              </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-muted-foreground" />
+              <CardTitle>LinkedIn Search History ({filteredSearches.length})</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
               {searches.length > 0 && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Trash className="h-4 w-4" />
-                      Clear All
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Clear All LinkedIn Search History</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all your LinkedIn search history. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={deleteAllSearches} className="bg-red-600 hover:bg-red-700">
+                <>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="gap-2">
+                        <Trash className="w-4 h-4" />
                         Delete All
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete All LinkedIn Search History</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete all LinkedIn search history? This action cannot be undone and will remove all {searches.length} entries.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={deleteAllSearches}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          Delete All
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <div className="relative w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search history..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {filteredSearches.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              {searches.length === 0 ? "No LinkedIn searches yet." : "No searches match your filter."}
+            <div className="text-center py-8">
+              <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                {searches.length === 0 ? 'No LinkedIn search history yet' : 'No matching searches'}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {searches.length === 0 
+                  ? "Your LinkedIn search history will appear here after you run your first search."
+                  : "Try adjusting your search terms."
+                }
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -133,8 +148,8 @@ export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ on
                 <TableHeader>
                   <TableRow>
                     <TableHead>Job Title</TableHead>
-                    <TableHead>Skills</TableHead>
-                    <TableHead>Experience</TableHead>
+                    <TableHead>Required Skills</TableHead>
+                    <TableHead>Experience Level</TableHead>
                     <TableHead>Results</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
@@ -142,11 +157,22 @@ export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ on
                 </TableHeader>
                 <TableBody>
                   {filteredSearches.map((search) => (
-                    <TableRow key={search.id}>
-                      <TableCell className="font-medium">{search.job_title}</TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate" title={search.required_skills}>
-                          {search.required_skills}
+                    <TableRow key={search.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div className="font-medium">{search.job_title}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {search.required_skills.split(',').slice(0, 3).map((skill, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {skill.trim()}
+                            </Badge>
+                          ))}
+                          {search.required_skills.split(',').length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{search.required_skills.split(',').length - 3}
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -155,39 +181,49 @@ export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ on
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">
-                          {search.candidate_count} candidates
-                        </Badge>
+                        <span className="font-medium">{search.candidate_count}</span> candidates
                       </TableCell>
-                      <TableCell>{formatDate(search.created_at)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(search.created_at)}
+                      </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
+                          <Button 
+                            variant="ghost" 
                             size="sm"
                             onClick={() => handleViewResults(search)}
-                            className="gap-1"
+                            title="View saved results"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
-                          {onRerunSearch && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRerunSearch(search)}
-                              className="gap-1"
-                            >
-                              <RotateCcw className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteSearch(search.id)}
-                            className="gap-1 text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete LinkedIn Search History</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this LinkedIn search history entry? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteSearch(search.id)}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -200,10 +236,12 @@ export const LinkedinSearchHistory: React.FC<LinkedinSearchHistoryProps> = ({ on
       </Card>
 
       <LinkedinSearchResultsModal
-        isOpen={showResultsModal}
-        onClose={() => setShowResultsModal(false)}
+        isOpen={isResultsOpen}
         search={selectedSearch}
+        onClose={() => setIsResultsOpen(false)}
       />
     </>
   );
 };
+
+export default LinkedinSearchHistory;
