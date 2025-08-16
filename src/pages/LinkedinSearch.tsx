@@ -15,7 +15,6 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
 import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -415,83 +414,67 @@ const LinkedinSearch = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="search" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="search" className="gap-2">
-              <Search className="h-4 w-4" />
-              Search
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <Clock className="h-4 w-4" />
-              History
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>What candidate are you looking for?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                   <FormField
+                     control={form.control}
+                     name="job_title"
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormControl>
+                           <Input 
+                             placeholder="5 Marketing specialists in Uzbekistan"
+                             {...field} 
+                           />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
 
-          <TabsContent value="search" className="space-y-6">
+                   <Button type="submit" disabled={isLoading} className="w-full">
+                     {isLoading ? (
+                       <div className="flex items-center gap-2">
+                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                         Searching LinkedIn...
+                       </div>
+                     ) : (
+                       <div className="flex items-center gap-2">
+                         <Search className="h-4 w-4" />
+                         Search LinkedIn
+                       </div>
+                     )}
+                   </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+
+          {lastSearch && (
             <Card>
               <CardHeader>
-                <CardTitle>What candidate are you looking for?</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Search Results
+                  <Badge variant="secondary">{searchResults.length} candidates</Badge>
+                </CardTitle>
+                 <div className="text-sm text-gray-600">
+                   <p><strong>Search Query:</strong> {lastSearch.job_title}</p>
+                 </div>
               </CardHeader>
               <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                     <FormField
-                       control={form.control}
-                       name="job_title"
-                       render={({ field }) => (
-                         <FormItem>
-                           <FormControl>
-                             <Input 
-                               placeholder="5 Marketing specialists in Uzbekistan"
-                               {...field} 
-                             />
-                           </FormControl>
-                           <FormMessage />
-                         </FormItem>
-                       )}
-                     />
-
-                     <Button type="submit" disabled={isLoading} className="w-full">
-                       {isLoading ? (
-                         <div className="flex items-center gap-2">
-                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                           Searching LinkedIn...
-                         </div>
-                       ) : (
-                         <div className="flex items-center gap-2">
-                           <Search className="h-4 w-4" />
-                           Search LinkedIn
-                         </div>
-                       )}
-                     </Button>
-                  </form>
-                </Form>
+                <ResumeSearchTable candidates={searchResults} loading={isLoading} />
               </CardContent>
             </Card>
+          )}
 
-            {lastSearch && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Search Results
-                    <Badge variant="secondary">{searchResults.length} candidates</Badge>
-                  </CardTitle>
-                   <div className="text-sm text-gray-600">
-                     <p><strong>Search Query:</strong> {lastSearch.job_title}</p>
-                   </div>
-                </CardHeader>
-                <CardContent>
-                  <ResumeSearchTable candidates={searchResults} loading={isLoading} />
-                </CardContent>
-              </Card>
-            )}
-
-          </TabsContent>
-
-          <TabsContent value="history">
-            <LinkedinSearchHistory onRerunSearch={handleRerunSearch} />
-          </TabsContent>
-        </Tabs>
+          <LinkedinSearchHistory onRerunSearch={handleRerunSearch} />
+        </div>
       </div>
     </div>
   );
