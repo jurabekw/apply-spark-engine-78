@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_metrics: {
+        Row: {
+          created_at: string
+          date_period: string
+          id: string
+          metric_data: Json
+          metric_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_period: string
+          id?: string
+          metric_data: Json
+          metric_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_period?: string
+          id?: string
+          metric_data?: Json
+          metric_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       candidate_batches: {
         Row: {
           created_at: string
@@ -232,10 +262,46 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      recruitment_performance: {
+        Row: {
+          avg_ai_score: number | null
+          batches_processed: number | null
+          hired: number | null
+          month: string | null
+          shortlisted: number | null
+          source: string | null
+          total_candidates: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      search_patterns: {
+        Row: {
+          avg_candidates_found: number | null
+          experience_level: string | null
+          job_title: string | null
+          search_count: number | null
+          user_id: string | null
+          week: string | null
+        }
+        Relationships: []
+      }
+      skills_analysis: {
+        Row: {
+          avg_score: number | null
+          frequency: number | null
+          skill: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      refresh_analytics_views: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
