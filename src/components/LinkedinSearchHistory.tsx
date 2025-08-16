@@ -13,29 +13,6 @@ interface LinkedinSearchHistoryProps {
   onRerunSearch?: (search: { job_title: string; required_skills: string; experience_level: string }) => void;
 }
 
-const getExperienceLevelLabel = (level: string) => {
-  const labels = {
-    'noExperience': 'No Experience',
-    'between1And3': '1-3 Years', 
-    'between3And6': '3-6 Years',
-    'moreThan6': '6+ Years',
-    'junior': 'Junior (0-2 years)',
-    'mid': 'Mid-level (2-5 years)',
-    'senior': 'Senior (5+ years)'
-  };
-  return labels[level as keyof typeof labels] || level;
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
 const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { searches, loading, deleteSearch, deleteAllSearches } = useLinkedinSearchHistory();
@@ -43,6 +20,26 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
   // State to handle viewing saved results
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const [selectedSearch, setSelectedSearch] = useState<any>(null);
+
+  const getExperienceLevelLabel = (level: string) => {
+    const labels = {
+      'noExperience': 'No Experience',
+      'between1And3': '1-3 Years',
+      'between3And6': '3-6 Years',
+      'moreThan6': '6+ Years'
+    };
+    return labels[level as keyof typeof labels] || level;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const filteredSearches = searches.filter(search =>
     search.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,7 +81,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              <CardTitle>LinkedIn Search History ({filteredSearches.length})</CardTitle>
+              <CardTitle>Search History ({filteredSearches.length})</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {searches.length > 0 && (
@@ -98,9 +95,9 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete All LinkedIn Search History</AlertDialogTitle>
+                        <AlertDialogTitle>Delete All Search History</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete all LinkedIn search history? This action cannot be undone and will remove all {searches.length} entries.
+                          Are you sure you want to delete all search history? This action cannot be undone and will remove all {searches.length} entries.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -133,11 +130,11 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
             <div className="text-center py-8">
               <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                {searches.length === 0 ? 'No LinkedIn search history yet' : 'No matching searches'}
+                {searches.length === 0 ? 'No search history yet' : 'No matching searches'}
               </h3>
               <p className="text-muted-foreground text-sm">
                 {searches.length === 0 
-                  ? "Your LinkedIn search history will appear here after you run your first search."
+                  ? "Your search history will appear here after you run your first search."
                   : "Try adjusting your search terms."
                 }
               </p>
@@ -208,9 +205,9 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete LinkedIn Search History</AlertDialogTitle>
+                                <AlertDialogTitle>Delete Search History</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this LinkedIn search history entry? This action cannot be undone.
+                                  Are you sure you want to delete this search history entry? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
