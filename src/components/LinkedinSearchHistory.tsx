@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Search, Eye, Trash2, Clock, Trash } from 'lucide-react';
 import { useLinkedinSearchHistory } from '@/hooks/useLinkedinSearchHistory';
-import { LinkedinSearchResultsModal } from './LinkedinSearchResultsModal';
+import SearchResultsModal from './SearchResultsModal';
 
 interface LinkedinSearchHistoryProps {
   onRerunSearch?: (search: { job_title: string; required_skills: string; experience_level: string }) => void;
@@ -232,7 +232,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
         </CardContent>
       </Card>
 
-      <LinkedinSearchResultsModal
+      <SearchResultsModal
         isOpen={isResultsOpen}
         search={selectedSearch}
         onClose={() => setIsResultsOpen(false)}
