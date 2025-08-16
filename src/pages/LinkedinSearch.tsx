@@ -44,25 +44,71 @@ const LinkedinSearch = () => {
     if (!response) return [];
 
     console.log('Raw webhook response:', response);
+    console.log('Response type:', typeof response);
 
-    // Preprocess webhook response format
     let processedResponse = response;
     
+    // Handle case where response is a string containing multiple JSON objects separated by tabs/newlines
+    if (typeof response === 'string') {
+      console.log('Processing string response...');
+      try {
+        // Split by tab characters first (most likely separator for your webhook)
+        let jsonObjects = response.split('\t').filter(part => part.trim());
+        
+        // If no tabs, try splitting by double newlines
+        if (jsonObjects.length === 1) {
+          jsonObjects = response.split('\n\n').filter(part => part.trim());
+        }
+        
+        // If still one part, try splitting by single newlines
+        if (jsonObjects.length === 1) {
+          jsonObjects = response.split('\n').filter(part => part.trim());
+        }
+        
+        console.log('Found JSON objects:', jsonObjects.length);
+        
+        let allCandidates: any[] = [];
+        
+        for (const jsonStr of jsonObjects) {
+          try {
+            const trimmed = jsonStr.trim();
+            if (trimmed) {
+              console.log('Parsing JSON object:', trimmed.substring(0, 100) + '...');
+              const parsed = JSON.parse(trimmed);
+              
+              if (parsed.candidates && Array.isArray(parsed.candidates)) {
+                console.log(`Found ${parsed.candidates.length} candidates in this object`);
+                allCandidates.push(...parsed.candidates);
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to parse JSON object:', error, jsonStr.substring(0, 100));
+          }
+        }
+        
+        console.log('Total candidates extracted:', allCandidates.length);
+        
+        if (allCandidates.length > 0) {
+          processedResponse = allCandidates;
+        }
+      } catch (error) {
+        console.warn('Failed to process string response:', error);
+      }
+    }
+    
     // Handle case where response is an array containing objects with 'output' property
-    if (Array.isArray(response)) {
+    else if (Array.isArray(response)) {
+      console.log('Processing array response...');
       let allCandidates: any[] = [];
       
       for (const item of response) {
         if (item && typeof item === 'object' && item.output && Array.isArray(item.output)) {
-          // Parse each JSON string in the output array
           for (const jsonString of item.output) {
             if (typeof jsonString === 'string') {
               try {
-                // Clean the JSON string (remove extra whitespace/newlines)
                 const cleanedJson = jsonString.trim();
                 const parsedObject = JSON.parse(cleanedJson);
                 
-                // Extract candidates from the parsed object
                 if (parsedObject.candidates && Array.isArray(parsedObject.candidates)) {
                   allCandidates.push(...parsedObject.candidates);
                 } else if (Array.isArray(parsedObject)) {
@@ -76,7 +122,6 @@ const LinkedinSearch = () => {
             }
           }
         } else {
-          // If item doesn't have output property, add it directly
           allCandidates.push(item);
         }
       }
@@ -84,54 +129,13 @@ const LinkedinSearch = () => {
       processedResponse = allCandidates;
     }
     
-    // Handle case where response is a string containing multiple JSON objects
-    if (typeof response === 'string') {
-      try {
-        // Split by lines and try to parse each as separate JSON
-        const lines = response.split('\n').filter(line => line.trim());
-        let allCandidates: any[] = [];
-        
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line.trim());
-            if (parsed.candidates && Array.isArray(parsed.candidates)) {
-              allCandidates.push(...parsed.candidates);
-            } else if (Array.isArray(parsed)) {
-              allCandidates.push(...parsed);
-            } else if (parsed.title || parsed.name) {
-              // Single candidate object
-              allCandidates.push(parsed);
-            }
-          } catch (error) {
-            console.warn('Failed to parse line as JSON:', error, line);
-          }
-        }
-        
-        if (allCandidates.length > 0) {
-          processedResponse = allCandidates;
-        } else {
-          // Try parsing the entire string as single JSON
-          try {
-            processedResponse = JSON.parse(response);
-          } catch (error) {
-            console.warn('Failed to parse entire response as JSON:', error);
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to process string response:', error);
-      }
-    }
-    
-    // Handle case where response contains multiple objects directly (common webhook format)
-    if (response && typeof response === 'object' && !Array.isArray(response)) {
-      // Check if response has candidates property
+    // Handle case where response is a single object with candidates property
+    else if (response && typeof response === 'object' && !Array.isArray(response)) {
+      console.log('Processing object response...');
       if (response.candidates && Array.isArray(response.candidates)) {
         processedResponse = response.candidates;
-      } else {
-        // Check if response itself looks like a candidate
-        if (response.title || response.name || response.AI_score) {
-          processedResponse = [response];
-        }
+      } else if (response.title || response.name || response.AI_score) {
+        processedResponse = [response];
       }
     }
 
