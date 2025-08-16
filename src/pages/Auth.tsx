@@ -72,28 +72,12 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email: signupEmail,
-        password: signupPassword,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-            company: company,
-          }
-        }
-      });
-
-      if (error) throw error;
-
+      // Temporarily disabled signup functionality
       toast({
-        title: "Verification email sent",
-        description: `We sent a verification link to ${signupEmail}. Please check your inbox.`,
+        title: "Coming Soon!",
+        description: "New registrations are temporarily disabled. Please check back later or contact support.",
+        variant: "default",
       });
-      setVerificationSent(true);
-      setVerificationEmail(signupEmail);
     } catch (error: any) {
       toast({
         title: "Sign up failed",
