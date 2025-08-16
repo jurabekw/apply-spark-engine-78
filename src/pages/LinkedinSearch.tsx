@@ -43,7 +43,9 @@ const LinkedinSearch = () => {
   const normalizeCandidates = (response: any): any[] => {
     if (!response) return [];
 
-    // Preprocess webhook response format: check for output arrays containing JSON strings
+    console.log('Raw webhook response:', response);
+
+    // Preprocess webhook response format
     let processedResponse = response;
     
     // Handle case where response is an array containing objects with 'output' property
@@ -80,6 +82,57 @@ const LinkedinSearch = () => {
       }
       
       processedResponse = allCandidates;
+    }
+    
+    // Handle case where response is a string containing multiple JSON objects
+    if (typeof response === 'string') {
+      try {
+        // Split by lines and try to parse each as separate JSON
+        const lines = response.split('\n').filter(line => line.trim());
+        let allCandidates: any[] = [];
+        
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line.trim());
+            if (parsed.candidates && Array.isArray(parsed.candidates)) {
+              allCandidates.push(...parsed.candidates);
+            } else if (Array.isArray(parsed)) {
+              allCandidates.push(...parsed);
+            } else if (parsed.title || parsed.name) {
+              // Single candidate object
+              allCandidates.push(parsed);
+            }
+          } catch (error) {
+            console.warn('Failed to parse line as JSON:', error, line);
+          }
+        }
+        
+        if (allCandidates.length > 0) {
+          processedResponse = allCandidates;
+        } else {
+          // Try parsing the entire string as single JSON
+          try {
+            processedResponse = JSON.parse(response);
+          } catch (error) {
+            console.warn('Failed to parse entire response as JSON:', error);
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to process string response:', error);
+      }
+    }
+    
+    // Handle case where response contains multiple objects directly (common webhook format)
+    if (response && typeof response === 'object' && !Array.isArray(response)) {
+      // Check if response has candidates property
+      if (response.candidates && Array.isArray(response.candidates)) {
+        processedResponse = response.candidates;
+      } else {
+        // Check if response itself looks like a candidate
+        if (response.title || response.name || response.AI_score) {
+          processedResponse = [response];
+        }
+      }
     }
 
     const toStr = (val: any): string => {
