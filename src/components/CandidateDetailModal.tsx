@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Eye, Download, X } from 'lucide-react';
+import { Eye, Download, X, Linkedin } from 'lucide-react';
 import { Candidate } from '@/hooks/useCandidates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -229,6 +229,63 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
               </Card>
             )}
           </div>
+
+          {/* Profile Links */}
+          {((candidate.source === 'linkedin_search' && candidate.ai_analysis?.linkedin_url) || 
+            (candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url)) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Links</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {candidate.source === 'linkedin_search' && candidate.ai_analysis?.linkedin_url && (
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                          <Linkedin className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">LinkedIn Profile</p>
+                          <p className="text-sm text-gray-500">View full LinkedIn profile</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => window.open(candidate.ai_analysis?.linkedin_url, '_blank')}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Profile
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url && (
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-red-100 text-red-600">
+                          <span className="text-sm font-bold">HH</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">HH.ru Profile</p>
+                          <p className="text-sm text-gray-500">View full HH.ru profile</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => window.open(candidate.ai_analysis?.hh_url, '_blank')}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Profile
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Resume Document */}
           {candidate.resume_file_path && (
