@@ -42,6 +42,16 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Check if login is allowed for this email
+      if (loginEmail !== 'shokirovj36@gmail.com') {
+        toast({
+          title: "Access Temporarily Restricted",
+          description: "Login is temporarily disabled for maintenance. Please check back later.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
