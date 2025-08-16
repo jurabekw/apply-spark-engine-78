@@ -14,7 +14,7 @@ const CandidateTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'upload' | 'hh_search'>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'upload' | 'hh_search' | 'linkedin_search'>('all');
   const { candidates, loading, updateCandidateStatus, deleteCandidate, refetch } = useCandidates();
 
   // Listen for candidate updates from HH search
@@ -74,6 +74,7 @@ const CandidateTable = () => {
     if (sourceFilter !== 'all') {
       if (sourceFilter === 'upload' && candidate.source !== 'upload') return false;
       if (sourceFilter === 'hh_search' && candidate.source !== 'hh_search') return false;
+      if (sourceFilter === 'linkedin_search' && candidate.source !== 'linkedin_search') return false;
     }
     // Text search
     const name = (candidate.name || '').toLowerCase();
@@ -107,7 +108,7 @@ const CandidateTable = () => {
       ai_score: c.ai_score ?? '',
       experience_years: c.experience_years ?? '',
       skills: Array.isArray(c.skills) ? c.skills.join('; ') : '',
-      source: c.source === 'hh_search' ? 'HH.ru' : 'Upload',
+      source: c.source === 'hh_search' ? 'HH.ru' : c.source === 'linkedin_search' ? 'LinkedIn' : 'Upload',
       submitted_at: c.submitted_at || c.created_at,
       hh_url: (c as any).ai_analysis?.hh_url ?? ''
     }));
@@ -212,6 +213,14 @@ const CandidateTable = () => {
               >
                 HH Search
               </Button>
+              <Button 
+                variant={sourceFilter === 'linkedin_search' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setSourceFilter('linkedin_search')}
+                className={sourceFilter === 'linkedin_search' ? 'shadow-sm' : ''}
+              >
+                LinkedIn Search
+              </Button>
             </div>
             
             <Button variant="outline" onClick={handleExport} disabled={filteredCandidates.length === 0}>
@@ -246,7 +255,9 @@ const CandidateTable = () => {
               </CardTitle>
               {filteredCandidates.length > 0 && (
                 <Badge variant="secondary" className="px-3 py-1">
-                  {sourceFilter === 'all' ? 'All Sources' : sourceFilter === 'upload' ? 'Uploaded' : 'HH Search'}
+                  {sourceFilter === 'all' ? 'All Sources' : 
+                   sourceFilter === 'upload' ? 'Uploaded' : 
+                   sourceFilter === 'hh_search' ? 'HH Search' : 'LinkedIn Search'}
                 </Badge>
               )}
             </div>
@@ -338,10 +349,10 @@ const CandidateTable = () => {
                             </Badge>
                             
                             <Badge 
-                              variant={candidate.source === 'hh_search' ? 'brand' : 'secondary'}
+                              variant={candidate.source === 'hh_search' ? 'brand' : candidate.source === 'linkedin_search' ? 'brand' : 'secondary'}
                               className="text-xs"
                             >
-                              {candidate.source === 'hh_search' ? 'HH.ru' : 'Uploaded'}
+                              {candidate.source === 'hh_search' ? 'HH.ru' : candidate.source === 'linkedin_search' ? 'LinkedIn' : 'Uploaded'}
                             </Badge>
                             
                             {candidate.skills && candidate.skills.length > 0 && (
