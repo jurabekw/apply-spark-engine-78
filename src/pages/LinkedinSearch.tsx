@@ -206,7 +206,7 @@ const LinkedinSearch = () => {
       });
       
       // Send GET request to n8n webhook
-      const webhookResponse = await fetch(`https://sadasd1.app.n8n.cloud/webhook-test/792bf888-4084-42c8-a476-a3fc059d0618?${queryParams.toString()}`, {
+      const webhookResponse = await fetch(`https://sadasd1.app.n8n.cloud/webhook-test/463633d4-a16f-49d7-b0c6-c7e0c53f9013?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
