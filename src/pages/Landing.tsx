@@ -3,52 +3,55 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, CheckCircle, Star, Zap, Shield, Clock, Brain, Target, TrendingUp, Search, Database, Filter, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Logo from '@/components/Logo';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Resume Analysis",
-      description: "Advanced AI algorithms analyze resumes in seconds, extracting key skills, experience, and qualifications with 98% accuracy."
+      title: t('features.ai-analysis.title'),
+      description: t('features.ai-analysis.description')
     },
     {
       icon: Search,
-      title: "Intelligent Candidate Search",
-      description: "Find perfect candidates from your database or external sources using natural language queries and smart filtering."
+      title: t('features.search.title'),
+      description: t('features.search.description')
     },
     {
       icon: Database,
-      title: "Comprehensive Database Search",
-      description: "Search through millions of candidate profiles from leading job boards and professional networks instantly."
+      title: t('features.database.title'),
+      description: t('features.database.description')
     },
     {
       icon: Zap,
-      title: "Lightning-Fast Screening",
-      description: "Process hundreds of resumes in minutes, not days. Get instant insights, rankings, and match scores."
+      title: t('features.screening.title'),
+      description: t('features.screening.description')
     },
     {
       icon: Shield,
-      title: "Bias-Free Hiring",
-      description: "Eliminate unconscious bias with objective, data-driven candidate evaluation and fair assessment algorithms."
+      title: t('features.bias-free.title'),
+      description: t('features.bias-free.description')
     },
     {
       icon: Target,
-      title: "Perfect Job Matching",
-      description: "Find ideal candidates using our proprietary skill-matching algorithm and cultural fit assessment."
+      title: t('features.matching.title'),
+      description: t('features.matching.description')
     }
   ];
 
   const benefits = [
-    "Reduce hiring time by up to 80%",
-    "Access millions of candidate profiles",
-    "Eliminate unconscious bias in recruitment", 
-    "Process 10x more applications efficiently",
-    "Improve candidate quality with AI insights",
-    "Streamline your entire hiring workflow",
-    "Make data-driven hiring decisions"
+    t('benefits.time'),
+    t('benefits.profiles'),
+    t('benefits.bias'),
+    t('benefits.efficiency'),
+    t('benefits.quality'),
+    t('benefits.workflow'),
+    t('benefits.decisions')
   ];
 
   const testimonials = [
@@ -75,23 +78,23 @@ const Landing = () => {
   const searchFeatures = [
     {
       icon: Search,
-      title: "Smart Query Search",
-      description: "Use natural language to find candidates: 'Senior React developer with 5+ years in fintech'"
+      title: t('search.smart-query.title'),
+      description: t('search.smart-query.description')
     },
     {
       icon: Filter,
-      title: "Advanced Filtering",
-      description: "Filter by location, salary, experience, skills, education, and 50+ other criteria"
+      title: t('search.filtering.title'),
+      description: t('search.filtering.description')
     },
     {
       icon: Database,
-      title: "Multi-Source Access",
-      description: "Search across LinkedIn, Indeed, Stack Overflow, GitHub, and 20+ other platforms"
+      title: t('search.multi-source.title'),
+      description: t('search.multi-source.description')
     },
     {
       icon: Sparkles,
-      title: "AI Recommendations",
-      description: "Get AI-suggested candidates based on your hiring patterns and success metrics"
+      title: t('search.ai-recommendations.title'),
+      description: t('search.ai-recommendations.description')
     }
   ];
 
@@ -103,11 +106,12 @@ const Landing = () => {
           <Logo size="md" variant="light" />
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <Button variant="ghost" onClick={() => navigate('/auth?tab=signin')}>
-              Sign In
+              {t('landing.auth.signin')}
             </Button>
             <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-glow" onClick={() => navigate('/auth?tab=signup')}>
-              Get Started Free
+              {t('landing.auth.signup')}
             </Button>
           </div>
         </div>
@@ -116,21 +120,19 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <Badge variant="secondary" className="mb-8 px-6 py-3 text-sm bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          🚀 Trusted by 1000+ HR teams worldwide
+          {t('landing.hero.badge')}
         </Badge>
         
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-8 leading-tight">
-          Find Perfect Candidates
+          {t('landing.hero.title')}
           <br />
           <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
-            10x Faster
+            {t('landing.hero.subtitle')}
           </span>
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-          Revolutionary AI-powered recruitment platform combining resume analysis with 
-          intelligent candidate search across millions of profiles. Find, screen, and hire 
-          the perfect talent in minutes, not months.
+          {t('landing.hero.description')}
         </p>
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
@@ -139,12 +141,12 @@ const Landing = () => {
             className="bg-gradient-to-r from-primary to-accent hover:shadow-glow px-10 py-6 text-lg font-medium"
             onClick={() => navigate('/auth?tab=signup')}
           >
-            Start Free Trial
+            {t('landing.hero.cta')}
           </Button>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          No credit card required • 14-day free trial • Cancel anytime
+          {t('landing.hero.no-card')}
         </p>
       </section>
 
