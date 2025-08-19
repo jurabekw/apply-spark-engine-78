@@ -43,7 +43,8 @@ const Auth = () => {
 
     try {
       // Check if login is allowed for this email
-      if (loginEmail !== 'shokirovj36@gmail.com') {
+      const allowedEmails = ['shokirovj36@gmail.com', 'shakhnoza.amirkhanova@gmail.com'];
+      if (!allowedEmails.includes(loginEmail)) {
         toast({
           title: "Access Temporarily Restricted",
           description: "Login is temporarily disabled for maintenance. Please check back later.",
