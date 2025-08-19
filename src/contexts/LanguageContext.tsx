@@ -13,8 +13,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 // Detect user's country for default language
 const detectDefaultLanguage = (): Language => {
   try {
+    // Check localStorage first
+    const savedLang = localStorage.getItem('language') as Language;
+    if (savedLang) return savedLang;
+    
+    // Check timezone for Uzbekistan
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // Uzbekistan uses Russian as business language
     if (timezone.includes('Tashkent') || timezone.includes('Samarkand')) {
       return 'ru';
     }
@@ -125,6 +129,14 @@ const translations = {
     'stats.accuracy': 'Match Accuracy',
     'stats.companies': 'Companies',
     'stats.profiles': 'Profiles Searched',
+    'stats.total-candidates': 'Total Candidates',
+    'stats.active-positions': 'Active Positions',
+    'stats.average-ai-score': 'Average AI Score',
+    'stats.this-week': 'This Week',
+    'stats.all-candidates': 'All candidates in database',
+    'stats.currently-open': 'Currently open positions',
+    'stats.candidate-match': 'Candidate match quality',
+    'stats.new-candidates': 'New candidates added',
     
     // Common
     'common.loading': 'Loading...',
@@ -237,6 +249,14 @@ const translations = {
     'stats.accuracy': 'Точность совпадений',
     'stats.companies': 'Компаний',
     'stats.profiles': 'Профилей найдено',
+    'stats.total-candidates': 'Всего кандидатов',
+    'stats.active-positions': 'Активные позиции',
+    'stats.average-ai-score': 'Средний балл ИИ',
+    'stats.this-week': 'На этой неделе',
+    'stats.all-candidates': 'Все кандидаты в базе данных',
+    'stats.currently-open': 'В настоящее время открытые позиции',
+    'stats.candidate-match': 'Качество соответствия кандидатов',
+    'stats.new-candidates': 'Новые кандидаты добавлены',
     
     // Common
     'common.loading': 'Загрузка...',
@@ -256,8 +276,7 @@ const translations = {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem('language') as Language;
-    return saved || detectDefaultLanguage();
+    return detectDefaultLanguage();
   });
 
   useEffect(() => {
@@ -272,6 +291,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (value && typeof value === 'object') {
         value = value[k];
       } else {
+        console.log(`Translation missing for key: ${key} in language: ${language}`);
         return key; // Return key if translation not found
       }
     }

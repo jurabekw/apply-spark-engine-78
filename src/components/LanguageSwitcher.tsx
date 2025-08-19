@@ -28,25 +28,25 @@ const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 px-3">
-          <span className="text-lg">{currentLang.flag}</span>
-          <span className="hidden sm:inline text-sm font-medium">{currentLang.shortName}</span>
+        <Button variant="ghost" className="flex items-center gap-2 px-3 h-9 hover:bg-muted">
+          <span className="text-base leading-none select-none">{currentLang.flag}</span>
+          <span className="text-sm font-medium text-foreground hidden sm:inline">{currentLang.shortName}</span>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg">
+      <DropdownMenuContent align="end" className="w-44 bg-popover border border-border shadow-lg z-[60]">
         {Object.entries(languages).map(([code, lang]) => (
           <DropdownMenuItem
             key={code}
             onClick={() => handleLanguageChange(code as Language)}
-            className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted ${
-              language === code ? 'bg-muted/50' : ''
+            className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent focus:bg-accent ${
+              language === code ? 'bg-accent/50' : ''
             }`}
           >
-            <span className="text-lg">{lang.flag}</span>
-            <span className="font-medium">{lang.name}</span>
+            <span className="text-base leading-none select-none">{lang.flag}</span>
+            <span className="font-medium text-foreground flex-1">{lang.name}</span>
             {language === code && (
-              <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+              <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
             )}
           </DropdownMenuItem>
         ))}
