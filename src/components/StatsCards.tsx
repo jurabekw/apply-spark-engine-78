@@ -3,12 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, TrendingUp, Clock, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import { useJobPostings } from '@/hooks/useJobPostings';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 const StatsCards = () => {
   const { candidates } = useCandidates();
   const { jobPostings } = useJobPostings();
-  const { t } = useLanguage();
 
   const totalCandidates = candidates.length;
   const shortlistedCandidates = candidates.filter(c => c.status === 'shortlisted').length;
@@ -22,9 +20,9 @@ const StatsCards = () => {
 
   const stats = [
     {
-      title: t('stats.total-candidates'),
+      title: 'Total Candidates',
       value: totalCandidates.toString(),
-      description: t('stats.all-candidates'),
+      description: 'All candidates in database',
       icon: Users,
       gradient: 'from-blue-500 to-blue-600',
       bgGradient: 'from-blue-50 to-blue-100',
@@ -32,9 +30,9 @@ const StatsCards = () => {
       trend: 'up' as const,
     },
     {
-      title: t('stats.active-positions'),
+      title: 'Active Positions',
       value: jobPostings.filter(j => j.status === 'active').length.toString(),
-      description: t('stats.currently-open'),
+      description: 'Currently open positions',
       icon: FileText,
       gradient: 'from-emerald-500 to-emerald-600',
       bgGradient: 'from-emerald-50 to-emerald-100',
@@ -42,9 +40,9 @@ const StatsCards = () => {
       trend: 'up' as const,
     },
     {
-      title: t('stats.average-ai-score'),
+      title: 'Average AI Score',
       value: `${averageScore}%`,
-      description: t('stats.candidate-match'),
+      description: 'Candidate match quality',
       icon: TrendingUp,
       gradient: 'from-primary to-accent',
       bgGradient: 'from-primary/10 to-accent/10',
@@ -52,9 +50,9 @@ const StatsCards = () => {
       trend: 'up' as const,
     },
     {
-      title: t('stats.this-week'),
+      title: 'This Week',
       value: recentCandidates.toString(),
-      description: t('stats.new-candidates'),
+      description: 'New candidates added',
       icon: Clock,
       gradient: 'from-amber-500 to-orange-500',
       bgGradient: 'from-amber-50 to-orange-100',

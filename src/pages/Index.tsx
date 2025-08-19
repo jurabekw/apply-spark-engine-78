@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, Settings, Plus, Filter, Download, Search, ArrowRight, TrendingUp, Clock, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
@@ -22,7 +21,6 @@ import CandidateDetailModal from '@/components/CandidateDetailModal';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { user, loading } = useAuth();
-  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const { searches, loading: loadingSearches } = useSearchHistory();
@@ -60,7 +58,7 @@ const recentSearches = useMemo(() => {
           <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-ring">
             <div className="w-6 h-6 bg-white rounded-full"></div>
           </div>
-          <p className="text-muted-foreground">{t('dashboard.loading')}</p>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -79,12 +77,12 @@ const recentSearches = useMemo(() => {
         <div className="bg-card rounded-xl border border-border/50 p-2 mb-8 shadow-sm">
           <div className="flex flex-wrap gap-1">
             {[
-              { id: 'dashboard', label: t('dashboard.tabs.dashboard'), icon: BarChart3 },
-              { id: 'upload', label: t('dashboard.tabs.upload'), icon: Upload },
-              { id: 'hh-search', label: t('dashboard.tabs.hh-search'), icon: Search },
-              { id: 'linkedin-search', label: t('dashboard.tabs.linkedin-search'), icon: Users },
-              { id: 'candidates', label: t('dashboard.tabs.candidates'), icon: Users },
-              { id: 'forms', label: t('dashboard.tabs.forms'), icon: FileText },
+              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+              { id: 'upload', label: 'Upload Resumes', icon: Upload },
+              { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
+              { id: 'linkedin-search', label: 'LinkedIn Search', icon: Users },
+              { id: 'candidates', label: 'Candidates', icon: Users },
+              { id: 'forms', label: 'Application Forms', icon: FileText },
             ].map(({ id, label, icon: Icon }) => (
               <Button
                 key={id}
@@ -112,15 +110,15 @@ const recentSearches = useMemo(() => {
             <div className="flex justify-between items-start mb-8 animate-fade-in">
               <div>
                 <h1 className="text-4xl font-heading font-bold text-foreground mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {t('dashboard.welcome')}
+                  Welcome Back
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                  {t('dashboard.description').replace('{date}', new Date().toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' }))}
+                  Your AI-powered recruitment dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
               <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
                 <Clock className="w-4 h-4 mr-2" />
-                {t('dashboard.status.online')}
+                Online
               </Badge>
             </div>
 
@@ -135,9 +133,9 @@ const recentSearches = useMemo(() => {
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  <CardTitle className="text-xl">{t('dashboard.quick-upload.title')}</CardTitle>
+                  <CardTitle className="text-xl">Quick Upload</CardTitle>
                   <CardDescription>
-                    {t('dashboard.quick-upload.description')}
+                    Upload multiple resumes and get instant AI analysis with detailed scoring
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -146,7 +144,7 @@ const recentSearches = useMemo(() => {
                     variant="default"
                     className="w-full"
                   >
-                    {t('dashboard.quick-upload.button')}
+                    Start Screening Process
                   </Button>
                 </CardContent>
               </Card>
@@ -159,9 +157,9 @@ const recentSearches = useMemo(() => {
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-success transition-colors" />
                   </div>
-                  <CardTitle className="text-xl">{t('dashboard.hh-search.title')}</CardTitle>
+                  <CardTitle className="text-xl">HH Search</CardTitle>
                   <CardDescription>
-                    {t('dashboard.hh-search.description')}
+                    Search external candidate databases with AI-powered matching
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -170,7 +168,7 @@ const recentSearches = useMemo(() => {
                     variant="success"
                     className="w-full"
                   >
-                    {t('dashboard.hh-search.button')}
+                    Search Candidates
                   </Button>
                 </CardContent>
               </Card>
@@ -183,10 +181,10 @@ const recentSearches = useMemo(() => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Search className="w-5 h-5 text-success" />
-                      {t('dashboard.recent-searches.title')}
+                      Recent HH Searches
                     </CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('hh-search')} className="text-success hover:text-success">
-                      {t('dashboard.recent-searches.view-all')} <ArrowRight className="w-4 h-4 ml-1" />
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -200,7 +198,7 @@ const recentSearches = useMemo(() => {
                   ) : recentSearches.length === 0 ? (
                     <div className="text-center py-6">
                       <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">{t('dashboard.recent-searches.empty')}</p>
+                      <p className="text-sm text-muted-foreground">No searches yet</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -212,7 +210,7 @@ const recentSearches = useMemo(() => {
                               <div className="text-xs text-muted-foreground mb-2">
                                 {s.experience_level} • {s.required_skills}
                               </div>
-                              <Badge variant="success" className="text-xs">{s.candidate_count} {t('dashboard.recent-searches.found')}</Badge>
+                              <Badge variant="success" className="text-xs">{s.candidate_count} found</Badge>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
@@ -236,10 +234,10 @@ const recentSearches = useMemo(() => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Upload className="w-5 h-5 text-primary" />
-                      {t('dashboard.recent-uploads.title')}
+                      Recent Uploads
                     </CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('candidates')} className="text-primary hover:text-primary">
-                      {t('dashboard.recent-uploads.view-all')} <ArrowRight className="w-4 h-4 ml-1" />
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -253,7 +251,7 @@ const recentSearches = useMemo(() => {
                   ) : recentUploads.length === 0 ? (
                     <div className="text-center py-6">
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">{t('dashboard.recent-uploads.empty')}</p>
+                      <p className="text-sm text-muted-foreground">No uploads yet</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -266,7 +264,7 @@ const recentSearches = useMemo(() => {
                                 {c.position || 'Candidate'} • {c.status}
                               </div>
                               {typeof c.ai_score === 'number' && (
-                                <Badge variant="brand" className="text-xs">{c.ai_score}% {t('dashboard.recent-uploads.match')}</Badge>
+                                <Badge variant="brand" className="text-xs">{c.ai_score}% match</Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-2">
@@ -300,14 +298,14 @@ const recentSearches = useMemo(() => {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {t('dashboard.forms.title')}
+              Form Builder Coming Soon
             </h3>
             <p className="text-gray-500 mb-6">
-              {t('dashboard.forms.description')}
+              Create custom application forms with our drag-and-drop builder
             </p>
             <Button disabled className="bg-gray-300">
               <Plus className="w-4 h-4 mr-2" />
-              {t('dashboard.forms.button')}
+              Create New Form
             </Button>
           </div>
         )}
