@@ -116,7 +116,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <Badge variant="secondary" className="mb-8 px-6 py-3 text-sm bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          🚀 Trusted by 1000+ HR teams worldwide
+          🚀 Trusted by 50+ HR teams worldwide
         </Badge>
         
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-8 leading-tight">
