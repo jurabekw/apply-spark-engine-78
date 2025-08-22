@@ -55,19 +55,19 @@ const Landing = () => {
     {
       name: "Алёна Смирнова",
       role: "HR директор",
-      content: "TalentSpark революционизировал наш найм. Функция поиска помогла нам найти старших разработчиков, до которых мы не могли добраться раньше - заполнили 3 позиции за 2 недели!",
+      content: "TalentSpark revolutionized our hiring. The headhunter search feature helped us find senior developers we couldn't reach before - filled 3 positions in 2 weeks!",
       rating: 5
     },
     {
       name: "Дилшод Ахмедов", 
       role: "Кадр мутахассиси",
-      content: "Поиск по базе кандидатов невероятен. Мы нашли идеальные совпадения для узких ролей, которые традиционно заняли бы месяцы для заполнения.",
+      content: "The candidate database search is incredible. We found perfect matches for niche roles that would have taken months to fill traditionally.",
       rating: 5
     },
     {
       name: "Анна Петрова",
       role: "Менеджер по персоналу",
-      content: "Лучшие инвестиции в HR технологии. Наше время найма сократилось с 45 до 12 дней, и качество кандидатов значительно улучшилось.",
+      content: "Best investment in HR tech. Our time-to-hire dropped from 45 to 12 days, and candidate quality improved dramatically.",
       rating: 5
     }
   ];
