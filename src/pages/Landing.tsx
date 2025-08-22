@@ -268,11 +268,11 @@ const Landing = () => {
                   <div className="text-muted-foreground">Match Accuracy</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">1K+</div>
+                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">50+</div>
                   <div className="text-muted-foreground">Companies</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">5M+</div>
+                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">10K+</div>
                   <div className="text-muted-foreground">Profiles Searched</div>
                 </div>
               </div>
