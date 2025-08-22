@@ -132,6 +132,28 @@ const Landing = () => {
           intelligent candidate search across millions of profiles. Find, screen, and hire 
           the perfect talent in minutes, not months.
         </p>
+
+        {/* Platform Integration Icons */}
+        <div className="flex items-center justify-center gap-8 mb-12">
+          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">in</span>
+            </div>
+            <span className="text-foreground font-medium">LinkedIn Integration</span>
+          </div>
+          
+          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xs">HH</span>
+            </div>
+            <span className="text-foreground font-medium">HeadHunter.uz</span>
+          </div>
+          
+          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
+            <Upload className="w-8 h-8 text-primary" />
+            <span className="text-foreground font-medium">Bulk Resume Upload</span>
+          </div>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
           <Button 
