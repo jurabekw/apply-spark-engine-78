@@ -42,17 +42,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Check if login is allowed for this email
-      const allowedEmails = ['shokirovj36@gmail.com', 'shakhnoza.amirkhanova@gmail.com'];
-      if (!allowedEmails.includes(loginEmail)) {
-        toast({
-          title: "Access Temporarily Restricted",
-          description: "Login is temporarily disabled for maintenance. Please check back later.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
@@ -83,12 +72,30 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Temporarily disabled signup functionality
-      toast({
-        title: "Coming Soon!",
-        description: "New registrations are temporarily disabled. Please check back later or contact support.",
-        variant: "default",
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: signupEmail,
+        password: signupPassword,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: fullName,
+            company: company,
+          }
+        }
       });
+
+      if (error) throw error;
+
+      if (data.user) {
+        setVerificationEmail(signupEmail);
+        setVerificationSent(true);
+        toast({
+          title: "Check your email!",
+          description: "We've sent you a verification link to complete your registration.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Sign up failed",

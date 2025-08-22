@@ -29,17 +29,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // Check if user is authorized to remain logged in
-        const allowedEmails = ['shokirovj36@gmail.com', 'shakhnoza.amirkhanova@gmail.com'];
-        if (session?.user?.email && !allowedEmails.includes(session.user.email)) {
-          // Sign out unauthorized users
-          supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -48,17 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      // Check if user is authorized to remain logged in
-      const allowedEmails = ['shokirovj36@gmail.com', 'shakhnoza.amirkhanova@gmail.com'];
-      if (session?.user?.email && !allowedEmails.includes(session.user.email)) {
-        // Sign out unauthorized users
-        supabase.auth.signOut();
-        setSession(null);
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
