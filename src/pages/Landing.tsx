@@ -128,9 +128,8 @@ const Landing = () => {
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-          Revolutionary AI-powered recruitment platform combining resume analysis with 
-          intelligent candidate search across millions of profiles. Find, screen, and hire 
-          the perfect talent in minutes, not months.
+          AI-powered recruitment platform that analyzes resumes and searches millions of profiles. 
+          Find and hire perfect talent in minutes, not months.
         </p>
 
         {/* Platform Integration Icons */}
