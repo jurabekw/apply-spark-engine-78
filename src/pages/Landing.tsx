@@ -86,7 +86,7 @@ const Landing = () => {
     {
       icon: Database,
       title: "Multi-Source Access",
-      description: "Search across LinkedIn, Indeed, Stack Overflow, GitHub, and 20+ other platforms"
+      description: "Search across Headhunter.uz, Linkedin, your own candidate database and others"
     },
     {
       icon: Sparkles,
