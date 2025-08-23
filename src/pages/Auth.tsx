@@ -130,10 +130,9 @@ const Auth = () => {
       // Clean up existing state
       cleanupAuthState();
       
-      // Use the current origin but ensure we use the actual deployed URL if available
-      const redirectUrl = window.location.origin === 'http://localhost:3000' 
-        ? `${window.location.origin}/dashboard`
-        : `${window.location.origin}/dashboard`;
+      // Get the current URL and construct proper redirect
+      const baseUrl = window.location.origin;
+      const redirectUrl = `${baseUrl}/auth`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
 import ResumeSearch from "./pages/ResumeSearch";
 import LinkedinSearch from "./pages/LinkedinSearch";
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/dashboard" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/confirm" element={<EmailConfirmation />} />
               <Route path="/resume-search" element={<ResumeSearch />} />
               <Route path="/linkedin-search" element={<LinkedinSearch />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
