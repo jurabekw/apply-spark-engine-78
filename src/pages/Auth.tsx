@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Mail, Lock, User, Building } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'signin');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -30,18 +32,70 @@ const Auth = () => {
   const [verificationSent, setVerificationSent] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
 
+  // Clean up auth state utility
+  const cleanupAuthState = () => {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   useEffect(() => {
+    // Redirect if already authenticated
+    if (user) {
+      navigate('/dashboard');
+      return;
+    }
+
+    // Handle URL parameters for auth errors
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    
+    if (error) {
+      let message = 'Authentication failed';
+      if (error === 'access_denied' && errorDescription?.includes('otp_expired')) {
+        message = 'Email verification link has expired. Please sign up again to receive a new verification email.';
+      } else if (errorDescription) {
+        message = errorDescription.replace(/\+/g, ' ');
+      }
+      
+      toast({
+        title: "Authentication Error",
+        description: message,
+        variant: "destructive",
+      });
+      
+      // Clean up URL parameters
+      navigate('/auth', { replace: true });
+    }
+
     const tab = searchParams.get('tab');
     if (tab && (tab === 'signin' || tab === 'signup')) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [searchParams, user, navigate, toast]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Clean up existing state
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
@@ -54,7 +108,8 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-        navigate('/dashboard');
+        // Force page reload for clean state
+        window.location.href = '/dashboard';
       }
     } catch (error: any) {
       toast({
@@ -72,7 +127,13 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      // Clean up existing state
+      cleanupAuthState();
+      
+      // Use the current origin but ensure we use the actual deployed URL if available
+      const redirectUrl = window.location.origin === 'http://localhost:3000' 
+        ? `${window.location.origin}/dashboard`
+        : `${window.location.origin}/dashboard`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,

@@ -29,9 +29,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Handle successful sign-in
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            // Only redirect if we're on the auth page
+            if (window.location.pathname === '/auth') {
+              window.location.href = '/dashboard';
+            }
+          }, 100);
+        }
       }
     );
 
@@ -46,7 +57,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Clean up auth state
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Attempt global sign out
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Force page reload for clean state
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force reload even if sign out fails
+      window.location.href = '/auth';
+    }
   };
 
   const value = {
