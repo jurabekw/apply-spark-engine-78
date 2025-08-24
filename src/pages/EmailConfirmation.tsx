@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const EmailConfirmation = () => {
-  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -15,26 +14,64 @@ const EmailConfirmation = () => {
 
   useEffect(() => {
     const handleEmailConfirmation = async () => {
-      const token = searchParams.get('token');
-      const type = searchParams.get('type');
-      
-      if (!token || type !== 'signup') {
-        setStatus('error');
-        setMessage('Invalid confirmation link');
-        return;
-      }
-
       try {
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'signup'
-        });
-
+        // Check for error in URL hash first
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get('error');
+        const errorDescription = hashParams.get('error_description');
+        
         if (error) {
-          throw error;
+          setStatus('error');
+          setMessage(errorDescription || 'Email confirmation failed');
+          
+          toast({
+            title: "Confirmation Failed",
+            description: errorDescription || "Email confirmation failed",
+            variant: "destructive",
+          });
+          return;
         }
 
-        if (data.user) {
+        // Set up auth state listener to detect successful confirmation
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN' && session?.user) {
+            setStatus('success');
+            setMessage('Email confirmed successfully! You can now sign in.');
+            
+            toast({
+              title: "Email Confirmed",
+              description: "Your account has been verified. You can now sign in.",
+            });
+
+            // Redirect to dashboard after 3 seconds
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 3000);
+          } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            // Check if there's a user session after token refresh
+            const checkSession = async () => {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session?.user) {
+                setStatus('success');
+                setMessage('Email confirmed successfully! You can now sign in.');
+                
+                toast({
+                  title: "Email Confirmed",
+                  description: "Your account has been verified. You can now sign in.",
+                });
+
+                setTimeout(() => {
+                  navigate('/dashboard');
+                }, 3000);
+              }
+            };
+            checkSession();
+          }
+        });
+
+        // Check for existing session (in case user is already authenticated)
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
           setStatus('success');
           setMessage('Email confirmed successfully! You can now sign in.');
           
@@ -43,11 +80,24 @@ const EmailConfirmation = () => {
             description: "Your account has been verified. You can now sign in.",
           });
 
-          // Redirect to sign in after 3 seconds
           setTimeout(() => {
-            navigate('/auth?tab=signin');
+            navigate('/dashboard');
           }, 3000);
+        } else {
+          // If no session and no error, wait a moment for Supabase to process the URL
+          setTimeout(() => {
+            // If still loading after 5 seconds, show error
+            if (status === 'loading') {
+              setStatus('error');
+              setMessage('Email confirmation timed out. Please try again.');
+            }
+          }, 5000);
         }
+
+        // Cleanup subscription
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error: any) {
         console.error('Email confirmation error:', error);
         setStatus('error');
@@ -62,7 +112,7 @@ const EmailConfirmation = () => {
     };
 
     handleEmailConfirmation();
-  }, [searchParams, navigate, toast]);
+  }, [navigate, toast, status]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center p-4">
