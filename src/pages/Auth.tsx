@@ -36,6 +36,11 @@ const Auth = () => {
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  
+  // Password reset state
+  const [resetMode, setResetMode] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Clean up auth state utility
   const cleanupAuthState = () => {
@@ -78,6 +83,13 @@ const Auth = () => {
       
       // Clean up URL parameters
       navigate('/auth', { replace: true });
+    }
+
+    // Check for password reset mode
+    const mode = searchParams.get('mode');
+    if (mode === 'reset') {
+      setResetMode(true);
+      setActiveTab('signin');
     }
 
     const tab = searchParams.get('tab');
@@ -212,7 +224,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `https://talentspark.uz/auth?tab=signin`,
+        redirectTo: `https://talentspark.uz/auth?mode=reset`,
       });
 
       if (error) throw error;
@@ -222,6 +234,57 @@ const Auth = () => {
         title: "Password reset email sent",
         description: "Check your email for instructions to reset your password.",
       });
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure both passwords are the same.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password updated successfully",
+        description: "Your password has been reset. You can now sign in with your new password.",
+      });
+
+      // Reset state and redirect to sign in
+      setResetMode(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      navigate('/auth?tab=signin', { replace: true });
     } catch (error: any) {
       toast({
         title: "Password reset failed",
@@ -262,7 +325,57 @@ const Auth = () => {
               </TabsList>
 
               <TabsContent value="signin" className="space-y-4 mt-6">
-                {forgotPasswordMode ? (
+                {resetMode ? (
+                  <div className="space-y-4">
+                    <form onSubmit={handlePasswordReset} className="space-y-4">
+                      <div className="text-center space-y-2">
+                        <h3 className="text-xl font-semibold">Set new password</h3>
+                        <p className="text-muted-foreground">
+                          Enter your new password below.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-password">New Password</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            id="new-password"
+                            type="password"
+                            placeholder="Enter your new password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="pl-10"
+                            required
+                            minLength={6}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirm Password</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            id="confirm-password"
+                            type="password"
+                            placeholder="Confirm your new password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="pl-10"
+                            required
+                            minLength={6}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700"
+                        disabled={loading}
+                      >
+                        {loading ? 'Updating Password...' : 'Update Password'}
+                      </Button>
+                    </form>
+                  </div>
+                ) : forgotPasswordMode ? (
                   <div className="space-y-4">
                     {resetEmailSent ? (
                       <div className="space-y-4 text-center">
