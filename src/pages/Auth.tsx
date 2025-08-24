@@ -132,7 +132,7 @@ const Auth = () => {
       
       // Get the current URL and construct proper redirect
       const baseUrl = window.location.origin;
-      const redirectUrl = `${baseUrl}/auth`;
+      const redirectUrl = `${baseUrl}/confirm`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
