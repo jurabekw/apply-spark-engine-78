@@ -130,9 +130,8 @@ const Auth = () => {
       // Clean up existing state
       cleanupAuthState();
       
-      // Get the current URL and construct proper redirect
-      const baseUrl = window.location.origin;
-      const redirectUrl = `${baseUrl}/confirm`;
+      // Use the correct domain for email confirmation
+      const redirectUrl = `https://talentspark.uz/confirm`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
