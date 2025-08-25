@@ -57,8 +57,11 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Redirect if already authenticated
-    if (user) {
+    // Check for password reset mode first
+    const mode = searchParams.get('mode');
+    
+    // Don't redirect to dashboard if we're in password reset mode
+    if (user && mode !== 'reset') {
       navigate('/dashboard');
       return;
     }
@@ -85,8 +88,7 @@ const Auth = () => {
       navigate('/auth', { replace: true });
     }
 
-    // Check for password reset mode
-    const mode = searchParams.get('mode');
+    // Check for password reset mode (using existing mode variable)
     if (mode === 'reset') {
       setResetMode(true);
       setActiveTab('signin');

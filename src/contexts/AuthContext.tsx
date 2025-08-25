@@ -36,12 +36,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session.user);
           setLoading(false);
           
-          // Redirect to dashboard after successful sign-in
-          setTimeout(() => {
-            if (window.location.pathname === '/auth' || window.location.pathname === '/') {
-              window.location.href = '/dashboard';
-            }
-          }, 100);
+          // Check if this is a password recovery session
+          const urlParams = new URLSearchParams(window.location.search);
+          const mode = urlParams.get('mode');
+          
+          // Don't redirect to dashboard if we're in password reset mode
+          if (mode !== 'reset') {
+            // Redirect to dashboard after successful sign-in
+            setTimeout(() => {
+              if (window.location.pathname === '/auth' || window.location.pathname === '/') {
+                window.location.href = '/dashboard';
+              }
+            }, 100);
+          }
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
