@@ -138,7 +138,7 @@ const Landing = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">in</span>
             </div>
-            <span className="text-foreground font-medium">LinkedIn Integration</span>
+            <span className="text-foreground font-medium">Linkedin.com</span>
           </div>
           
           <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
