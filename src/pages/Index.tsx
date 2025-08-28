@@ -118,9 +118,9 @@ const recentSearches = useMemo(() => {
                   {t('dashboard.overview')} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
-              <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
+                <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
                 <Clock className="w-4 h-4 mr-2" />
-                Online
+                {t('status.online')}
               </Badge>
             </div>
 
@@ -239,7 +239,7 @@ const recentSearches = useMemo(() => {
                       {t('dashboard.recentUploads')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('candidates')} className="text-primary hover:text-primary">
-                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                      {t('candidates.viewAll')} <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -300,14 +300,14 @@ const recentSearches = useMemo(() => {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {t('common.comingSoon')}
+              {t('forms.comingSoonTitle')}
             </h3>
             <p className="text-gray-500 mb-6">
-              Create custom application forms with our drag-and-drop builder
+              {t('forms.comingSoonDescription')}
             </p>
             <Button disabled className="bg-gray-300">
               <Plus className="w-4 h-4 mr-2" />
-              Create New Form
+              {t('forms.createNewForm')}
             </Button>
           </div>
         )}

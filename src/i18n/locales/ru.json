@@ -89,5 +89,93 @@
     "noRecentActivity": "Последняя активность не найдена.",
     "noRecentSearches": "Последние поиски не найдены.",
     "noRecentUploads": "Последние загрузки не найдены."
+  },
+  "stats": {
+    "totalCandidates": "Всего кандидатов",
+    "allCandidatesInDatabase": "Все кандидаты в базе данных",
+    "activePositions": "Активные позиции",
+    "currentlyOpenPositions": "Открытые в настоящее время позиции",
+    "averageAiScore": "Средний балл ИИ",
+    "candidateMatchQuality": "Качество соответствия кандидатов",
+    "thisWeek": "На этой неделе",
+    "newCandidatesAdded": "Добавлено новых кандидатов"
+  },
+  "upload": {
+    "title": "Загрузка и анализ резюме",
+    "subtitle": "Загружайте несколько резюме и получайте мгновенный анализ кандидатов на основе ИИ",
+    "positionTitle": "Название позиции",
+    "positionPlaceholder": "например, Старший Frontend разработчик",
+    "requirementsAndSkills": "Требования и навыки",
+    "requirementsPlaceholder": "Опишите ключевые требования, навыки и квалификацию...",
+    "dragDropFiles": "Перетащите PDF файлы",
+    "dropFilesHere": "Отпустите файлы здесь",
+    "browseFiles": "выберите файлы",
+    "fileRestrictions": "Только PDF файлы • Максимум 10 файлов • До 10 МБ каждый",
+    "selectedFiles": "Выбранные файлы",
+    "processingStatus": "Статус обработки",
+    "analyze": "Анализировать",
+    "analyzing": "Анализируем резюме...",
+    "uploadingResumes": "Загружаем все резюме...",
+    "analyzingWithAi": "Анализируем резюме с помощью ИИ...",
+    "aiPoweredAnalysisTitle": "Анализ на основе ИИ",
+    "aiAnalysisDescription": "Наш продвинутый ИИ извлекает информацию о кандидатах, рассчитывает метрики опыта, определяет ключевые навыки и предоставляет интеллектуальные оценки соответствия на основе ваших конкретных требований к работе.",
+    "invalidFileType": "Неверный тип файла",
+    "onlyPdfFiles": "Пожалуйста, выберите только PDF файлы.",
+    "tooManyFiles": "Слишком много файлов",
+    "maxTenFiles": "Пожалуйста, выберите максимум 10 файлов за раз.",
+    "noFilesSelected": "Файлы не выбраны",
+    "selectPdfFiles": "Пожалуйста, выберите хотя бы один PDF файл для обработки.",
+    "missingInformation": "Недостающая информация",
+    "provideTitleAndRequirements": "Пожалуйста, укажите название позиции и требования.",
+    "processingComplete": "Обработка завершена!",
+    "processingFailed": "Обработка не удалась"
+  },
+  "linkedinSearch": {
+    "title": "Поиск кандидатов LinkedIn",
+    "subtitle": "Найдите квалифицированных кандидатов в LinkedIn",
+    "whatCandidate": "Какого кандидата вы ищете?",
+    "placeholder": "5 специалистов по маркетингу в Узбекистане",
+    "searchLinkedin": "Поиск в LinkedIn",
+    "searchingLinkedin": "Поиск в LinkedIn...",
+    "searchResults": "Результаты поиска",
+    "candidates": "кандидатов",
+    "searchQuery": "Поисковый запрос",
+    "searchCompleted": "Поиск завершен!",
+    "foundCandidates": "Найдено {count} кандидатов, соответствующих вашим критериям.",
+    "searchFailed": "Поиск не удался",
+    "authRequired": "Требуется аутентификация",
+    "loginToSearch": "Пожалуйста, войдите в систему для поиска кандидатов.",
+    "candidatesSaved": "Кандидаты LinkedIn сохранены",
+    "candidatesSavedDescription": "{inserted}/{total} сохранено. Все {shown} показаны в результатах."
+  },
+  "resumeSearch": {
+    "title": "Поиск кандидатов HH",
+    "subtitle": "Поиск кандидатов HH.ru с оценкой ИИ",
+    "jobTitle": "Название должности",
+    "jobTitlePlaceholder": "например, Старший Frontend разработчик",
+    "requiredSkills": "Необходимые навыки",
+    "skillsPlaceholder": "React, TypeScript, Node.js",
+    "experienceLevel": "Уровень опыта",
+    "noExperience": "Без опыта",
+    "between1And3": "1-3 года",
+    "between3And6": "3-6 лет",
+    "moreThan6": "6+ лет",
+    "searchCandidates": "Поиск кандидатов",
+    "searching": "Поиск...",
+    "aiScore": "Оценка ИИ",
+    "viewProfile": "Посмотреть профиль",
+    "noCandidatesFound": "Кандидаты, соответствующие вашим критериям, не найдены.",
+    "tryAdjusting": "Попробуйте изменить ваши требования."
+  },
+  "candidates": {
+    "viewAll": "Показать все"
+  },
+  "forms": {
+    "comingSoonTitle": "Скоро",
+    "comingSoonDescription": "Создавайте пользовательские анкеты с помощью нашего конструктора перетаскивания",
+    "createNewForm": "Создать новую форму"
+  },
+  "status": {
+    "online": "Онлайн"
   }
 }

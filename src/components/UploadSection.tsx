@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
 import AnalysisHistory from '@/components/AnalysisHistory';
+import { useTranslation } from 'react-i18next';
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobRequirements, setJobRequirements] = useState('');
@@ -20,14 +21,15 @@ const UploadSection = () => {
   
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const validateAndSetFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
     
     if (pdfFiles.length !== fileArray.length) {
       toast({
-        title: "Invalid file type",
-        description: "Please select only PDF files.",
+        title: t('upload.invalidFileType'),
+        description: t('upload.onlyPdfFiles'),
         variant: "destructive"
       });
       return false;
@@ -35,8 +37,8 @@ const UploadSection = () => {
     
     if (pdfFiles.length > 10) {
       toast({
-        title: "Too many files",
-        description: "Please select maximum 10 files at once.",
+        title: t('upload.tooManyFiles'),
+        description: t('upload.maxTenFiles'),
         variant: "destructive"
       });
       return false;
@@ -162,16 +164,16 @@ const UploadSection = () => {
     e.preventDefault();
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({
-        title: "No files selected",
-        description: "Please select at least one PDF file to process.",
+        title: t('upload.noFilesSelected'),
+        description: t('upload.selectPdfFiles'),
         variant: "destructive"
       });
       return;
     }
     if (!jobTitle.trim() || !jobRequirements.trim()) {
       toast({
-        title: "Missing information",
-        description: "Please provide both job title and requirements.",
+        title: t('upload.missingInformation'),
+        description: t('upload.provideTitleAndRequirements'),
         variant: "destructive"
       });
       return;
@@ -183,12 +185,12 @@ const UploadSection = () => {
     
     try {
       // Step 1: Upload all resumes
-      setProcessingProgress(['Uploading all resumes...']);
+      setProcessingProgress([t('upload.uploadingResumes')]);
       const uploadedResumes = await uploadAllResumes(files);
       setProcessingProgress(prev => [...prev, `✅ Uploaded ${uploadedResumes.length} resume${uploadedResumes.length > 1 ? 's' : ''}`]);
       
       // Step 2: Process all resumes together
-      setProcessingProgress(prev => [...prev, 'Analyzing resumes with AI...']);
+      setProcessingProgress(prev => [...prev, t('upload.analyzingWithAi')]);
       const result = await processAllResumes(uploadedResumes);
       
       if (result.success) {
@@ -196,7 +198,7 @@ const UploadSection = () => {
         setProcessingProgress(prev => [...prev, `✅ Successfully processed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''}`]);
         
         toast({
-          title: "Processing Complete!",
+          title: t('upload.processingComplete'),
           description: `Successfully analyzed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''} from ${files.length} resume${files.length > 1 ? 's' : ''}.`
         });
         
@@ -228,7 +230,7 @@ const UploadSection = () => {
       setProcessingProgress(prev => [...prev, `❌ ${displayError}`]);
       
       toast({
-        title: "Processing Failed",
+        title: t('upload.processingFailed'),
         description: displayError,
         variant: "destructive"
       });
@@ -245,10 +247,10 @@ const UploadSection = () => {
             <div className="p-2 bg-gradient-to-br from-primary to-accent rounded-xl">
               <CloudUpload className="w-6 h-6 text-white" />
             </div>
-            Resume Upload & Analysis
+            {t('upload.title')}
           </CardTitle>
           <p className="text-muted-foreground">
-            Upload multiple resumes and get instant AI-powered candidate analysis
+            {t('upload.subtitle')}
           </p>
         </CardHeader>
         
@@ -257,10 +259,10 @@ const UploadSection = () => {
             {/* Job Details */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="job-title" className="text-sm font-medium">Position Title</Label>
+                <Label htmlFor="job-title" className="text-sm font-medium">{t('upload.positionTitle')}</Label>
                 <Input 
                   id="job-title" 
-                  placeholder="e.g., Senior Frontend Developer" 
+                  placeholder={t('upload.positionPlaceholder')}
                   value={jobTitle} 
                   onChange={e => setJobTitle(e.target.value)} 
                   disabled={isProcessing} 
@@ -270,9 +272,9 @@ const UploadSection = () => {
               </div>
               
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Requirements & Skills</Label>
+                <Label className="text-sm font-medium">{t('upload.requirementsAndSkills')}</Label>
                 <Textarea 
-                  placeholder="Describe key requirements, skills, and qualifications..." 
+                  placeholder={t('upload.requirementsPlaceholder')}
                   value={jobRequirements} 
                   onChange={e => setJobRequirements(e.target.value)} 
                   disabled={isProcessing} 
@@ -315,13 +317,13 @@ const UploadSection = () => {
                 
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium text-foreground">
-                    {isDragOver ? 'Drop files here' : 'Drag & drop PDF files'}
+                    {isDragOver ? t('upload.dropFilesHere') : t('upload.dragDropFiles')}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    or <Button variant="link" className="p-0 h-auto text-primary">browse files</Button>
+                    or <Button variant="link" className="p-0 h-auto text-primary">{t('upload.browseFiles')}</Button>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF files only • Maximum 10 files • Up to 10MB each
+                    {t('upload.fileRestrictions')}
                   </p>
                 </div>
               </div>
@@ -333,7 +335,7 @@ const UploadSection = () => {
                 <CardContent className="p-4">
                   <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-success" />
-                    Selected Files ({selectedFiles.length})
+                    {t('upload.selectedFiles')} ({selectedFiles.length})
                   </h4>
                   <div className="grid gap-3">
                     {Array.from(selectedFiles).map((file, index) => (
@@ -371,7 +373,7 @@ const UploadSection = () => {
                 <CardContent className="p-4">
                   <h4 className="font-medium text-primary mb-3 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing Status
+                    {t('upload.processingStatus')}
                   </h4>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {processingProgress.map((message, index) => (
@@ -395,12 +397,12 @@ const UploadSection = () => {
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                  Analyzing Resumes...
+                  {t('upload.analyzing')}
                 </>
               ) : (
                 <>
                   <CloudUpload className="w-5 h-5 mr-3" />
-                  Analyze {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
+                  {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
                 </>
               )}
             </Button>
@@ -414,10 +416,9 @@ const UploadSection = () => {
                   <CheckCircle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground mb-2">AI-Powered Analysis</h4>
+                  <h4 className="font-semibold text-foreground mb-2">{t('upload.aiPoweredAnalysisTitle')}</h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Our advanced AI extracts candidate information, calculates experience metrics, 
-                    identifies key skills, and provides intelligent match scores based on your specific job requirements.
+                    {t('upload.aiAnalysisDescription')}
                   </p>
                 </div>
               </div>

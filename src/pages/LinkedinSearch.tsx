@@ -18,6 +18,7 @@ import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
 
 const searchSchema = z.object({
   job_title: z.string().min(1, "Please describe what candidate you're looking for"),
@@ -31,6 +32,7 @@ const LinkedinSearch = () => {
   const [lastSearch, setLastSearch] = useState<SearchFormData | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
@@ -215,8 +217,8 @@ const LinkedinSearch = () => {
   const onSubmit = async (data: SearchFormData) => {
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to search for candidates.",
+        title: t('linkedinSearch.authRequired'),
+        description: t('linkedinSearch.loginToSearch'),
         variant: "destructive",
       });
       return;
@@ -364,8 +366,12 @@ const LinkedinSearch = () => {
         }
 
         toast({
-          title: 'LinkedIn candidates saved',
-          description: `${inserted}/${records.length} saved. All ${normalizedCandidates.length} shown in results.`,
+          title: t('linkedinSearch.candidatesSaved'),
+          description: t('linkedinSearch.candidatesSavedDescription', {
+            inserted,
+            total: records.length,
+            shown: normalizedCandidates.length
+          }),
         });
 
         // Refresh the main candidates view on dashboard
@@ -376,8 +382,8 @@ const LinkedinSearch = () => {
       setLastSearch(data);
 
       toast({
-        title: "Search completed!",
-        description: `Found ${normalizedCandidates.length} candidates matching your criteria.`,
+        title: t('linkedinSearch.searchCompleted'),
+        description: t('linkedinSearch.foundCandidates', { count: normalizedCandidates.length }),
       });
 
       // Trigger refresh of search history
@@ -386,7 +392,7 @@ const LinkedinSearch = () => {
     } catch (error) {
       console.error('LinkedIn search error:', error);
       toast({
-        title: "Search failed",
+        title: t('linkedinSearch.searchFailed'),
         description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -409,15 +415,15 @@ const LinkedinSearch = () => {
             <Linkedin className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">LinkedIn Candidate Search</h1>
-            <p className="text-gray-600">Find qualified candidates on LinkedIn</p>
+            <h1 className="text-3xl font-bold">{t('linkedinSearch.title')}</h1>
+            <p className="text-gray-600">{t('linkedinSearch.subtitle')}</p>
           </div>
         </div>
 
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>What candidate are you looking for?</CardTitle>
+              <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -427,30 +433,30 @@ const LinkedinSearch = () => {
                      name="job_title"
                      render={({ field }) => (
                        <FormItem>
-                         <FormControl>
-                           <Input 
-                             placeholder="5 Marketing specialists in Uzbekistan"
-                             {...field} 
-                           />
-                         </FormControl>
+                          <FormControl>
+                            <Input 
+                              placeholder={t('linkedinSearch.placeholder')}
+                              {...field} 
+                            />
+                          </FormControl>
                          <FormMessage />
                        </FormItem>
                      )}
                    />
 
-                   <Button type="submit" disabled={isLoading} className="w-full">
-                     {isLoading ? (
-                       <div className="flex items-center gap-2">
-                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                         Searching LinkedIn...
-                       </div>
-                     ) : (
-                       <div className="flex items-center gap-2">
-                         <Search className="h-4 w-4" />
-                         Search LinkedIn
-                       </div>
-                     )}
-                   </Button>
+                     <Button type="submit" disabled={isLoading} className="w-full">
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          {t('linkedinSearch.searchingLinkedin')}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Search className="h-4 w-4" />
+                          {t('linkedinSearch.searchLinkedin')}
+                        </div>
+                      )}
+                    </Button>
                 </form>
               </Form>
             </CardContent>
@@ -458,15 +464,15 @@ const LinkedinSearch = () => {
 
           {lastSearch && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Search Results
-                  <Badge variant="secondary">{searchResults.length} candidates</Badge>
-                </CardTitle>
-                 <div className="text-sm text-gray-600">
-                   <p><strong>Search Query:</strong> {lastSearch.job_title}</p>
-                 </div>
-              </CardHeader>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   {t('linkedinSearch.searchResults')}
+                   <Badge variant="secondary">{searchResults.length} {t('linkedinSearch.candidates')}</Badge>
+                 </CardTitle>
+                  <div className="text-sm text-gray-600">
+                    <p><strong>{t('linkedinSearch.searchQuery')}:</strong> {lastSearch.job_title}</p>
+                  </div>
+               </CardHeader>
               <CardContent>
                 <ResumeSearchTable candidates={searchResults} loading={isLoading} />
               </CardContent>
