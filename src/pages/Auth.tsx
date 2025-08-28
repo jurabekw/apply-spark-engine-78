@@ -9,6 +9,7 @@ import { AlertCircle, Mail, Lock, User, Building } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -17,6 +18,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -322,8 +324,8 @@ const Auth = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin">{t('auth.signIn')}</TabsTrigger>
+                <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin" className="space-y-4 mt-6">
@@ -444,13 +446,13 @@ const Auth = () => {
                 ) : (
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
+                      <Label htmlFor="login-email">{t('auth.email')}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="login-email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={t('auth.enterEmail')}
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
                           className="pl-10"
@@ -460,14 +462,14 @@ const Auth = () => {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="login-password">Password</Label>
+                        <Label htmlFor="login-password">{t('auth.password')}</Label>
                         <Button
                           variant="link"
                           type="button"
                           className="h-auto p-0 text-sm text-indigo-600 hover:text-indigo-700"
                           onClick={() => setForgotPasswordMode(true)}
                         >
-                          Forgot password?
+                          {t('auth.forgotPassword')}
                         </Button>
                       </div>
                       <div className="relative">
@@ -475,7 +477,7 @@ const Auth = () => {
                         <Input
                           id="login-password"
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder={t('auth.enterPassword')}
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
                           className="pl-10"

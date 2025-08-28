@@ -17,11 +17,13 @@ import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { formatDistanceToNow } from 'date-fns';
 import SearchResultsModal from '@/components/SearchResultsModal';
 import CandidateDetailModal from '@/components/CandidateDetailModal';
+import { useTranslation } from 'react-i18next';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { searches, loading: loadingSearches } = useSearchHistory();
   const { candidates, loading: loadingCandidates } = useCandidates();
@@ -77,12 +79,12 @@ const recentSearches = useMemo(() => {
         <div className="bg-card rounded-xl border border-border/50 p-2 mb-8 shadow-sm">
           <div className="flex flex-wrap gap-1">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-              { id: 'upload', label: 'Upload Resumes', icon: Upload },
-              { id: 'hh-search', label: 'HH Candidate Search', icon: Search },
-              { id: 'linkedin-search', label: 'LinkedIn Search', icon: Users },
-              { id: 'candidates', label: 'Candidates', icon: Users },
-              { id: 'forms', label: 'Application Forms', icon: FileText },
+              { id: 'dashboard', label: t('navigation.dashboard'), icon: BarChart3 },
+              { id: 'upload', label: t('navigation.uploadResumes'), icon: Upload },
+              { id: 'hh-search', label: t('navigation.hhCandidateSearch'), icon: Search },
+              { id: 'linkedin-search', label: t('navigation.linkedinSearch'), icon: Users },
+              { id: 'candidates', label: t('navigation.candidates'), icon: Users },
+              { id: 'forms', label: t('navigation.applicationForms'), icon: FileText },
             ].map(({ id, label, icon: Icon }) => (
               <Button
                 key={id}
@@ -110,10 +112,10 @@ const recentSearches = useMemo(() => {
             <div className="flex justify-between items-start mb-8 animate-fade-in">
               <div>
                 <h1 className="text-4xl font-heading font-bold text-foreground mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Welcome Back
+                  {t('dashboard.welcome')}
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                  Your AI-powered recruitment dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  {t('dashboard.overview')} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
               <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
@@ -133,9 +135,9 @@ const recentSearches = useMemo(() => {
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  <CardTitle className="text-xl">Quick Upload</CardTitle>
+                  <CardTitle className="text-xl">{t('dashboard.uploadResumes')}</CardTitle>
                   <CardDescription>
-                    Upload multiple resumes and get instant AI analysis with detailed scoring
+                    {t('dashboard.uploadDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -144,7 +146,7 @@ const recentSearches = useMemo(() => {
                     variant="default"
                     className="w-full"
                   >
-                    Start Screening Process
+                    {t('common.upload')}
                   </Button>
                 </CardContent>
               </Card>
@@ -157,9 +159,9 @@ const recentSearches = useMemo(() => {
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-success transition-colors" />
                   </div>
-                  <CardTitle className="text-xl">HH Search</CardTitle>
+                  <CardTitle className="text-xl">{t('dashboard.hhSearch')}</CardTitle>
                   <CardDescription>
-                    Search external candidate databases with AI-powered matching
+                    {t('dashboard.hhSearchDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -168,7 +170,7 @@ const recentSearches = useMemo(() => {
                     variant="success"
                     className="w-full"
                   >
-                    Search Candidates
+                    {t('common.search')}
                   </Button>
                 </CardContent>
               </Card>
@@ -181,10 +183,10 @@ const recentSearches = useMemo(() => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Search className="w-5 h-5 text-success" />
-                      Recent HH Searches
+                      {t('dashboard.recentSearches')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('hh-search')} className="text-success hover:text-success">
-                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                      {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -198,7 +200,7 @@ const recentSearches = useMemo(() => {
                   ) : recentSearches.length === 0 ? (
                     <div className="text-center py-6">
                       <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">No searches yet</p>
+                      <p className="text-sm text-muted-foreground">{t('dashboard.noRecentSearches')}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -234,7 +236,7 @@ const recentSearches = useMemo(() => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Upload className="w-5 h-5 text-primary" />
-                      Recent Uploads
+                      {t('dashboard.recentUploads')}
                     </CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('candidates')} className="text-primary hover:text-primary">
                       View all <ArrowRight className="w-4 h-4 ml-1" />
@@ -251,7 +253,7 @@ const recentSearches = useMemo(() => {
                   ) : recentUploads.length === 0 ? (
                     <div className="text-center py-6">
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">No uploads yet</p>
+                      <p className="text-sm text-muted-foreground">{t('dashboard.noRecentUploads')}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -298,7 +300,7 @@ const recentSearches = useMemo(() => {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Form Builder Coming Soon
+              {t('common.comingSoon')}
             </h3>
             <p className="text-gray-500 mb-6">
               Create custom application forms with our drag-and-drop builder

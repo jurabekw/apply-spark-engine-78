@@ -3,10 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Upload, Users, FileText, BarChart3, CheckCircle, Star, Zap, Shield, Clock, Brain, Target, TrendingUp, Search, Database, Filter, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Logo from '@/components/Logo';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const features = [
     {
@@ -103,11 +106,12 @@ const Landing = () => {
           <Logo size="md" variant="light" />
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <Button variant="ghost" onClick={() => navigate('/auth?tab=signin')}>
-              Sign In
+              {t('auth.signIn')}
             </Button>
             <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-glow" onClick={() => navigate('/auth?tab=signup')}>
-              Get Started Free
+              {t('landing.getStarted')}
             </Button>
           </div>
         </div>
@@ -120,16 +124,11 @@ const Landing = () => {
         </Badge>
         
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-8 leading-tight">
-          Find Perfect Candidates
-          <br />
-          <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
-            10x Faster
-          </span>
+          {t('landing.title')}
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-          AI-powered recruitment platform that analyzes resumes and searches millions of profiles. 
-          Find and hire perfect talent in minutes, not months.
+          {t('landing.subtitle')}
         </p>
 
         {/* Platform Integration Icons */}
@@ -138,7 +137,7 @@ const Landing = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">in</span>
             </div>
-            <span className="text-foreground font-medium">Linkedin.com</span>
+            <span className="text-foreground font-medium">{t('landing.linkedinIntegration')}</span>
           </div>
           
           <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
@@ -160,7 +159,7 @@ const Landing = () => {
             className="bg-gradient-to-r from-primary to-accent hover:shadow-glow px-10 py-6 text-lg font-medium"
             onClick={() => navigate('/auth?tab=signup')}
           >
-            Start Free Trial
+            {t('landing.startFreeTrial')}
           </Button>
         </div>
 
