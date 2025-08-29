@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import SearchCandidateDetailModal from './SearchCandidateDetailModal';
+import { useTranslation } from 'react-i18next';
 
 interface Candidate {
   title: string;
@@ -30,6 +31,7 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
   candidates = [], 
   loading = false 
 }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [minScore, setMinScore] = useState([0]);
   const [onlyWithUrl, setOnlyWithUrl] = useState(false);
@@ -104,12 +106,12 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
       <Card className="p-6">
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <h3 className="text-lg font-semibold">LinkedIn Search Results ({filteredCandidates.length})</h3>
+            <h3 className="text-lg font-semibold">LinkedIn {t('messages.searchResults')} ({filteredCandidates.length})</h3>
             <div className="flex gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search candidates..."
+                  placeholder={t('placeholders.searchResults')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-full sm:w-64"
@@ -120,13 +122,13 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Filter className="h-4 w-4" />
-                    Filter
+                    {t('buttons.filter')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <div className="space-y-4">
                     <div>
-                      <Label>Minimum AI Score: {minScore[0]}</Label>
+                      <Label>{t('labels.minimumAiScore')}: {minScore[0]}</Label>
                       <Slider
                         value={minScore}
                         onValueChange={setMinScore}
@@ -142,7 +144,7 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                         checked={onlyWithUrl}
                         onCheckedChange={(checked) => setOnlyWithUrl(checked as boolean)}
                       />
-                      <Label htmlFor="linkedin-url">Only show profiles with LinkedIn URL</Label>
+                      <Label htmlFor="linkedin-url">{t('labels.onlyWithLinkedinUrl')}</Label>
                     </div>
                   </div>
                 </PopoverContent>
@@ -151,7 +153,7 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
               {filteredCandidates.length > 0 && (
                 <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
                   <Download className="h-4 w-4" />
-                  Export CSV
+                  {t('buttons.exportCsv')}
                 </Button>
               )}
             </div>
@@ -159,19 +161,19 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
 
           {filteredCandidates.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {candidates.length === 0 ? "No candidates found." : "No candidates match your filters."}
+              {candidates.length === 0 ? t('messages.noCandidatesFound') : t('messages.noCandidatesMatch')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>AI Score</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Key Skills</TableHead>
-                    <TableHead>LinkedIn Profile</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('tableHeaders.candidate')}</TableHead>
+                    <TableHead>{t('tableHeaders.aiScore')}</TableHead>
+                    <TableHead>{t('tableHeaders.experience')}</TableHead>
+                    <TableHead>{t('tableHeaders.keySkills')}</TableHead>
+                    <TableHead>{t('tableHeaders.linkedinProfile')}</TableHead>
+                    <TableHead>{t('tableHeaders.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -180,14 +182,14 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                     return (
                       <TableRow key={index}>
                         <TableCell className="font-medium">
-                          {candidate.title || 'N/A'}
+                          {candidate.title || t('messages.na')}
                         </TableCell>
                         <TableCell>
                           <Badge className={getScoreColor(score)}>
                             {score.toFixed(1)}
                           </Badge>
                         </TableCell>
-                        <TableCell>{candidate.experience || 'N/A'}</TableCell>
+                        <TableCell>{candidate.experience || t('messages.na')}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {Array.isArray(candidate.key_skills) && candidate.key_skills.slice(0, 3).map((skill, idx) => (
@@ -197,7 +199,7 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                             ))}
                             {Array.isArray(candidate.key_skills) && candidate.key_skills.length > 3 && (
                               <Badge variant="outline" className="text-xs">
-                                +{candidate.key_skills.length - 3} more
+                                +{candidate.key_skills.length - 3} {t('messages.more')}
                               </Badge>
                             )}
                           </div>
@@ -216,12 +218,12 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1"
                               >
-                                View Profile
+                                {t('buttons.viewProfile')}
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                             </Button>
                           ) : (
-                            <span className="text-gray-400">Not available</span>
+                            <span className="text-gray-400">{t('messages.notAvailable')}</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -232,7 +234,7 @@ export const LinkedinSearchTable: React.FC<LinkedinSearchTableProps> = ({
                             className="gap-1"
                           >
                             <Eye className="h-4 w-4" />
-                            View
+                            {t('buttons.view')}
                           </Button>
                         </TableCell>
                       </TableRow>

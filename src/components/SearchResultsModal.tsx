@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ResumeSearchTable from './ResumeSearchTable';
+import { useTranslation } from 'react-i18next';
 
 interface SearchResultsModalProps {
   isOpen: boolean;
@@ -148,6 +149,7 @@ const normalizeCandidates = (response: any): any[] => {
 };
 
 const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps) => {
+  const { t } = useTranslation();
   const candidates = useMemo(() => normalizeCandidates(search?.response), [search]);
 
   return (
@@ -155,7 +157,7 @@ const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps
       <DialogContent className="w-[92vw] max-w-5xl xl:max-w-6xl h-[85vh] min-h-0 p-0 overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex flex-col gap-1">
-            <span>Search Results</span>
+            <span>{t('messages.searchResults')}</span>
             {search && (
               <span className="text-sm text-muted-foreground font-normal">
                 {search.job_title} • {getExperienceLevelLabel(search.experience_level)} • {search.required_skills}
@@ -170,7 +172,7 @@ const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps
           </div>
         ) : (
           <div className="py-12 text-center text-muted-foreground">
-            No saved results found for this search.
+            {t('messages.noSavedResults')}
           </div>
         )}
       </DialogContent>

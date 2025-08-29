@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import SearchCandidateDetailModal from './SearchCandidateDetailModal';
+import { useTranslation } from 'react-i18next';
 interface Candidate {
   title: string;
   experience: string;
@@ -29,6 +30,7 @@ const ResumeSearchTable = ({
   candidates,
   loading
 }: ResumeSearchTableProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [onlyWithUrl, setOnlyWithUrl] = useState(false);
@@ -109,7 +111,7 @@ const ResumeSearchTable = ({
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-2 text-muted-foreground">Loading search results...</span>
+            <span className="ml-2 text-muted-foreground">{t('messages.loadingSearchResults')}</span>
           </div>
         </CardContent>
       </Card>;
@@ -117,17 +119,17 @@ const ResumeSearchTable = ({
   return <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Search Results ({filteredCandidates.length})</CardTitle>
+          <CardTitle>{t('messages.searchResults')} ({filteredCandidates.length})</CardTitle>
           <div className="flex gap-2">
             <div className="relative w-72">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search candidates..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input placeholder={t('placeholders.searchResults')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Filter className="w-4 h-4 mr-2" />
-                  Filter
+                  {t('buttons.filter')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-72" align="end">
@@ -141,14 +143,14 @@ const ResumeSearchTable = ({
                     <Button variant="secondary" size="sm" onClick={() => {
                     setMinScore(0);
                     setOnlyWithUrl(false);
-                  }}>Reset</Button>
+                  }}>{t('buttons.reset')}</Button>
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
             <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="w-4 h-4 mr-2" />
-              Export
+              {t('buttons.export')}
             </Button>
           </div>
         </div>
@@ -158,23 +160,23 @@ const ResumeSearchTable = ({
             <div className="text-muted-foreground mb-4">
               <Search className="w-16 h-16 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">
-                No candidates found
+                {t('messages.noCandidatesFound')}
               </h3>
               <p>
-                {candidates.length === 0 ? "Run a search to find matching candidates from HH.ru" : "Try adjusting your search terms."}
+                {candidates.length === 0 ? t('messages.runSearchDescription') : t('messages.candidatesTryAdjusting')}
               </p>
             </div>
           </div> : <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Candidate</TableHead>
-                  <TableHead>AI Score</TableHead>
-                  <TableHead>Experience</TableHead>
-                  <TableHead>Education</TableHead>
-                  <TableHead>Key Skills</TableHead>
-                  <TableHead>Resume</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('tableHeaders.candidate')}</TableHead>
+                  <TableHead>{t('tableHeaders.aiScore')}</TableHead>
+                  <TableHead>{t('tableHeaders.experience')}</TableHead>
+                  <TableHead>{t('tableHeaders.education')}</TableHead>
+                  <TableHead>{t('tableHeaders.keySkills')}</TableHead>
+                  <TableHead>{t('tableHeaders.resume')}</TableHead>
+                  <TableHead>{t('tableHeaders.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,10 +197,10 @@ const ResumeSearchTable = ({
                         </div>
                       </TableCell>
                       <TableCell>
-                        {candidate.experience || 'Not specified'}
+                        {candidate.experience || t('messages.notSpecified')}
                       </TableCell>
                       <TableCell>
-                        {candidate.education_level || 'Not specified'}
+                        {candidate.education_level || t('messages.notSpecified')}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
@@ -219,7 +221,7 @@ const ResumeSearchTable = ({
                       </TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => setSelectedCandidate(candidate)}>
-                          View
+                          {t('buttons.view')}
                         </Button>
                       </TableCell>
                     </TableRow>;

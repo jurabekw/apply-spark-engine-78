@@ -9,8 +9,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Download, Star, Eye, Loader2, Trash2, ExternalLink, Filter, ArrowUpDown, MoreHorizontal, User, Users, Mail, MapPin, Calendar, Award } from 'lucide-react';
 import { useCandidates } from '@/hooks/useCandidates';
 import CandidateDetailModal from './CandidateDetailModal';
+import { useTranslation } from 'react-i18next';
 
 const CandidateTable = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -49,21 +51,21 @@ const CandidateTable = () => {
   };
 
   const getScoreLabel = (score: number | undefined) => {
-    if (!score) return 'No score';
-    if (score >= 85) return 'Excellent';
-    if (score >= 70) return 'Good';
-    if (score >= 60) return 'Fair';
-    return 'Poor';
+    if (!score) return t('messages.noScore');
+    if (score >= 85) return t('messages.excellent');
+    if (score >= 70) return t('messages.good');
+    if (score >= 60) return t('messages.fair');
+    return t('messages.poor');
   };
 
   const getStatusLabel = (status: string) => {
     const labels = {
-      'new': 'New',
-      'reviewing': 'Reviewing',
-      'shortlisted': 'Shortlisted',
-      'interviewed': 'Interviewed',
-      'hired': 'Hired',
-      'rejected': 'Rejected'
+      'new': t('scoreLabels.new'),
+      'reviewing': t('scoreLabels.reviewing'),
+      'shortlisted': t('scoreLabels.shortlisted'),
+      'interviewed': t('scoreLabels.interviewed'),
+      'hired': t('scoreLabels.hired'),
+      'rejected': t('scoreLabels.rejected')
     };
     return labels[status as keyof typeof labels] || status;
   };
@@ -160,7 +162,7 @@ const CandidateTable = () => {
       <div className="space-y-6 animate-fade-in">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-foreground">Candidate Database</h2>
+            <h2 className="text-3xl font-heading font-bold text-foreground">{t('navigation.candidates')} Database</h2>
             <p className="text-muted-foreground">Manage and review all candidate submissions</p>
           </div>
         </div>
@@ -168,7 +170,7 @@ const CandidateTable = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <span className="ml-3 text-muted-foreground">Loading candidates...</span>
+              <span className="ml-3 text-muted-foreground">{t('messages.loadingCandidates')}</span>
             </div>
           </CardContent>
         </Card>
@@ -195,7 +197,7 @@ const CandidateTable = () => {
                 onClick={() => setSourceFilter('all')}
                 className={sourceFilter === 'all' ? 'shadow-sm' : ''}
               >
-                All
+{t('buttons.all')}
               </Button>
               <Button 
                 variant={sourceFilter === 'upload' ? 'default' : 'ghost'} 
@@ -203,7 +205,7 @@ const CandidateTable = () => {
                 onClick={() => setSourceFilter('upload')}
                 className={sourceFilter === 'upload' ? 'shadow-sm' : ''}
               >
-                Uploaded
+{t('buttons.uploaded')}
               </Button>
               <Button 
                 variant={sourceFilter === 'hh_search' ? 'default' : 'ghost'} 
@@ -211,7 +213,7 @@ const CandidateTable = () => {
                 onClick={() => setSourceFilter('hh_search')}
                 className={sourceFilter === 'hh_search' ? 'shadow-sm' : ''}
               >
-                HH Search
+{t('buttons.hhSearch')}
               </Button>
               <Button 
                 variant={sourceFilter === 'linkedin_search' ? 'default' : 'ghost'} 
@@ -219,13 +221,13 @@ const CandidateTable = () => {
                 onClick={() => setSourceFilter('linkedin_search')}
                 className={sourceFilter === 'linkedin_search' ? 'shadow-sm' : ''}
               >
-                LinkedIn Search
+{t('buttons.linkedinSearch')}
               </Button>
             </div>
             
             <Button variant="outline" onClick={handleExport} disabled={filteredCandidates.length === 0}>
               <Download className="w-4 h-4 mr-2" />
-              Export CSV
+              {t('buttons.exportCsv')}
             </Button>
           </div>
         </div>
@@ -236,7 +238,7 @@ const CandidateTable = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
-                placeholder="Search candidates by name, email, or position..."
+                placeholder={t('placeholders.searchCandidates')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-12 h-12 text-base"
@@ -251,7 +253,7 @@ const CandidateTable = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
-                Candidates ({filteredCandidates.length})
+                {t('labels.candidates')} ({filteredCandidates.length})
               </CardTitle>
               {filteredCandidates.length > 0 && (
                 <Badge variant="secondary" className="px-3 py-1">
@@ -270,12 +272,12 @@ const CandidateTable = () => {
                   <User className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  No candidates found
+                  {t('messages.noCandidatesFound')}
                 </h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   {candidates.length === 0 
-                    ? "Upload some resumes or search HH candidates to get started with AI-powered screening."
-                    : "Try adjusting your search terms or filters."
+                    ? t('messages.candidatesDescription')
+                    : t('messages.candidatesTryAdjusting')
                   }
                 </p>
               </div>
@@ -382,7 +384,7 @@ const CandidateTable = () => {
                           className="flex-1 lg:flex-none"
                         >
                           <Eye className="w-4 h-4 mr-2" />
-                          View Details
+                          {t('buttons.viewDetails')}
                         </Button>
                         
                         <div className="flex gap-1">

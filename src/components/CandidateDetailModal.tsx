@@ -9,6 +9,7 @@ import { Eye, Download, X, Linkedin } from 'lucide-react';
 import { Candidate } from '@/hooks/useCandidates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface CandidateDetailModalProps {
   candidate: Candidate | null;
@@ -17,6 +18,7 @@ interface CandidateDetailModalProps {
 }
 
 const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailModalProps) => {
+  const { t } = useTranslation();
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [loadingResume, setLoadingResume] = useState(false);
   const { toast } = useToast();
@@ -34,8 +36,8 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
   const handleViewResume = async () => {
     if (!candidate.resume_file_path) {
       toast({
-        title: "No resume file",
-        description: "This candidate doesn't have an uploaded resume file.",
+        title: t('messages.noResumeFile'),
+        description: t('messages.noResumeDescription'),
         variant: "destructive",
       });
       return;
@@ -54,8 +56,8 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
     } catch (error) {
       console.error('Error loading resume:', error);
       toast({
-        title: "Error loading resume",
-        description: "Could not load the resume file. Please try again.",
+        title: t('messages.errorLoadingResume'),
+        description: t('messages.errorLoadingResumeDescription'),
         variant: "destructive",
       });
     } finally {
@@ -68,7 +70,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Candidate Details - {candidate.name}</span>
+            <span>{t('messages.candidateDetails')} - {candidate.name}</span>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -79,33 +81,33 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle>{t('labels.basicInformation')}</CardTitle>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Name</p>
+                <p className="text-sm text-gray-500">{t('labels.name')}</p>
                 <p className="font-medium">{candidate.name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{candidate.email || 'Not provided'}</p>
+                <p className="text-sm text-gray-500">{t('labels.email')}</p>
+                <p className="font-medium">{candidate.email || t('messages.notProvided')}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Phone</p>
-                <p className="font-medium">{candidate.phone || 'Not provided'}</p>
+                <p className="text-sm text-gray-500">{t('labels.phone')}</p>
+                <p className="font-medium">{candidate.phone || t('messages.notProvided')}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Position</p>
-                <p className="font-medium">{candidate.position || 'Not specified'}</p>
+                <p className="text-sm text-gray-500">{t('labels.position')}</p>
+                <p className="font-medium">{candidate.position || t('messages.notSpecified')}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Experience</p>
+                <p className="text-sm text-gray-500">{t('labels.experience')}</p>
                 <p className="font-medium">
-                  {candidate.experience_years ? `${candidate.experience_years} years` : 'Not specified'}
+                  {candidate.experience_years ? `${candidate.experience_years} ${t('messages.years')}` : t('messages.notSpecified')}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Source</p>
+                <p className="text-sm text-gray-500">{t('labels.source')}</p>
                 <Badge variant="outline">{candidate.source}</Badge>
               </div>
             </CardContent>
@@ -115,7 +117,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                AI Analysis & Score
+{t('labels.basicInformation')} & {t('labels.aiScore')}
                 <Badge className={getScoreColor(candidate.ai_score)}>
                   {candidate.ai_score ? `${candidate.ai_score}%` : 'N/A'}
                 </Badge>
@@ -124,10 +126,10 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
             <CardContent className="space-y-4">
               {candidate.ai_score && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">Match Score</p>
+                  <p className="text-sm text-gray-500 mb-2">{t('labels.matchScore')}</p>
                   <Progress value={candidate.ai_score} className="h-3" />
                   <p className="text-xs text-gray-500 mt-1">
-                    {candidate.ai_score}% match based on job requirements
+                    {candidate.ai_score}% {t('messages.matchBasedOnRequirements')}
                   </p>
                 </div>
               )}
