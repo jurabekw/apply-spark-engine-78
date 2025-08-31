@@ -309,5 +309,63 @@
     "resume": "Resume",
     "linkedinProfile": "LinkedIn Profile",
     "actions": "Actions"
+  },
+  "validation": {
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "invalidEmail": "Please enter a valid email address",
+    "fieldRequired": "This field is required"
+  },
+  "toasts": {
+    "authError": "Authentication Error",
+    "welcomeBack": "Welcome back!",
+    "signInFailed": "Sign in failed", 
+    "accountExists": "Account already exists",
+    "signUpFailed": "Sign up failed",
+    "checkEmail": "Check your email!",
+    "verificationEmail": "We've sent you a verification email. Please check your inbox and click the link to complete your registration.",
+    "passwordResetSent": "Password reset email sent",
+    "passwordResetFailed": "Password reset failed",
+    "passwordUpdated": "Password updated successfully",
+    "confirmationFailed": "Confirmation Failed",
+    "emailConfirmed": "Email Confirmed",
+    "accountVerified": "Your account has been verified. You can now sign in.",
+    "warning": "Warning",
+    "candidatesSaved": "Candidates saved",
+    "searchCompleted": "Search completed",
+    "errorSavingSearch": "Error saving search to database, but results are available.",
+    "apiQuotaExceeded": "API quota exceeded - try again later",
+    "apiAuthFailed": "API key authentication failed", 
+    "serviceUnavailable": "Service temporarily unavailable"
+  },
+  "errors": {
+    "confirmingEmail": "Confirming your email...",
+    "emailConfirmed": "Email Confirmed!",
+    "confirmationFailed": "Confirmation Failed",
+    "confirmationTimedOut": "Email confirmation timed out. Please try again.",
+    "failedToConfirm": "Failed to confirm email",
+    "pageNotFound": "Oops! Page not found",
+    "returnToHome": "Return to Home",
+    "404": "404"
+  },
+  "loading": {
+    "loading": "Loading...",
+    "searching": "Searching...",
+    "processing": "Processing...",
+    "pleaseWait": "Please wait...",
+    "analyzing": "Analyzing...",
+    "uploading": "Uploading..."
+  },
+  "selects": {
+    "selectExperience": "Select experience",
+    "selectAll": "Select All",
+    "selectOption": "Select an option",
+    "chooseFile": "Choose file",
+    "browse": "Browse"
+  },
+  "confirmDialogs": {
+    "areYouSure": "Are you sure?",
+    "thisActionCannotBeUndone": "This action cannot be undone",
+    "confirmDeletion": "Confirm deletion"
   }
 }

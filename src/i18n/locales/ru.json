@@ -309,5 +309,63 @@
     "resume": "Резюме",
     "linkedinProfile": "Профиль LinkedIn",
     "actions": "Действия"
+  },
+  "validation": {
+    "passwordsDoNotMatch": "Пароли не совпадают",
+    "passwordTooShort": "Пароль должен содержать не менее 6 символов",
+    "invalidEmail": "Пожалуйста, введите действительный email адрес",
+    "fieldRequired": "Это поле обязательно для заполнения"
+  },
+  "toasts": {
+    "authError": "Ошибка аутентификации",
+    "welcomeBack": "Добро пожаловать!",
+    "signInFailed": "Вход не выполнен", 
+    "accountExists": "Аккаунт уже существует",
+    "signUpFailed": "Регистрация не удалась",
+    "checkEmail": "Проверьте вашу почту!",
+    "verificationEmail": "Мы отправили вам письмо для подтверждения. Пожалуйста, проверьте почту и перейдите по ссылке для завершения регистрации.",
+    "passwordResetSent": "Письмо для сброса пароля отправлено",
+    "passwordResetFailed": "Сброс пароля не удался",
+    "passwordUpdated": "Пароль успешно обновлен",
+    "confirmationFailed": "Подтверждение не удалось",
+    "emailConfirmed": "Email подтвержден",
+    "accountVerified": "Ваш аккаунт подтвержден. Теперь вы можете войти в систему.",
+    "warning": "Предупреждение",
+    "candidatesSaved": "Кандидаты сохранены",
+    "searchCompleted": "Поиск завершен",
+    "errorSavingSearch": "Ошибка сохранения поиска в базе данных, но результаты доступны.",
+    "apiQuotaExceeded": "Превышен лимит API - попробуйте позже",
+    "apiAuthFailed": "Ошибка аутентификации API ключа",
+    "serviceUnavailable": "Сервис временно недоступен"
+  },
+  "errors": {
+    "confirmingEmail": "Подтверждение вашего email...",
+    "emailConfirmed": "Email подтвержден!",
+    "confirmationFailed": "Подтверждение не удалось",
+    "confirmationTimedOut": "Время подтверждения email истекло. Пожалуйста, попробуйте снова.",
+    "failedToConfirm": "Не удалось подтвердить email",
+    "pageNotFound": "Упс! Страница не найдена",
+    "returnToHome": "Вернуться на главную",
+    "404": "404"
+  },
+  "loading": {
+    "loading": "Загрузка...",
+    "searching": "Поиск...",
+    "processing": "Обработка...",
+    "pleaseWait": "Пожалуйста, подождите...",
+    "analyzing": "Анализ...",
+    "uploading": "Загрузка..."
+  },
+  "selects": {
+    "selectExperience": "Выберите опыт",
+    "selectAll": "Выбрать все",
+    "selectOption": "Выберите опцию",
+    "chooseFile": "Выберите файл",
+    "browse": "Обзор"
+  },
+  "confirmDialogs": {
+    "areYouSure": "Вы уверены?",
+    "thisActionCannotBeUndone": "Это действие нельзя отменить",
+    "confirmDeletion": "Подтвердить удаление"
   }
 }

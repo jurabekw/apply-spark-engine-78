@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import ResumeSearchTable from "@/components/ResumeSearchTable";
 import SearchHistory from "@/components/SearchHistory";
+import { useTranslation } from 'react-i18next';
 
 // Types
 type Candidate = {
@@ -337,6 +338,7 @@ export default function ResumeSearch() {
   const {
     toast
   } = useToast();
+  const { t } = useTranslation();
 
   // Form
   const form = useForm<z.infer<typeof schema>>({
@@ -671,7 +673,7 @@ export default function ResumeSearch() {
             }) => <FormItem className="md:col-span-1">
                     <FormLabel>Job Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Software Developer, Marketing Manager" aria-label="Job Title" {...field} />
+                      <Input placeholder={t('resumeSearch.jobTitlePlaceholder')} aria-label="Job Title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>} />
@@ -683,7 +685,7 @@ export default function ResumeSearch() {
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger aria-label="Experience Level">
-                          <SelectValue placeholder="Select experience" />
+                          <SelectValue placeholder={t('selects.selectExperience')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -701,7 +703,7 @@ export default function ResumeSearch() {
             }) => <FormItem className="md:col-span-2">
                     <FormLabel>Required Skills</FormLabel>
                     <FormControl>
-                      <Textarea rows={4} placeholder="Enter skills separated by commas (e.g. JavaScript, React, Node.js, Python)" aria-label="Required Skills" {...field} />
+                      <Textarea rows={4} placeholder={t('resumeSearch.skillsPlaceholder')} aria-label="Required Skills" {...field} />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">Separate multiple skills with commas</p>
                     <FormMessage />

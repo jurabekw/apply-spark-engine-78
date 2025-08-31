@@ -81,7 +81,7 @@ const Auth = () => {
       }
       
       toast({
-        title: "Authentication Error",
+        title: t('toasts.authError'),
         description: message,
         variant: "destructive",
       });
@@ -126,7 +126,7 @@ const Auth = () => {
 
       if (data.user) {
         toast({
-          title: "Welcome back!",
+          title: t('toasts.welcomeBack'),
           description: "You have been successfully signed in.",
         });
         // Force page reload for clean state
@@ -134,7 +134,7 @@ const Auth = () => {
       }
     } catch (error: any) {
       toast({
-        title: "Sign in failed",
+        title: t('toasts.signInFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -163,7 +163,7 @@ const Auth = () => {
       } else if (checkError?.message.includes('Invalid login credentials')) {
         // Email exists but password is wrong - user should sign in
         toast({
-          title: "Account already exists",
+          title: t('toasts.accountExists'),
           description: "An account with this email already exists. Please sign in instead.",
           variant: "destructive",
         });
@@ -345,7 +345,7 @@ const Auth = () => {
                           <Input
                             id="new-password"
                             type="password"
-                            placeholder="Enter your new password"
+                            placeholder={t('auth.enterNewPassword')}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             className="pl-10"
@@ -361,7 +361,7 @@ const Auth = () => {
                           <Input
                             id="confirm-password"
                             type="password"
-                            placeholder="Confirm your new password"
+                            placeholder={t('auth.confirmNewPassword')}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             className="pl-10"
@@ -417,7 +417,7 @@ const Auth = () => {
                             <Input
                               id="reset-email"
                               type="email"
-                              placeholder="Enter your email"
+                              placeholder={t('auth.enterEmail')}
                               value={resetEmail}
                               onChange={(e) => setResetEmail(e.target.value)}
                               className="pl-10"
@@ -548,7 +548,7 @@ const Auth = () => {
                         <Input
                           id="signup-email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={t('auth.enterEmail')}
                           value={signupEmail}
                           onChange={(e) => setSignupEmail(e.target.value)}
                           className="pl-10"

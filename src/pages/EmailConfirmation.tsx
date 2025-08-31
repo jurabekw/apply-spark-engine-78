@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const EmailConfirmation = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleEmailConfirmation = async () => {
@@ -25,8 +27,8 @@ const EmailConfirmation = () => {
           setMessage(errorDescription || 'Email confirmation failed');
           
           toast({
-            title: "Confirmation Failed",
-            description: errorDescription || "Email confirmation failed",
+            title: t('toasts.confirmationFailed'),
+            description: errorDescription || t('errors.failedToConfirm'),
             variant: "destructive",
           });
           return;
@@ -131,9 +133,9 @@ const EmailConfirmation = () => {
               )}
             </div>
             <CardTitle>
-              {status === 'loading' && 'Confirming your email...'}
-              {status === 'success' && 'Email Confirmed!'}
-              {status === 'error' && 'Confirmation Failed'}
+              {status === 'loading' && t('errors.confirmingEmail')}
+              {status === 'success' && t('errors.emailConfirmed')}
+              {status === 'error' && t('errors.confirmationFailed')}
             </CardTitle>
             <CardDescription>{message}</CardDescription>
           </CardHeader>
@@ -143,7 +145,7 @@ const EmailConfirmation = () => {
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => navigate('/auth?tab=signin')}
               >
-                Go to Sign In
+                {t('auth.signIn')}
               </Button>
             )}
             {status === 'error' && (
@@ -152,14 +154,14 @@ const EmailConfirmation = () => {
                   className="w-full bg-indigo-600 hover:bg-indigo-700"
                   onClick={() => navigate('/auth?tab=signup')}
                 >
-                  Try Sign Up Again
+                  {t('auth.signUp')}
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full"
                   onClick={() => navigate('/auth?tab=signin')}
                 >
-                  Go to Sign In
+                  {t('auth.signIn')}
                 </Button>
               </div>
             )}

@@ -313,7 +313,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                     {loadingResume ? (
                       <>
                         <div className="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
-                        Loading...
+                        {t('loading.loading')}
                       </>
                     ) : (
                       <>

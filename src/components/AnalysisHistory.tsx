@@ -8,10 +8,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Eye, Trash2, Clock, FileText, Trash, Users } from 'lucide-react';
 import { useBatchHistory } from '@/hooks/useBatchHistory';
 import BatchHistoryModal from './BatchHistoryModal';
+import { useTranslation } from 'react-i18next';
 
 const AnalysisHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { batches, loading, deleteBatch, deleteAllBatches } = useBatchHistory();
+  const { t } = useTranslation();
   
   // State to handle viewing batch details
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
@@ -96,7 +98,7 @@ const AnalysisHistory = () => {
                   <div className="relative w-64">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
-                      placeholder="Search history..."
+                      placeholder={t('placeholders.searchHistory')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
