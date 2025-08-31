@@ -367,5 +367,18 @@
     "areYouSure": "Вы уверены?",
     "thisActionCannotBeUndone": "Это действие нельзя отменить",
     "confirmDeletion": "Подтвердить удаление"
+  },
+  "filters": {
+    "minimumAiScore": "Минимальная оценка ИИ",
+    "onlyWithLinkedinUrl": "Только с LinkedIn URL",
+    "showAll": "Показать все",
+    "applyFilters": "Применить фильтры",
+    "clearFilters": "Очистить фильтры"
+  },
+  "statusLabels": {
+    "pending": "В ожидании",
+    "active": "Активный",
+    "completed": "Завершен",
+    "failed": "Не удался"
   }
 }

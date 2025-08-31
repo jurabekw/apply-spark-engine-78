@@ -367,5 +367,18 @@
     "areYouSure": "Are you sure?",
     "thisActionCannotBeUndone": "This action cannot be undone",
     "confirmDeletion": "Confirm deletion"
+  },
+  "filters": {
+    "minimumAiScore": "Minimum AI Score",
+    "onlyWithLinkedinUrl": "Only with LinkedIn URL",
+    "showAll": "Show All",
+    "applyFilters": "Apply Filters",
+    "clearFilters": "Clear Filters"
+  },
+  "statusLabels": {
+    "pending": "Pending",
+    "active": "Active",
+    "completed": "Completed",
+    "failed": "Failed"
   }
 }
