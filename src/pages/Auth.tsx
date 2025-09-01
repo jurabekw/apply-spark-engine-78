@@ -311,14 +311,14 @@ const Auth = () => {
             </div>
           </div>
           <h2 className="text-3xl font-bold text-gray-900">TalentSpark</h2>
-          <p className="text-gray-600 mt-2">AI-Powered HR Recruitment Platform</p>
+          <p className="text-gray-600 mt-2">{t('auth.platformSubtitle')}</p>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-center">Get Started</CardTitle>
+            <CardTitle className="text-center">{t('auth.getStarted')}</CardTitle>
             <CardDescription className="text-center">
-              Sign in to your account or create a new one
+              {t('auth.signInToAccount')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -333,13 +333,13 @@ const Auth = () => {
                   <div className="space-y-4">
                     <form onSubmit={handlePasswordReset} className="space-y-4">
                       <div className="text-center space-y-2">
-                        <h3 className="text-xl font-semibold">Set new password</h3>
+                        <h3 className="text-xl font-semibold">{t('auth.setNewPassword')}</h3>
                         <p className="text-muted-foreground">
-                          Enter your new password below.
+                          {t('auth.enterNewPasswordBelow')}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="new-password">New Password</Label>
+                        <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
@@ -355,7 +355,7 @@ const Auth = () => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="confirm-password">Confirm Password</Label>
+                        <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
@@ -375,7 +375,7 @@ const Auth = () => {
                         className="w-full bg-indigo-600 hover:bg-indigo-700"
                         disabled={loading}
                       >
-                        {loading ? 'Updating Password...' : 'Update Password'}
+                        {loading ? t('auth.updatingPassword') : t('auth.updatePassword')}
                       </Button>
                     </form>
                   </div>
@@ -386,9 +386,9 @@ const Auth = () => {
                         <div className="mx-auto w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
                           <Mail className="w-6 h-6 text-white" />
                         </div>
-                        <h3 className="text-xl font-semibold">Check your email</h3>
+                        <h3 className="text-xl font-semibold">{t('auth.checkYourEmail')}</h3>
                         <p className="text-muted-foreground">
-                          We sent a password reset link to {resetEmail}. Please open your inbox and follow the link to reset your password.
+                          {t('auth.resetLinkSent', { email: resetEmail })}
                         </p>
                         <Button 
                           variant="outline" 
@@ -399,19 +399,19 @@ const Auth = () => {
                             setResetEmail('');
                           }}
                         >
-                          Back to Sign In
+                          {t('auth.backToSignIn')}
                         </Button>
                       </div>
                     ) : (
                       <form onSubmit={handleForgotPassword} className="space-y-4">
                         <div className="text-center space-y-2">
-                          <h3 className="text-xl font-semibold">Reset your password</h3>
+                          <h3 className="text-xl font-semibold">{t('auth.resetYourPassword')}</h3>
                           <p className="text-muted-foreground">
-                            Enter your email address and we'll send you a link to reset your password.
+                            {t('auth.sendResetLink')}
                           </p>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="reset-email">Email</Label>
+                          <Label htmlFor="reset-email">{t('auth.email')}</Label>
                           <div className="relative">
                             <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                             <Input
@@ -430,7 +430,7 @@ const Auth = () => {
                           className="w-full bg-indigo-600 hover:bg-indigo-700"
                           disabled={loading}
                         >
-                          {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
+                          {loading ? t('auth.sendingResetLink') : t('auth.sendResetLinkButton')}
                         </Button>
                         <Button 
                           variant="outline" 
@@ -438,7 +438,7 @@ const Auth = () => {
                           className="w-full" 
                           onClick={() => setForgotPasswordMode(false)}
                         >
-                          Back to Sign In
+                          {t('auth.backToSignIn')}
                         </Button>
                       </form>
                     )}
@@ -490,7 +490,7 @@ const Auth = () => {
                       className="w-full bg-indigo-600 hover:bg-indigo-700"
                       disabled={loading}
                     >
-                      {loading ? 'Signing In...' : 'Sign In'}
+                      {loading ? t('auth.signingIn') : t('auth.signIn')}
                     </Button>
                   </form>
                 )}
@@ -502,24 +502,24 @@ const Auth = () => {
                     <div className="mx-auto w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
                       <Mail className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold">Check your email</h3>
+                    <h3 className="text-xl font-semibold">{t('auth.checkYourEmail')}</h3>
                     <p className="text-muted-foreground">
-                      We sent a verification link to {verificationEmail}. Please open your inbox and follow the link to finish signing up.
+                      {t('auth.checkEmailForVerification', { email: verificationEmail })}
                     </p>
                     <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => setActiveTab('signin')}>
-                      Go to Sign In
+                      {t('auth.goToSignIn')}
                     </Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="full-name">Full Name</Label>
+                      <Label htmlFor="full-name">{t('auth.fullName')}</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="full-name"
                           type="text"
-                          placeholder="Enter your full name"
+                          placeholder={t('auth.enterFullName')}
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           className="pl-10"
@@ -528,13 +528,13 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
+                      <Label htmlFor="company">{t('auth.company')}</Label>
                       <div className="relative">
                         <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="company"
                           type="text"
-                          placeholder="Enter your company name"
+                          placeholder={t('auth.enterCompany')}
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           className="pl-10"
@@ -542,7 +542,7 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
+                      <Label htmlFor="signup-email">{t('auth.email')}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
@@ -557,13 +557,13 @@ const Auth = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
+                      <Label htmlFor="signup-password">{t('auth.password')}</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
                           type="password"
-                          placeholder="Create a password"
+                          placeholder={t('auth.createPassword')}
                           value={signupPassword}
                           onChange={(e) => setSignupPassword(e.target.value)}
                           className="pl-10"
@@ -577,7 +577,7 @@ const Auth = () => {
                       className="w-full bg-indigo-600 hover:bg-indigo-700"
                       disabled={loading}
                     >
-                      {loading ? 'Creating Account...' : 'Create Account'}
+                      {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
                     </Button>
                   </form>
                 )}
@@ -587,7 +587,7 @@ const Auth = () => {
         </Card>
 
         <p className="text-center text-sm text-gray-600">
-          By signing up, you agree to our terms of service and privacy policy.
+          {t('auth.termsAndPrivacy')}
         </p>
       </div>
     </div>
