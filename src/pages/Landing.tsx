@@ -14,63 +14,63 @@ const Landing = () => {
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Resume Analysis",
-      description: "Advanced AI algorithms analyze resumes in seconds, extracting key skills, experience, and qualifications with 98% accuracy."
+      title: t('landing.features.aiPoweredAnalysis'),
+      description: t('landing.features.aiPoweredDescription')
     },
     {
       icon: Search,
-      title: "Intelligent Candidate Search",
-      description: "Find perfect candidates from your database or external sources using natural language queries and smart filtering."
+      title: t('landing.features.intelligentSearch'),
+      description: t('landing.features.intelligentSearchDescription')
     },
     {
       icon: Database,
-      title: "Comprehensive Database Search",
-      description: "Search through millions of candidate profiles from leading job boards and professional networks instantly."
+      title: t('landing.features.comprehensiveDatabase'),
+      description: t('landing.features.comprehensiveDatabaseDescription')
     },
     {
       icon: Zap,
-      title: "Lightning-Fast Screening",
-      description: "Process hundreds of resumes in minutes, not days. Get instant insights, rankings, and match scores."
+      title: t('landing.features.lightningFast'),
+      description: t('landing.features.lightningFastDescription')
     },
     {
       icon: Shield,
-      title: "Bias-Free Hiring",
-      description: "Eliminate unconscious bias with objective, data-driven candidate evaluation and fair assessment algorithms."
+      title: t('landing.features.biasFree'),
+      description: t('landing.features.biasFreeDescription')
     },
     {
       icon: Target,
-      title: "Perfect Job Matching",
-      description: "Find ideal candidates using our proprietary skill-matching algorithm and cultural fit assessment."
+      title: t('landing.features.perfectMatching'),
+      description: t('landing.features.perfectMatchingDescription')
     }
   ];
 
   const benefits = [
-    "Reduce hiring time by up to 80%",
-    "Access millions of candidate profiles",
-    "Eliminate unconscious bias in recruitment", 
-    "Process 10x more applications efficiently",
-    "Improve candidate quality with AI insights",
-    "Streamline your entire hiring workflow",
-    "Make data-driven hiring decisions"
+    t('landing.benefits.reduceTime'),
+    t('landing.benefits.accessProfiles'),
+    t('landing.benefits.eliminateBias'),
+    t('landing.benefits.processMore'),
+    t('landing.benefits.improveQuality'),
+    t('landing.benefits.streamlineWorkflow'),
+    t('landing.benefits.dataDriven')
   ];
 
   const testimonials = [
     {
       name: "Алёна Смирнова",
-      role: "HR Director",
-      content: "TalentSpark revolutionized our hiring. The headhunter search feature helped us find senior developers we couldn't reach before - filled 3 positions in 2 weeks!",
+      role: t('landing.testimonials.role1'),
+      content: t('landing.testimonials.testimonial1'),
       rating: 5
     },
     {
       name: "Дилшод Ахмедов", 
-      role: "HR Specialist",
-      content: "The candidate database search is incredible. We found perfect matches for niche roles that would have taken months to fill traditionally.",
+      role: t('landing.testimonials.role2'),
+      content: t('landing.testimonials.testimonial2'),
       rating: 5
     },
     {
       name: "Анна Петрова",
-      role: "HR Manager",
-      content: "Best investment in HR tech. Our time-to-hire dropped from 45 to 12 days, and candidate quality improved dramatically.",
+      role: t('landing.testimonials.role3'),
+      content: t('landing.testimonials.testimonial3'),
       rating: 5
     }
   ];
@@ -78,23 +78,23 @@ const Landing = () => {
   const searchFeatures = [
     {
       icon: Search,
-      title: "Smart Query Search",
-      description: "Use natural language to find candidates: 'Senior React developer with 5+ years in fintech'"
+      title: t('landing.searchFeatures.smartQuery'),
+      description: t('landing.searchFeatures.smartQueryDescription')
     },
     {
       icon: Filter,
-      title: "Advanced Filtering",
-      description: "Filter by location, salary, experience, skills, education, and 50+ other criteria"
+      title: t('landing.searchFeatures.advancedFiltering'),
+      description: t('landing.searchFeatures.advancedFilteringDescription')
     },
     {
       icon: Database,
-      title: "Multi-Source Access",
-      description: "Search across Headhunter.uz, Linkedin, your own candidate database and others"
+      title: t('landing.searchFeatures.multiSource'),
+      description: t('landing.searchFeatures.multiSourceDescription')
     },
     {
       icon: Sparkles,
-      title: "AI Recommendations",
-      description: "Get AI-suggested candidates based on your hiring patterns and success metrics"
+      title: t('landing.searchFeatures.aiRecommendations'),
+      description: t('landing.searchFeatures.aiRecommendationsDescription')
     }
   ];
 
@@ -120,7 +120,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <Badge variant="secondary" className="mb-8 px-6 py-3 text-sm bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          🚀 Trusted by 50+ HR teams worldwide
+          🚀 {t('landing.trustedByTeams')}
         </Badge>
         
         <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-8 leading-tight">
@@ -149,7 +149,7 @@ const Landing = () => {
           
           <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
             <Upload className="w-8 h-8 text-primary" />
-            <span className="text-foreground font-medium">Bulk Resume Upload</span>
+            <span className="text-foreground font-medium">{t('landing.bulkResumeUpload')}</span>
           </div>
         </div>
         
@@ -164,7 +164,7 @@ const Landing = () => {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          No credit card required • 14-day free trial • Cancel anytime
+          {t('landing.noCreditCardRequired')}
         </p>
       </section>
 
@@ -217,10 +217,10 @@ const Landing = () => {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-            Powerful Features for Modern Hiring
+            {t('landing.powerfulFeaturesTitle')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Everything you need to revolutionize your recruitment process and find exceptional talent
+            {t('landing.powerfulFeaturesSubtitle')}
           </p>
         </div>
 
@@ -249,11 +249,10 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-8">
-                Why Choose TalentSpark?
+                {t('landing.whyChooseTitle')}
               </h2>
               <p className="text-xl text-muted-foreground mb-10">
-                Join thousands of companies that have revolutionized their hiring process and 
-                discovered top talent they never knew existed.
+                {t('landing.whyChooseSubtitle')}
               </p>
               
               <div className="space-y-6">
@@ -272,7 +271,7 @@ const Landing = () => {
                 className="mt-10 bg-gradient-to-r from-primary to-accent hover:shadow-glow px-8 py-4"
                 onClick={() => navigate('/auth?tab=signup')}
               >
-                Get Started Today
+                {t('landing.getStartedToday')}
               </Button>
             </div>
             
@@ -280,19 +279,19 @@ const Landing = () => {
               <div className="grid grid-cols-2 gap-8">
                 <div className="text-center">
                   <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">80%</div>
-                  <div className="text-muted-foreground">Faster Hiring</div>
+                  <div className="text-muted-foreground">{t('landing.fasterHiring')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">98%</div>
-                  <div className="text-muted-foreground">Match Accuracy</div>
+                  <div className="text-muted-foreground">{t('landing.matchAccuracy')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">50+</div>
-                  <div className="text-muted-foreground">Companies</div>
+                  <div className="text-muted-foreground">{t('landing.companies')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">10K+</div>
-                  <div className="text-muted-foreground">Profiles Searched</div>
+                  <div className="text-muted-foreground">{t('landing.profilesSearched')}</div>
                 </div>
               </div>
             </div>
@@ -304,10 +303,10 @@ const Landing = () => {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-            Loved by HR Teams Worldwide
+            {t('landing.lovedByTeamsTitle')}
           </h2>
           <p className="text-xl text-muted-foreground">
-            See how TalentSpark is transforming recruitment for leading companies
+            {t('landing.lovedByTeamsSubtitle')}
           </p>
         </div>
 
@@ -339,11 +338,10 @@ const Landing = () => {
       <section className="bg-gradient-to-r from-primary via-accent to-primary py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            Ready to Transform Your Hiring?
+            {t('landing.readyToTransformCTA')}
           </h2>
           <p className="text-xl text-white/90 mb-12 max-w-3xl mx-auto">
-            Join thousands of HR professionals who have revolutionized their recruitment process 
-            and discovered top talent with TalentSpark's AI-powered platform.
+            {t('landing.ctaSubtitle')}
           </p>
           
           <div className="flex justify-center">
@@ -353,7 +351,7 @@ const Landing = () => {
               className="px-10 py-6 text-lg bg-white hover:bg-white/90 text-primary"
               onClick={() => navigate('/auth?tab=signup')}
             >
-              Start Your Free Trial
+              {t('landing.startYourFreeTrial')}
             </Button>
           </div>
         </div>
@@ -366,7 +364,7 @@ const Landing = () => {
             <Logo size="lg" variant="dark" />
             
             <div className="text-sm text-slate-400 mt-4 md:mt-0">
-              © 2024 TalentSpark. All rights reserved.
+              {t('landing.copyrightText')}
             </div>
           </div>
         </div>
