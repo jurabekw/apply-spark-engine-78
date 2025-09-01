@@ -49,7 +49,11 @@
     "storageDescription": "Enterprise-grade security ensures your candidate data is protected and compliant.",
     "readyToTransform": "Ready to Transform Your Hiring Process?",
     "transformSubtitle": "Join hundreds of companies already using our platform to find top talent faster and more efficiently.",
-    "startFreeTrial": "Start Free Trial"
+    "startFreeTrial": "Start Free Trial",
+    "newFeature": "New Feature",
+    "intelligentCandidateSearch": "Intelligent Candidate Search",
+    "candidateSearchDescription": "Access millions of candidate profiles with AI-powered search. Find passive candidates, niche specialists, and perfect cultural fits that traditional methods miss.",
+    "trySearchFeature": "Try Search Feature"
   },
   "auth": {
     "signIn": "Sign In",

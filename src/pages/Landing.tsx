@@ -173,14 +173,13 @@ const Landing = () => {
         <div className="bg-gradient-to-br from-surface to-surface/50 rounded-3xl border border-border/50 shadow-elegant p-12">
           <div className="text-center mb-16">
             <Badge className="mb-6 bg-gradient-to-r from-success/10 to-accent/10 text-success border-success/20">
-              New Feature
+              {t('landing.newFeature')}
             </Badge>
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-              Intelligent Candidate Search
+              {t('landing.intelligentCandidateSearch')}
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Access millions of candidate profiles with AI-powered search. Find passive candidates, 
-              niche specialists, and perfect cultural fits that traditional methods miss.
+              {t('landing.candidateSearchDescription')}
             </p>
           </div>
 
@@ -208,7 +207,7 @@ const Landing = () => {
               className="bg-gradient-to-r from-primary to-accent hover:shadow-glow px-8 py-4"
               onClick={() => navigate('/resume-search')}
             >
-              Try Search Feature
+              {t('landing.trySearchFeature')}
             </Button>
           </div>
         </div>
