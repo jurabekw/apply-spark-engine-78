@@ -135,7 +135,7 @@ const ResumeSearchTable = ({
               <PopoverContent className="w-72" align="end">
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm font-medium mb-2">Minimum AI score: {minScore}%</div>
+                    <div className="text-sm font-medium mb-2">{t('filters.minimumAiScore')}: {minScore}%</div>
                     <Slider value={[minScore]} onValueChange={v => setMinScore(v[0] ?? 0)} min={0} max={100} step={5} />
                   </div>
                   
@@ -214,7 +214,7 @@ const ResumeSearchTable = ({
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm" asChild>
-                          <a href={candidate.alternate_url} target="_blank" rel="noopener noreferrer" title="View profile on HH.ru">
+                          <a href={candidate.alternate_url} target="_blank" rel="noopener noreferrer" title={t('resumeSearchPage.viewProfileOnHhRu')}>
                             <ExternalLink className="w-4 h-4" />
                           </a>
                         </Button>

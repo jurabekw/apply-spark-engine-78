@@ -626,8 +626,8 @@ export default function ResumeSearch() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="text-sm">
-            <div>📅 <span className="font-medium">Experience:</span> {c.experience}</div>
-            <div>🎓 <span className="font-medium">Education:</span> {c.education_level}</div>
+            <div>📅 <span className="font-medium">{t('resumeSearchPage.experience')}:</span> {c.experience}</div>
+            <div>🎓 <span className="font-medium">{t('resumeSearchPage.education')}:</span> {c.education_level}</div>
           </div>
           <div className="flex flex-wrap gap-2">
             {c.key_skills?.map((s, i) => <Badge key={i} variant="secondary" className="bg-accent text-accent-foreground">
@@ -636,8 +636,8 @@ export default function ResumeSearch() {
           </div>
           <div className="pt-2">
             {c.alternate_url?.trim() ? <a href={c.alternate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" aria-label="View resume on HH.ru">
-                View Resume <ExternalLink className="h-4 w-4" />
-              </a> : <span className="text-sm text-muted-foreground">Resume link unavailable</span>}
+                {t('resumeSearchPage.viewResume')} <ExternalLink className="h-4 w-4" />
+              </a> : <span className="text-sm text-muted-foreground">{t('resumeSearchPage.resumeLinkUnavailable')}</span>}
           </div>
         </CardContent>
       </Card>;
@@ -645,25 +645,25 @@ export default function ResumeSearch() {
   const LoadingStatus = () => <div className="mt-6 rounded-md border bg-card p-4 text-sm">
       <div className="flex items-center gap-2">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" aria-label="Loading spinner" />
-        <span>Searching HH candidates...</span>
+        <span>{t('resumeSearchPage.searchingHhCandidates')}</span>
       </div>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-muted-foreground">
-        <li className={loadingStep === 0 ? "text-foreground" : ""}>Connecting to HH.ru...</li>
-        <li className={loadingStep === 1 ? "text-foreground" : ""}>Analyzing resumes with AI...</li>
-        <li className={loadingStep === 2 ? "text-foreground" : ""}>Preparing results...</li>
+        <li className={loadingStep === 0 ? "text-foreground" : ""}>{t('resumeSearchPage.connectingToHhRu')}</li>
+        <li className={loadingStep === 1 ? "text-foreground" : ""}>{t('resumeSearchPage.analyzingResumesWithAi')}</li>
+        <li className={loadingStep === 2 ? "text-foreground" : ""}>{t('resumeSearchPage.preparingResults')}</li>
       </ul>
-      <p className="mt-2 text-xs text-muted-foreground">This usually takes 30-60 seconds</p>
+      <p className="mt-2 text-xs text-muted-foreground">{t('resumeSearchPage.usuallyTakes')}</p>
     </div>;
   return <main className="container mx-auto px-4 py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold">HH Candidate Search</h1>
-        <p className="text-muted-foreground">Find HH.ru candidates by role, skills, and experience — scored by AI.</p>
+        <h1 className="text-3xl font-bold">{t('resumeSearchPage.title')}</h1>
+        <p className="text-muted-foreground">{t('resumeSearchPage.subtitle')}</p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>Search Candidates</CardTitle>
-          <CardDescription>Enter your requirements below</CardDescription>
+          <CardTitle>{t('resumeSearchPage.searchCandidates')}</CardTitle>
+          <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -671,7 +671,7 @@ export default function ResumeSearch() {
               <FormField control={form.control} name="jobTitle" render={({
               field
             }) => <FormItem className="md:col-span-1">
-                    <FormLabel>Job Title</FormLabel>
+                    <FormLabel>{t('tableHeaders.jobTitle')}</FormLabel>
                     <FormControl>
                       <Input placeholder={t('resumeSearch.jobTitlePlaceholder')} aria-label="Job Title" {...field} />
                     </FormControl>
@@ -681,7 +681,7 @@ export default function ResumeSearch() {
               <FormField control={form.control} name="experienceLevel" render={({
               field
             }) => <FormItem className="md:col-span-1">
-                    <FormLabel>Experience Level</FormLabel>
+                    <FormLabel>{t('tableHeaders.experienceLevel')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger aria-label="Experience Level">
@@ -689,10 +689,10 @@ export default function ResumeSearch() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="noExperience">No Experience</SelectItem>
-                        <SelectItem value="between1And3">1-3 Years</SelectItem>
-                        <SelectItem value="between3And6">3-6 Years</SelectItem>
-                        <SelectItem value="moreThan6">6+ Years</SelectItem>
+                        <SelectItem value="noExperience">{t('experienceLevels.noExperience')}</SelectItem>
+                        <SelectItem value="between1And3">{t('experienceLevels.between1And3')}</SelectItem>
+                        <SelectItem value="between3And6">{t('experienceLevels.between3And6')}</SelectItem>
+                        <SelectItem value="moreThan6">{t('experienceLevels.moreThan6')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -701,22 +701,22 @@ export default function ResumeSearch() {
               <FormField control={form.control} name="requiredSkills" render={({
               field
             }) => <FormItem className="md:col-span-2">
-                    <FormLabel>Required Skills</FormLabel>
+                    <FormLabel>{t('tableHeaders.requiredSkills')}</FormLabel>
                     <FormControl>
                       <Textarea rows={4} placeholder={t('resumeSearch.skillsPlaceholder')} aria-label="Required Skills" {...field} />
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">Separate multiple skills with commas</p>
+                    <p className="text-xs text-muted-foreground">{t('resumeSearchPage.separateSkills')}</p>
                     <FormMessage />
                   </FormItem>} />
 
               <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
-                  {loading ? "Searching HH.ru..." : "Search candidates"}
+                  {loading ? t('resumeSearchPage.searchingHhRu') : t('resumeSearchPage.searchCandidatesButton')}
                 </Button>
                 
                 <div className="ml-auto flex items-center gap-2">
                   <Checkbox id="noDedupe" checked={noDedupe} onCheckedChange={v => setNoDedupe(Boolean(v))} />
-                  <Label htmlFor="noDedupe" className="text-sm">Don't merge duplicates</Label>
+                  <Label htmlFor="noDedupe" className="text-sm">{t('resumeSearchPage.dontMergeDuplicates')}</Label>
                 </div>
               </div>
 

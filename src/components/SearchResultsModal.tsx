@@ -10,14 +10,14 @@ interface SearchResultsModalProps {
   search: any | null;
 }
 
-const getExperienceLevelLabel = (level: string) => {
+const getExperienceLevelLabel = (level: string, t: any) => {
   const labels = {
-    noExperience: 'No Experience',
-    between1And3: '1-3 Years',
-    between3And6: '3-6 Years',
-    moreThan6: '6+ Years',
+    noExperience: t('experienceLevels.noExperience'),
+    between1And3: t('experienceLevels.between1And3'),
+    between3And6: t('experienceLevels.between3And6'),
+    moreThan6: t('experienceLevels.moreThan6'),
   };
-  return labels[level as keyof typeof labels] || level || 'N/A';
+  return labels[level as keyof typeof labels] || level || t('messages.na');
 };
 
 const normalizeCandidates = (response: any): any[] => {
@@ -160,7 +160,7 @@ const SearchResultsModal = ({ isOpen, onClose, search }: SearchResultsModalProps
             <span>{t('messages.searchResults')}</span>
             {search && (
               <span className="text-sm text-muted-foreground font-normal">
-                {search.job_title} • {getExperienceLevelLabel(search.experience_level)} • {search.required_skills}
+                {search.job_title} • {getExperienceLevelLabel(search.experience_level, t)} • {search.required_skills}
               </span>
             )}
           </DialogTitle>

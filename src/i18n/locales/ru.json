@@ -475,5 +475,65 @@
     "dashboard": "Загружаем вашу панель управления...",
     "found": "найдено",
     "match": "соответствие"
+  },
+  "resumeSearchPage": {
+    "title": "Поиск кандидатов HH",
+    "subtitle": "Найдите кандидатов HH.ru по роли, навыкам и опыту — оценка с помощью ИИ.",
+    "searchCandidates": "Поиск кандидатов",
+    "enterRequirements": "Введите ваши требования ниже",
+    "separateSkills": "Разделяйте несколько навыков запятыми",
+    "searchingHhRu": "Поиск в HH.ru...",
+    "searchCandidatesButton": "Найти кандидатов",
+    "dontMergeDuplicates": "Не объединять дубликаты",
+    "connectingToHhRu": "Подключение к HH.ru...",
+    "analyzingResumesWithAi": "Анализ резюме с помощью ИИ...",
+    "preparingResults": "Подготовка результатов...",
+    "usuallyTakes": "Обычно это занимает 30-60 секунд",
+    "searchingHhCandidates": "Поиск кандидатов HH...",
+    "viewResume": "Просмотр резюме",
+    "resumeLinkUnavailable": "Ссылка на резюме недоступна",
+    "experience": "Опыт",
+    "education": "Образование",
+    "viewProfileOnHhRu": "Просмотреть профиль на HH.ru"
+  },
+  "searchHistory": {
+    "title": "История поиска",
+    "deleteAll": "Удалить все",
+    "deleteAllTitle": "Удалить всю историю поиска",
+    "deleteAllDescription": "Вы уверены, что хотите удалить всю историю поиска? Это действие нельзя отменить, и будут удалены все {count} записей.",
+    "deleteEntryTitle": "Удалить запись истории поиска",
+    "deleteEntryDescription": "Вы уверены, что хотите удалить эту запись истории поиска? Это действие нельзя отменить.",
+    "viewSavedResults": "Просмотреть сохраненные результаты",
+    "candidates": "кандидатов"
+  },
+  "tableHeaders": {
+    "candidate": "Кандидат",
+    "aiScore": "Оценка ИИ",
+    "experience": "Опыт",
+    "education": "Образование",
+    "keySkills": "Ключевые навыки",
+    "resume": "Резюме",
+    "actions": "Действия",
+    "jobTitle": "Название должности",
+    "requiredSkills": "Требуемые навыки",
+    "experienceLevel": "Уровень опыта",
+    "results": "Результаты",
+    "date": "Дата"
+  },
+  "experienceLevels": {
+    "noExperience": "Без опыта",
+    "between1And3": "1-3 года",
+    "between3And6": "3-6 лет",
+    "moreThan6": "6+ лет"
+  },
+  "selects": {
+    "selectExperience": "Выберите уровень опыта"
+  },
+  "filters": {
+    "minimumAiScore": "Минимальная оценка ИИ",
+    "onlyWithLinkedinUrl": "Только с LinkedIn URL",
+    "showAll": "Показать все",
+    "applyFilters": "Применить фильтры",
+    "clearFilters": "Очистить фильтры"
   }
 }
