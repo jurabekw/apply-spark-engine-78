@@ -470,5 +470,10 @@
     "active": "Active",
     "completed": "Completed",
     "failed": "Failed"
+  },
+  "loading": {
+    "dashboard": "Loading your dashboard...",
+    "found": "found",
+    "match": "match"
   }
 }

@@ -60,7 +60,7 @@ const recentSearches = useMemo(() => {
           <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse-ring">
             <div className="w-6 h-6 bg-white rounded-full"></div>
           </div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
+          <p className="text-muted-foreground">{t('loading.dashboard')}</p>
         </div>
       </div>
     );
@@ -212,7 +212,7 @@ const recentSearches = useMemo(() => {
                               <div className="text-xs text-muted-foreground mb-2">
                                 {s.experience_level} • {s.required_skills}
                               </div>
-                              <Badge variant="success" className="text-xs">{s.candidate_count} found</Badge>
+                              <Badge variant="success" className="text-xs">{s.candidate_count} {t('loading.found')}</Badge>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
@@ -266,7 +266,7 @@ const recentSearches = useMemo(() => {
                                 {c.position || 'Candidate'} • {c.status}
                               </div>
                               {typeof c.ai_score === 'number' && (
-                                <Badge variant="brand" className="text-xs">{c.ai_score}% match</Badge>
+                                <Badge variant="brand" className="text-xs">{c.ai_score}% {t('loading.match')}</Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-2">
