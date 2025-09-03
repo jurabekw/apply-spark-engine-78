@@ -25,10 +25,10 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
 
   const getExperienceLevelLabel = (level: string) => {
     const labels = {
-      'noExperience': 'No Experience',
-      'between1And3': '1-3 Years',
-      'between3And6': '3-6 Years',
-      'moreThan6': '6+ Years'
+      'noExperience': t('experienceLevels.noExperience'),
+      'between1And3': t('experienceLevels.between1And3'),
+      'between3And6': t('experienceLevels.between3And6'),
+      'moreThan6': t('experienceLevels.moreThan6')
     };
     return labels[level as keyof typeof labels] || level;
   };
@@ -69,7 +69,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            <span className="ml-2 text-muted-foreground">Loading search history...</span>
+            <span className="ml-2 text-muted-foreground">{t('linkedinSearch.loadingSearchHistory')}</span>
           </div>
         </CardContent>
       </Card>
@@ -83,7 +83,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              <CardTitle>Search History ({filteredSearches.length})</CardTitle>
+              <CardTitle>{t('linkedinSearch.searchHistoryTitle')} ({filteredSearches.length})</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {searches.length > 0 && (
@@ -92,23 +92,23 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" size="sm" className="gap-2">
                         <Trash className="w-4 h-4" />
-                        Delete All
+                        {t('linkedinSearch.deleteAllSearchHistory')}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete All Search History</AlertDialogTitle>
+                        <AlertDialogTitle>{t('linkedinSearch.deleteAllSearchHistory')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete all search history? This action cannot be undone and will remove all {searches.length} entries.
+                          {t('linkedinSearch.deleteAllSearchHistoryDescription', { count: searches.length })}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={deleteAllSearches}
                           className="bg-destructive hover:bg-destructive/90"
                         >
-                          Delete All
+                          {t('linkedinSearch.deleteAllSearchHistory')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -132,12 +132,12 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
             <div className="text-center py-8">
               <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                {searches.length === 0 ? 'No search history yet' : 'No matching searches'}
+                {searches.length === 0 ? t('linkedinSearch.noSearchHistoryYet') : t('linkedinSearch.noMatchingSearches')}
               </h3>
               <p className="text-muted-foreground text-sm">
                 {searches.length === 0 
-                  ? "Your search history will appear here after you run your first search."
-                  : "Try adjusting your search terms."
+                  ? t('linkedinSearch.searchHistoryDescription')
+                  : t('linkedinSearch.searchHistoryTryAdjusting')
                 }
               </p>
             </div>
@@ -146,12 +146,12 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Search Query</TableHead>
-                    <TableHead>Required Skills</TableHead>
-                    <TableHead>Experience Level</TableHead>
-                    <TableHead>Results</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('linkedinSearch.searchQuery')}</TableHead>
+                    <TableHead>{t('tableHeaders.requiredSkills')}</TableHead>
+                    <TableHead>{t('tableHeaders.experienceLevel')}</TableHead>
+                    <TableHead>{t('tableHeaders.results')}</TableHead>
+                    <TableHead>{t('tableHeaders.date')}</TableHead>
+                    <TableHead>{t('tableHeaders.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -180,7 +180,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{search.candidate_count}</span> candidates
+                        <span className="font-medium">{search.candidate_count}</span> {t('linkedinSearch.candidates')}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(search.created_at)}
@@ -191,7 +191,7 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleViewResults(search)}
-                            title="View saved results"
+                            title={t('linkedinSearch.viewSavedResults')}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -207,18 +207,18 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Search History</AlertDialogTitle>
+                                <AlertDialogTitle>{t('linkedinSearch.deleteSearchHistory')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this search history entry? This action cannot be undone.
+                                  {t('linkedinSearch.deleteSearchHistoryDescription')}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteSearch(search.id)}
                                   className="bg-destructive hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {t('common.delete')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
