@@ -162,8 +162,8 @@ const CandidateTable = () => {
       <div className="space-y-6 animate-fade-in">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-foreground">{t('navigation.candidates')} Database</h2>
-            <p className="text-muted-foreground">Manage and review all candidate submissions</p>
+            <h2 className="text-3xl font-heading font-bold text-foreground">{t('messages.candidateDatabase')}</h2>
+            <p className="text-muted-foreground">{t('messages.manageCandidates')}</p>
           </div>
         </div>
         <Card>
@@ -184,8 +184,8 @@ const CandidateTable = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-foreground">Candidate Database</h2>
-            <p className="text-muted-foreground">Manage and review all candidate submissions</p>
+            <h2 className="text-3xl font-heading font-bold text-foreground">{t('messages.candidateDatabase')}</h2>
+            <p className="text-muted-foreground">{t('messages.manageCandidates')}</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -256,11 +256,11 @@ const CandidateTable = () => {
                 {t('labels.candidates')} ({filteredCandidates.length})
               </CardTitle>
               {filteredCandidates.length > 0 && (
-                <Badge variant="secondary" className="px-3 py-1">
-                  {sourceFilter === 'all' ? 'All Sources' : 
-                   sourceFilter === 'upload' ? 'Uploaded' : 
-                   sourceFilter === 'hh_search' ? 'HH Search' : 'LinkedIn Search'}
-                </Badge>
+                 <Badge variant="secondary" className="px-3 py-1">
+                   {sourceFilter === 'all' ? t('buttons.all') + ' Sources' : 
+                    sourceFilter === 'upload' ? t('buttons.uploaded') : 
+                    sourceFilter === 'hh_search' ? t('buttons.hhSearch') : t('buttons.linkedinSearch')}
+                 </Badge>
               )}
             </div>
           </CardHeader>
@@ -333,10 +333,10 @@ const CandidateTable = () => {
                               </div>
                             )}
                             {candidate.experience_years && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {candidate.experience_years} years
-                              </div>
+                               <div className="flex items-center gap-1">
+                                 <Calendar className="w-3 h-3" />
+                                 {candidate.experience_years} {t('messages.years')}
+                               </div>
                             )}
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
@@ -364,11 +364,11 @@ const CandidateTable = () => {
                                     {skill}
                                   </Badge>
                                 ))}
-                                {candidate.skills.length > 3 && (
-                                  <Badge variant="outline" className="text-xs text-muted-foreground">
-                                    +{candidate.skills.length - 3} more
-                                  </Badge>
-                                )}
+                                 {candidate.skills.length > 3 && (
+                                   <Badge variant="outline" className="text-xs text-muted-foreground">
+                                     +{candidate.skills.length - 3} {t('messages.more')}
+                                   </Badge>
+                                 )}
                               </>
                             )}
                           </div>
@@ -395,12 +395,12 @@ const CandidateTable = () => {
                               asChild
                               className="text-muted-foreground hover:text-blue-600"
                             >
-                              <a 
-                                href={candidate.ai_analysis.linkedin_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                title="View LinkedIn Profile"
-                              >
+                               <a 
+                                 href={candidate.ai_analysis.linkedin_url} 
+                                 target="_blank" 
+                                 rel="noopener noreferrer"
+                                 title={t('messages.viewLinkedinProfile')}
+                               >
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                             </Button>
@@ -413,12 +413,12 @@ const CandidateTable = () => {
                               asChild
                               className="text-muted-foreground hover:text-brand"
                             >
-                              <a 
-                                href={candidate.ai_analysis.hh_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                title="View on HH.ru"
-                              >
+                               <a 
+                                 href={candidate.ai_analysis.hh_url} 
+                                 target="_blank" 
+                                 rel="noopener noreferrer"
+                                 title={t('messages.viewOnHH')}
+                               >
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                             </Button>
@@ -434,23 +434,26 @@ const CandidateTable = () => {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete {candidate.name}? This action cannot be undone and will permanently remove all candidate data{candidate.source === 'upload' ? ' including their resume' : ''}.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteCandidate(candidate.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>{t('messages.deleteCandidate')}</AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                   {t('messages.deleteCandidateConfirm', { 
+                                     name: candidate.name, 
+                                     hasResume: candidate.source === 'upload' ? t('messages.includingResume') : '' 
+                                   })}
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
+                                 <AlertDialogAction
+                                   onClick={() => handleDeleteCandidate(candidate.id)}
+                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                 >
+                                   {t('buttons.delete')}
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
                           </AlertDialog>
                         </div>
                       </div>
@@ -468,14 +471,14 @@ const CandidateTable = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                <div>
-                  <h4 className="font-semibold text-success">
-                    Live Database Connected
-                  </h4>
-                  <p className="text-sm text-success/80">
-                    Displaying {candidates.length} candidates with real-time AI analysis and scoring
-                  </p>
-                </div>
+                 <div>
+                   <h4 className="font-semibold text-success">
+                     {t('messages.liveDatabaseConnected')}
+                   </h4>
+                   <p className="text-sm text-success/80">
+                     {t('messages.displayingCandidates', { count: candidates.length })}
+                   </p>
+                 </div>
               </div>
             </CardContent>
           </Card>
