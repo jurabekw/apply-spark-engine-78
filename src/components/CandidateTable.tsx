@@ -312,13 +312,13 @@ const CandidateTable = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-4 mb-3">
                             <div>
-                              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {candidate.name || 'Unknown Candidate'}
-                              </h3>
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                {candidate.email || 'No email provided'}
-                              </p>
+                               <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                                 {candidate.name || t('messages.unknownCandidate')}
+                               </h3>
+                               <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                 <Mail className="w-3 h-3" />
+                                 {candidate.email || t('messages.noEmailProvided')}
+                               </p>
                             </div>
                             
                             {/* AI Score Badge */}

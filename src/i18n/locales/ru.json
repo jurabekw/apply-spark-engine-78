@@ -404,6 +404,8 @@
       "submittedAt": "Дата подачи",
       "hhUrl": "Ссылка HH"
     },
+    "unknownCandidate": "Неизвестный кандидат",
+    "noEmailProvided": "Email не указан",
     "errorLoadingResume": "Ошибка загрузки резюме",
     "errorLoadingResumeDescription": "Не удалось загрузить файл резюме. Попробуйте еще раз.",
     "viewFullLinkedinProfile": "Посмотреть полный профиль LinkedIn",

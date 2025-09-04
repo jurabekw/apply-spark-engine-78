@@ -404,6 +404,8 @@
       "submittedAt": "Submitted At",
       "hhUrl": "HH URL"
     },
+    "unknownCandidate": "Unknown Candidate",
+    "noEmailProvided": "No email provided",
     "errorLoadingResume": "Error loading resume",
     "errorLoadingResumeDescription": "Could not load the resume file. Please try again.",
     "viewFullLinkedinProfile": "View full LinkedIn profile",
