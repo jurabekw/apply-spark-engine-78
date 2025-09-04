@@ -394,6 +394,28 @@
     "viewFullHhProfile": "View full HH.ru profile",
     "more": "more"
   },
+  "analysisHistory": {
+    "title": "Batch Analysis History",
+    "deleteAll": "Delete All",
+    "deleteAllTitle": "Delete All Batch History",
+    "deleteAllDescription": "Are you sure you want to delete all batch history? This action cannot be undone and will remove all {count} batches and their candidates.",
+    "deleteBatch": "Delete Batch",
+    "deleteBatchDescription": "Are you sure you want to delete this batch and all its candidates? This action cannot be undone.",
+    "loadingHistory": "Loading analysis history...",
+    "noBatchHistory": "No batch history yet",
+    "noMatchingBatches": "No matching batches",
+    "noBatchHistoryDescription": "Your batch history will appear here after you upload your first resume batch.",
+    "adjustSearchTerms": "Try adjusting your search terms.",
+    "jobTitle": "Job Title",
+    "candidates": "Candidates",
+    "candidatesCount": "{count} candidates",
+    "jobRequirements": "Job Requirements",
+    "date": "Date",
+    "actions": "Actions",
+    "viewBatchDetails": "View batch details",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
   "dialogs": {
     "deleteAllBatchHistory": "Delete All Batch History",
     "deleteAllBatchHistoryDescription": "Are you sure you want to delete all batch history? This action cannot be undone and will remove all {count} batches and their candidates.",

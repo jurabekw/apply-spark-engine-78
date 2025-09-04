@@ -51,7 +51,7 @@ const AnalysisHistory = () => {
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            <span className="ml-2 text-muted-foreground">Loading analysis history...</span>
+            <span className="ml-2 text-muted-foreground">{t('analysisHistory.loadingHistory')}</span>
           </div>
         </CardContent>
       </Card>
@@ -65,7 +65,7 @@ const AnalysisHistory = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-muted-foreground" />
-              <CardTitle>Batch Analysis History ({filteredBatches.length})</CardTitle>
+              <CardTitle>{t('analysisHistory.title')} ({filteredBatches.length})</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {batches.length > 0 && (
@@ -74,23 +74,23 @@ const AnalysisHistory = () => {
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" size="sm" className="gap-2">
                         <Trash className="w-4 h-4" />
-                        Delete All
+                        {t('analysisHistory.deleteAll')}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete All Batch History</AlertDialogTitle>
+                        <AlertDialogTitle>{t('analysisHistory.deleteAllTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete all batch history? This action cannot be undone and will remove all {batches.length} batches and their candidates.
+                          {t('analysisHistory.deleteAllDescription', { count: batches.length })}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t('analysisHistory.cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={deleteAllBatches}
                           className="bg-destructive hover:bg-destructive/90"
                         >
-                          Delete All
+                          {t('analysisHistory.delete')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -114,12 +114,12 @@ const AnalysisHistory = () => {
             <div className="text-center py-8">
               <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                {batches.length === 0 ? 'No batch history yet' : 'No matching batches'}
+                {batches.length === 0 ? t('analysisHistory.noBatchHistory') : t('analysisHistory.noMatchingBatches')}
               </h3>
               <p className="text-muted-foreground text-sm">
                 {batches.length === 0 
-                  ? "Your batch history will appear here after you upload your first resume batch."
-                  : "Try adjusting your search terms."
+                  ? t('analysisHistory.noBatchHistoryDescription')
+                  : t('analysisHistory.adjustSearchTerms')
                 }
               </p>
             </div>
@@ -128,11 +128,11 @@ const AnalysisHistory = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Job Title</TableHead>
-                    <TableHead>Candidates</TableHead>
-                    <TableHead>Job Requirements</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('analysisHistory.jobTitle')}</TableHead>
+                    <TableHead>{t('analysisHistory.candidates')}</TableHead>
+                    <TableHead>{t('analysisHistory.jobRequirements')}</TableHead>
+                    <TableHead>{t('analysisHistory.date')}</TableHead>
+                    <TableHead>{t('analysisHistory.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -145,7 +145,7 @@ const AnalysisHistory = () => {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="text-xs">
-                          {batch.total_candidates} candidates
+                          {t('analysisHistory.candidatesCount', { count: batch.total_candidates })}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -162,7 +162,7 @@ const AnalysisHistory = () => {
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleViewBatch(batch)}
-                            title="View batch details"
+                            title={t('analysisHistory.viewBatchDetails')}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -178,18 +178,18 @@ const AnalysisHistory = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Batch</AlertDialogTitle>
+                                <AlertDialogTitle>{t('analysisHistory.deleteBatch')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this batch and all its candidates? This action cannot be undone.
+                                  {t('analysisHistory.deleteBatchDescription')}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('analysisHistory.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteBatch(batch.id)}
                                   className="bg-destructive hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {t('analysisHistory.delete')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>

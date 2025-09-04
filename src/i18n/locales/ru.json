@@ -394,6 +394,28 @@
     "viewFullHhProfile": "Посмотреть полный профиль HH.ru",
     "more": "еще"
   },
+  "analysisHistory": {
+    "title": "История анализа партий",
+    "deleteAll": "Удалить все",
+    "deleteAllTitle": "Удалить всю историю партий",
+    "deleteAllDescription": "Вы уверены, что хотите удалить всю историю партий? Это действие нельзя отменить и удалит все {count} партий и их кандидатов.",
+    "deleteBatch": "Удалить партию",
+    "deleteBatchDescription": "Вы уверены, что хотите удалить эту партию и всех её кандидатов? Это действие нельзя отменить.",
+    "loadingHistory": "Загрузка истории анализа...",
+    "noBatchHistory": "История партий пока пуста",
+    "noMatchingBatches": "Совпадающие партии не найдены",
+    "noBatchHistoryDescription": "История ваших партий появится здесь после загрузки первой партии резюме.",
+    "adjustSearchTerms": "Попробуйте изменить условия поиска.",
+    "jobTitle": "Должность",
+    "candidates": "Кандидаты",
+    "candidatesCount": "{count} кандидатов",
+    "jobRequirements": "Требования к работе",
+    "date": "Дата",
+    "actions": "Действия",
+    "viewBatchDetails": "Просмотреть детали партии",
+    "cancel": "Отмена",
+    "delete": "Удалить"
+  },
   "dialogs": {
     "deleteAllBatchHistory": "Удалить всю историю партий",
     "deleteAllBatchHistoryDescription": "Вы уверены, что хотите удалить всю историю партий? Это действие нельзя отменить, и это удалит все {count} партий и их кандидатов.",
