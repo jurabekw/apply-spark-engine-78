@@ -110,12 +110,23 @@ const CandidateTable = () => {
       ai_score: c.ai_score ?? '',
       experience_years: c.experience_years ?? '',
       skills: Array.isArray(c.skills) ? c.skills.join('; ') : '',
-      source: c.source === 'hh_search' ? 'HH.ru' : c.source === 'linkedin_search' ? 'LinkedIn' : 'Upload',
+      source: c.source === 'hh_search' ? t('messages.hhruLabel') : c.source === 'linkedin_search' ? t('messages.linkedinLabel') : t('messages.uploadedLabel'),
       submitted_at: c.submitted_at || c.created_at,
       hh_url: (c as any).ai_analysis?.hh_url ?? ''
     }));
 
-    const headers = ['Name','Email','Phone','Position','AI Score','Experience Years','Skills','Source','Submitted At','HH URL'];
+    const headers = [
+      t('messages.csvHeaders.name'),
+      t('messages.csvHeaders.email'),
+      t('messages.csvHeaders.phone'),
+      t('messages.csvHeaders.position'),
+      t('messages.csvHeaders.aiScore'),
+      t('messages.csvHeaders.experienceYears'),
+      t('messages.csvHeaders.skills'),
+      t('messages.csvHeaders.source'),
+      t('messages.csvHeaders.submittedAt'),
+      t('messages.csvHeaders.hhUrl')
+    ];
     const csv = [
       headers.join(','),
       ...rows.map(r => [
@@ -257,9 +268,9 @@ const CandidateTable = () => {
               </CardTitle>
               {filteredCandidates.length > 0 && (
                  <Badge variant="secondary" className="px-3 py-1">
-                   {sourceFilter === 'all' ? t('buttons.all') + ' Sources' : 
-                    sourceFilter === 'upload' ? t('buttons.uploaded') : 
-                    sourceFilter === 'hh_search' ? t('buttons.hhSearch') : t('buttons.linkedinSearch')}
+                    {sourceFilter === 'all' ? t('buttons.all') + ' ' + t('messages.sources') : 
+                     sourceFilter === 'upload' ? t('buttons.uploaded') : 
+                     sourceFilter === 'hh_search' ? t('buttons.hhSearch') : t('buttons.linkedinSearch')}
                  </Badge>
               )}
             </div>
@@ -354,7 +365,7 @@ const CandidateTable = () => {
                               variant={candidate.source === 'hh_search' ? 'brand' : candidate.source === 'linkedin_search' ? 'brand' : 'secondary'}
                               className="text-xs"
                             >
-                              {candidate.source === 'hh_search' ? 'HH.ru' : candidate.source === 'linkedin_search' ? 'LinkedIn' : 'Uploaded'}
+                              {candidate.source === 'hh_search' ? t('messages.hhruLabel') : candidate.source === 'linkedin_search' ? t('messages.linkedinLabel') : t('messages.uploadedLabel')}
                             </Badge>
                             
                             {candidate.skills && candidate.skills.length > 0 && (
