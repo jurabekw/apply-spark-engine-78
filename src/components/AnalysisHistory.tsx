@@ -65,7 +65,7 @@ const AnalysisHistory = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-muted-foreground" />
-              <CardTitle>{t('analysisHistory.title')} ({filteredBatches.length})</CardTitle>
+              <CardTitle>{t('analysisHistory.title')}</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {batches.length > 0 && (
