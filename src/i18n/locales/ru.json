@@ -387,7 +387,7 @@
     "viewOnHH": "Посмотреть на HH.ru",
     "candidateDatabase": "База данных кандидатов",
     "manageCandidates": "Управление и просмотр всех заявок кандидатов",
-    "more": "еще"
+    "more": "еще",
     "errorLoadingResume": "Ошибка загрузки резюме",
     "errorLoadingResumeDescription": "Не удалось загрузить файл резюме. Попробуйте еще раз.",
     "viewFullLinkedinProfile": "Посмотреть полный профиль LinkedIn",
