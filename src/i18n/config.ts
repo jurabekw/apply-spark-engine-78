@@ -19,8 +19,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
-    lng: 'en', // default language
+    fallbackLng: 'ru', // Default to Russian
+    lng: 'ru', // default language
     debug: false,
     
     detection: {
@@ -28,6 +28,9 @@ i18n
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
     },
+    
+    supportedLngs: ['en', 'ru'], // Only support these languages
+    load: 'languageOnly', // Only load language, ignore region codes
 
     interpolation: {
       escapeValue: false,

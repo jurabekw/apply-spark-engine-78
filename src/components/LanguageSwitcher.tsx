@@ -1,49 +1,49 @@
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 
 const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
     { code: 'ru', name: 'Русский', flag: '🇷🇺' },
   ];
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  // Auto-detect browser language on mount
+  useEffect(() => {
+    const browserLang = navigator.language.split('-')[0]; // Get language without region
+    const supportedLang = ['en', 'ru'].includes(browserLang) ? browserLang : 'ru';
+    
+    // Only set if no language is stored in localStorage
+    if (!localStorage.getItem('i18nextLng')) {
+      i18n.changeLanguage(supportedLang);
+    }
+  }, [i18n]);
 
-  const changeLanguage = (languageCode: string) => {
-    i18n.changeLanguage(languageCode);
+  // Get the opposite language to show in the flag
+  const getOppositeLanguage = () => {
+    const currentLang = i18n.language || 'ru';
+    return currentLang === 'en' ? 'ru' : 'en';
+  };
+
+  const oppositeLanguage = languages.find(lang => lang.code === getOppositeLanguage());
+
+  const toggleLanguage = () => {
+    const newLanguage = getOppositeLanguage();
+    i18n.changeLanguage(newLanguage);
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Globe className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        {languages.map((language) => (
-          <DropdownMenuItem
-            key={language.code}
-            onClick={() => changeLanguage(language.code)}
-            className={`cursor-pointer ${
-              i18n.language === language.code ? 'bg-muted' : ''
-            }`}
-          >
-            <span className="mr-2">{language.flag}</span>
-            <span className="text-sm">{language.name}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleLanguage}
+      className="relative transition-transform hover:scale-110 duration-200"
+      title={`Switch to ${oppositeLanguage?.name}`}
+    >
+      <span className="text-lg">{oppositeLanguage?.flag}</span>
+    </Button>
   );
 };
 
