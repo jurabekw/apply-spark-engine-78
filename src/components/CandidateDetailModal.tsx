@@ -116,8 +116,8 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
           {/* AI Analysis & Score */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-{t('labels.basicInformation')} & {t('labels.aiScore')}
+                <CardTitle className="flex items-center gap-2">
+                  {t('messages.aiScore')} & {t('messages.scoreReasoning')}
                 <Badge className={getScoreColor(candidate.ai_score)}>
                   {candidate.ai_score ? `${candidate.ai_score}%` : 'N/A'}
                 </Badge>
@@ -138,7 +138,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                 <div className="space-y-4">
                   {candidate.ai_analysis.match_reasoning && (
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Score Reasoning</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">{t('messages.scoreReasoning')}</p>
                       <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
                         {candidate.ai_analysis.match_reasoning}
                       </p>
@@ -147,7 +147,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
 
                   {candidate.ai_analysis.strengths && candidate.ai_analysis.strengths.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-green-700 mb-2">Strengths</p>
+                      <p className="text-sm font-medium text-green-700 mb-2">{t('messages.strengths')}</p>
                       <ul className="list-disc list-inside space-y-1">
                         {candidate.ai_analysis.strengths.map((strength: string, index: number) => (
                           <li key={index} className="text-sm text-green-600">{strength}</li>
@@ -158,7 +158,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
 
                   {candidate.ai_analysis.weaknesses && candidate.ai_analysis.weaknesses.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-red-700 mb-2">Areas for Improvement</p>
+                      <p className="text-sm font-medium text-red-700 mb-2">{t('messages.areasForImprovement')}</p>
                       <ul className="list-disc list-inside space-y-1">
                         {candidate.ai_analysis.weaknesses.map((weakness: string, index: number) => (
                           <li key={index} className="text-sm text-red-600">{weakness}</li>
@@ -169,7 +169,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
 
                   {candidate.ai_analysis.recommendations && (
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Recommendations</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">{t('messages.recommendations')}</p>
                       <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
                         {candidate.ai_analysis.recommendations}
                       </p>
@@ -178,7 +178,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
 
                   {candidate.ai_analysis.language_notes && (
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Language Notes</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">{t('messages.languageNotes')}</p>
                       <p className="text-sm text-gray-600">
                         {candidate.ai_analysis.language_notes}
                       </p>
@@ -193,7 +193,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
           {candidate.skills && candidate.skills.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Skills</CardTitle>
+                <CardTitle>{t('messages.skills')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
@@ -212,7 +212,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
             {candidate.education && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Education</CardTitle>
+                  <CardTitle>{t('messages.education')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600">{candidate.education}</p>
@@ -223,7 +223,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
             {candidate.work_history && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Work History</CardTitle>
+                  <CardTitle>{t('messages.workHistory')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600">{candidate.work_history}</p>
@@ -237,7 +237,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
             (candidate.source === 'hh_search' && candidate.ai_analysis?.hh_url)) && (
             <Card>
               <CardHeader>
-                <CardTitle>Profile Links</CardTitle>
+                <CardTitle>{t('messages.profileLinks')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -248,8 +248,8 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                           <Linkedin className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium">LinkedIn Profile</p>
-                          <p className="text-sm text-gray-500">View full LinkedIn profile</p>
+                          <p className="font-medium">{t('messages.linkedinProfile')}</p>
+                          <p className="text-sm text-gray-500">{t('messages.viewFullLinkedinProfile')}</p>
                         </div>
                       </div>
                       <Button
@@ -258,7 +258,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                         className="flex items-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
-                        View Profile
+                        {t('messages.viewProfile')}
                       </Button>
                     </div>
                   )}
@@ -270,8 +270,8 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                           <span className="text-sm font-bold">HH</span>
                         </div>
                         <div>
-                          <p className="font-medium">HH.ru Profile</p>
-                          <p className="text-sm text-gray-500">View full HH.ru profile</p>
+                          <p className="font-medium">{t('messages.hhProfile')}</p>
+                          <p className="text-sm text-gray-500">{t('messages.viewFullHhProfile')}</p>
                         </div>
                       </div>
                       <Button
@@ -280,7 +280,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                         className="flex items-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
-                        View Profile
+                        {t('messages.viewProfile')}
                       </Button>
                     </div>
                   )}
@@ -293,16 +293,16 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
           {candidate.resume_file_path && (
             <Card>
               <CardHeader>
-                <CardTitle>Resume Document</CardTitle>
+                <CardTitle>{t('messages.resumeDocument')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <p className="text-sm text-gray-600 mb-1">
-                      Original filename: {candidate.original_filename || 'Resume.pdf'}
+                      {t('messages.originalFilename')}: {candidate.original_filename || 'Resume.pdf'}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Uploaded on {new Date(candidate.created_at).toLocaleDateString()}
+                      {t('messages.uploadedOn')} {new Date(candidate.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <Button
@@ -318,7 +318,7 @@ const CandidateDetailModal = ({ candidate, isOpen, onClose }: CandidateDetailMod
                     ) : (
                       <>
                         <Eye className="w-4 h-4" />
-                        View Resume
+                        {t('messages.viewResume')}
                       </>
                     )}
                   </Button>
