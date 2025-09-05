@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
+import { Flag } from 'lucide-react';
 
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
@@ -28,6 +29,7 @@ const LanguageSwitcher = () => {
   };
 
   const oppositeLanguage = languages.find(lang => lang.code === getOppositeLanguage());
+  const currentLanguage = languages.find(lang => lang.code === i18n.language);
 
   const toggleLanguage = () => {
     const newLanguage = getOppositeLanguage();
@@ -37,12 +39,16 @@ const LanguageSwitcher = () => {
   return (
     <Button
       variant="ghost"
-      size="icon"
+      size="sm"
       onClick={toggleLanguage}
-      className="relative transition-transform hover:scale-110 duration-200"
+      className="relative transition-all hover:scale-105 duration-200 flex items-center gap-2 px-3 py-2 h-9 bg-muted/50 hover:bg-muted border border-border/30"
       title={`Switch to ${oppositeLanguage?.name}`}
     >
-      <span className="text-lg">{oppositeLanguage?.flag}</span>
+      <Flag className="w-3 h-3 text-muted-foreground" />
+      <span className="text-base leading-none">{oppositeLanguage?.flag}</span>
+      <span className="text-xs text-muted-foreground hidden sm:block">
+        {oppositeLanguage?.code.toUpperCase()}
+      </span>
     </Button>
   );
 };
