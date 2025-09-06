@@ -24,68 +24,53 @@
     "recruiter": "Recruiter"
   },
   "landing": {
-    "hero": {
-      "title": "Hire Smarter. Faster. Bias-Free.",
-      "subtitle": "Stop wasting weeks on resumes. TalentSpark's AI finds the right candidates in minutes — so you can build stronger teams without the guesswork.",
-      "cta": "Start Free Trial",
-      "noCreditCard": "No credit card, 14 days free"
-    },
-    "valueProposition": {
-      "title": "Intelligent Candidate Search",
-      "subtitle": "Discover top talent others miss. TalentSpark scans millions of profiles, applies smart filters, and recommends candidates that perfectly fit your role and culture.",
-      "step1": "Search",
-      "step1Description": "AI scans millions of profiles",
-      "step2": "Filter", 
-      "step2Description": "Smart algorithms apply filters",
-      "step3": "Perfect Match",
-      "step3Description": "Get ideal candidates instantly",
-      "benefit1": "✅ Access hidden passive candidates",
-      "benefit2": "✅ 98% skill-match accuracy", 
-      "benefit3": "✅ Cut time-to-hire by 80%",
-      "cta": "Try Smart Search Now"
-    },
-    "features": {
-      "title": "Core Features",
-      "feature1": {
-        "title": "AI-Powered Resume Analysis",
-        "description": "Extract key skills and qualifications instantly."
-      },
-      "feature2": {
-        "title": "Lightning-Fast Screening", 
-        "description": "Rank hundreds of resumes in seconds."
-      },
-      "feature3": {
-        "title": "Bias-Free Hiring",
-        "description": "Data-driven evaluation eliminates unconscious bias."
-      },
-      "feature4": {
-        "title": "Perfect Job Matching",
-        "description": "Proprietary algorithm ensures culture + skill fit."
-      }
-    },
-    "whyChoose": {
-      "title": "Why Choose TalentSpark?",
-      "subtitle": "HR leaders trust us because we help them:",
-      "benefit1": "Cut hiring time by up to 80%",
-      "benefit2": "Access millions of candidates instantly", 
-      "benefit3": "Eliminate bad hires and bias",
-      "benefit4": "Process 10x more applications with ease",
-      "benefit5": "Improve quality of hire with AI precision",
-      "statsTitle": "📊 Proven results:",
-      "stat1": "faster hiring",
-      "stat2": "match accuracy",
-      "stat3": "profiles searched", 
-      "stat4": "days average hire",
-      "cta": "Get Started Today"
-    },
-    "finalCta": {
-      "title": "Ready to hire top talent without the headaches?",
-      "subtitle": "Join thousands of HR professionals already using TalentSpark to hire faster, smarter, and bias-free.",
-      "cta": "Start Your Free Trial Today",
-      "guarantee": "Cancel anytime"
-    },
+    "title": "Smart Resume Analysis Platform",
+    "subtitle": "Revolutionize your hiring process with AI-powered resume analysis and candidate search. Find the perfect match faster than ever.",
+    "getStarted": "Get Started",
+    "howItWorks": "How It Works",
+    "features": "Features",
+    "uploadAnalyze": "Upload & Analyze",
+    "uploadDescription": "Upload resumes in bulk and get instant AI-powered analysis with skill extraction and candidate scoring.",
+    "smartSearch": "Smart Search",
+    "smartSearchDescription": "Search through thousands of candidates using intelligent filters and AI-powered matching algorithms.",
+    "integrateHire": "Integrate & Hire",
+    "integrateDescription": "Seamlessly integrate with your existing workflow and streamline your hiring process.",
+    "aiPowered": "AI-Powered Analysis",
+    "aiDescription": "Advanced machine learning algorithms analyze resumes and extract key insights automatically.",
+    "bulkProcessing": "Bulk Processing",
+    "bulkDescription": "Process hundreds of resumes simultaneously with our high-performance analysis engine.",
+    "linkedinIntegration": "Linkedin.com",
+    "linkedinDescription": "Direct integration with LinkedIn for expanded candidate search and profile analysis.",
+    "smartFiltering": "Smart Filtering",
+    "filteringDescription": "Intelligent filtering system that learns from your preferences and improves over time.",
+    "realTimeAnalytics": "Real-time Analytics",
+    "analyticsDescription": "Get instant insights into your recruitment pipeline with comprehensive analytics dashboard.",
+    "secureStorage": "Secure Storage",
+    "storageDescription": "Enterprise-grade security ensures your candidate data is protected and compliant.",
+    "readyToTransform": "Ready to Transform Your Hiring Process?",
+    "transformSubtitle": "Join hundreds of companies already using our platform to find top talent faster and more efficiently.",
+    "startFreeTrial": "Start Free Trial",
+    "newFeature": "New Feature",
+    "intelligentCandidateSearch": "Intelligent Candidate Search",
+    "candidateSearchDescription": "Access millions of candidate profiles with AI-powered search. Find passive candidates, niche specialists, and perfect cultural fits that traditional methods miss.",
+    "trySearchFeature": "Try Search Feature",
     "trustedByTeams": "Trusted by 50+ HR teams worldwide",
-    "bulkResumeUpload": "Bulk Upload",
+    "noCreditCardRequired": "No credit card required • 14-day free trial • Cancel anytime",
+    "bulkResumeUpload": "Bulk Resume Upload",
+    "powerfulFeaturesTitle": "Powerful Features for Modern Hiring",
+    "powerfulFeaturesSubtitle": "Everything you need to revolutionize your recruitment process and find exceptional talent",
+    "whyChooseTitle": "Why Choose TalentSpark?",
+    "whyChooseSubtitle": "Join thousands of companies that have revolutionized their hiring process and discovered top talent they never knew existed.",
+    "getStartedToday": "Get Started Today",
+    "fasterHiring": "Faster Hiring",
+    "matchAccuracy": "Match Accuracy", 
+    "companies": "Companies",
+    "profilesSearched": "Profiles Searched",
+    "lovedByTeamsTitle": "Loved by HR Teams Worldwide",
+    "lovedByTeamsSubtitle": "See how TalentSpark is transforming recruitment for leading companies",
+    "readyToTransformCTA": "Ready to Transform Your Hiring?",
+    "ctaSubtitle": "Join thousands of HR professionals who have revolutionized their recruitment process and discovered top talent with TalentSpark's AI-powered platform.",
+    "startYourFreeTrial": "Start Your Free Trial",
     "copyrightText": "© 2024 TalentSpark. All rights reserved.",
     "features": {
       "aiPoweredAnalysis": "AI-Powered Resume Analysis",
@@ -121,9 +106,9 @@
       "dataDriven": "Make data-driven hiring decisions"
     },
     "testimonials": {
-      "testimonial1": "TalentSpark helped us fill senior roles in just 2 weeks. We reached candidates we never could before.",
-      "testimonial2": "We found perfect matches for niche roles in days instead of months.",
-      "testimonial3": "Our time-to-hire dropped from 45 days to 12 days — best investment in HR tech.",
+      "testimonial1": "TalentSpark revolutionized our hiring. The headhunter search feature helped us find senior developers we couldn't reach before - filled 3 positions in 2 weeks!",
+      "testimonial2": "The candidate database search is incredible. We found perfect matches for niche roles that would have taken months to fill traditionally.",
+      "testimonial3": "Best investment in HR tech. Our time-to-hire dropped from 45 to 12 days, and candidate quality improved dramatically.",
       "role1": "HR Director",
       "role2": "HR Specialist", 
       "role3": "HR Manager"
