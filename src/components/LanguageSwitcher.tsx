@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
 const LanguageSwitcher = () => {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -28,7 +28,6 @@ const LanguageSwitcher = () => {
   };
 
   const oppositeLanguage = languages.find(lang => lang.code === getOppositeLanguage());
-  const currentLanguage = languages.find(lang => lang.code === i18n.language);
 
   const toggleLanguage = () => {
     const newLanguage = getOppositeLanguage();
