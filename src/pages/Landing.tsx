@@ -118,180 +118,264 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <Badge variant="secondary" className="mb-8 px-6 py-3 text-sm bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          🚀 {t('landing.trustedByTeams')}
-        </Badge>
-        
-        <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground mb-8 leading-tight">
-          {t('landing.title')}
-        </h1>
-        
-        <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
-          {t('landing.subtitle')}
-        </p>
-
-        {/* Platform Integration Icons */}
-        <div className="flex items-center justify-center gap-8 mb-12">
-          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">in</span>
-            </div>
-            <span className="text-foreground font-medium">{t('landing.linkedinIntegration')}</span>
-          </div>
+      <section className="bg-gradient-to-br from-blue-600 via-violet-600 to-purple-700 text-white py-24">
+        <div className="container mx-auto px-4 text-center">
+          <Badge className="mb-8 px-6 py-3 text-sm bg-white/10 text-white border-white/20">
+            ⭐ {t('landing.trustedByTeams')}
+          </Badge>
           
-          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">HH</span>
-            </div>
-            <span className="text-foreground font-medium">HeadHunter.uz</span>
-          </div>
+          <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 leading-tight">
+            {t('landing.hero.title')}
+          </h1>
           
-          <div className="flex items-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border/50 shadow-subtle">
-            <Upload className="w-8 h-8 text-primary" />
-            <span className="text-foreground font-medium">{t('landing.bulkResumeUpload')}</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-primary to-accent hover:shadow-glow px-10 py-6 text-lg font-medium"
-            onClick={() => navigate('/auth?tab=signup')}
-          >
-            {t('landing.startFreeTrial')}
-          </Button>
-        </div>
+          <p className="text-xl md:text-2xl mb-12 max-w-4xl mx-auto leading-relaxed text-white/90">
+            {t('landing.hero.subtitle')}
+          </p>
 
-        <p className="text-sm text-muted-foreground">
-          {t('landing.noCreditCardRequired')}
-        </p>
-      </section>
-
-      {/* Headhunter Search Feature Highlight */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-br from-surface to-surface/50 rounded-3xl border border-border/50 shadow-elegant p-12">
-          <div className="text-center mb-16">
-            <Badge className="mb-6 bg-gradient-to-r from-success/10 to-accent/10 text-success border-success/20">
-              {t('landing.newFeature')}
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-              {t('landing.intelligentCandidateSearch')}
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {t('landing.candidateSearchDescription')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {searchFeatures.map((feature, index) => (
-              <Card key={index} className="group hover-lift border-border/50">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center text-muted-foreground">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-primary to-accent hover:shadow-glow px-8 py-4"
-              onClick={() => navigate('/resume-search')}
+              className="bg-teal-500 hover:bg-teal-400 text-white px-12 py-6 text-lg font-bold rounded-xl shadow-2xl hover:shadow-teal-500/25 transform hover:scale-105 transition-all"
+              onClick={() => navigate('/auth?tab=signup')}
             >
-              {t('landing.trySearchFeature')}
+              👉 {t('landing.hero.cta')}
             </Button>
+          </div>
+
+          <p className="text-sm text-white/80">
+            {t('landing.hero.noCreditCard')}
+          </p>
+
+          {/* Client Logos Placeholder */}
+          <div className="mt-12 flex items-center justify-center gap-8 opacity-60">
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">in</span>
+              </div>
+              <span className="text-white font-medium">LinkedIn</span>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs">HH</span>
+              </div>
+              <span className="text-white font-medium">HeadHunter</span>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4">
+              <Upload className="w-8 h-8 text-white" />
+              <span className="text-white font-medium">{t('landing.bulkResumeUpload')}</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Core Features Section */}
+      {/* Core Value Proposition */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
-            {t('landing.powerfulFeaturesTitle')}
+            {t('landing.valueProposition.title')}
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('landing.powerfulFeaturesSubtitle')}
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            {t('landing.valueProposition.subtitle')}
           </p>
-        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="group hover-lift border-border/50">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-xl font-heading">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          {/* 3-Step Visual Process */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
+            <div className="flex flex-col items-center text-center max-w-xs">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Search className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">{t('landing.valueProposition.step1')}</h3>
+              <p className="text-muted-foreground text-sm">{t('landing.valueProposition.step1Description')}</p>
+            </div>
+            
+            <div className="hidden md:block text-4xl text-muted-foreground">→</div>
+            
+            <div className="flex flex-col items-center text-center max-w-xs">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Filter className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">{t('landing.valueProposition.step2')}</h3>
+              <p className="text-muted-foreground text-sm">{t('landing.valueProposition.step2Description')}</p>
+            </div>
+            
+            <div className="hidden md:block text-4xl text-muted-foreground">→</div>
+            
+            <div className="flex flex-col items-center text-center max-w-xs">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Target className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">{t('landing.valueProposition.step3')}</h3>
+              <p className="text-muted-foreground text-sm">{t('landing.valueProposition.step3Description')}</p>
+            </div>
+          </div>
+
+          {/* Value Points */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              <span className="font-medium">{t('landing.valueProposition.benefit1')}</span>
+            </div>
+            <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              <span className="font-medium">{t('landing.valueProposition.benefit2')}</span>
+            </div>
+            <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              <span className="font-medium">{t('landing.valueProposition.benefit3')}</span>
+            </div>
+          </div>
+
+          <Button 
+            size="lg" 
+            className="bg-violet-600 hover:bg-violet-500 text-white px-8 py-4 rounded-xl"
+            onClick={() => navigate('/resume-search')}
+          >
+            {t('landing.valueProposition.cta')}
+          </Button>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="bg-gradient-to-br from-surface via-surface/80 to-primary/5 py-20">
+      {/* Feature Highlights */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-6">
+            {t('landing.features.title')}
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-border/50">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                <Brain className="w-8 h-8 text-blue-600" />
+              </div>
+              <CardTitle className="text-lg">{t('landing.features.feature1.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-center text-muted-foreground">
+                {t('landing.features.feature1.description')}
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-border/50">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                <Zap className="w-8 h-8 text-green-600" />
+              </div>
+              <CardTitle className="text-lg">{t('landing.features.feature2.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-center text-muted-foreground">
+                {t('landing.features.feature2.description')}
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-border/50">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                <Shield className="w-8 h-8 text-purple-600" />
+              </div>
+              <CardTitle className="text-lg">{t('landing.features.feature3.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-center text-muted-foreground">
+                {t('landing.features.feature3.description')}
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-border/50">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                <Target className="w-8 h-8 text-orange-600" />
+              </div>
+              <CardTitle className="text-lg">{t('landing.features.feature4.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-center text-muted-foreground">
+                {t('landing.features.feature4.description')}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Why Choose TalentSpark */}
+      <section className="bg-gradient-to-br from-slate-50 via-blue-50 to-violet-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground mb-8">
-                {t('landing.whyChooseTitle')}
+                {t('landing.whyChoose.title')}
               </h2>
               <p className="text-xl text-muted-foreground mb-10">
-                {t('landing.whyChooseSubtitle')}
+                {t('landing.whyChoose.subtitle')}
               </p>
               
               <div className="space-y-6">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="w-6 h-6 bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-foreground text-lg">{benefit}</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
                   </div>
-                ))}
+                  <span className="text-foreground text-lg">{t('landing.whyChoose.benefit1')}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-foreground text-lg">{t('landing.whyChoose.benefit2')}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-foreground text-lg">{t('landing.whyChoose.benefit3')}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-foreground text-lg">{t('landing.whyChoose.benefit4')}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-foreground text-lg">{t('landing.whyChoose.benefit5')}</span>
+                </div>
               </div>
               
               <Button 
                 size="lg" 
-                className="mt-10 bg-gradient-to-r from-primary to-accent hover:shadow-glow px-8 py-4"
+                className="mt-10 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white px-8 py-4 rounded-xl"
                 onClick={() => navigate('/auth?tab=signup')}
               >
-                {t('landing.getStartedToday')}
+                {t('landing.whyChoose.cta')}
               </Button>
             </div>
             
-            <div className="bg-gradient-to-br from-surface to-muted/20 rounded-3xl p-10 border border-border/50 shadow-elegant">
+            <div className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-3xl p-10 border border-slate-200 dark:border-slate-600 shadow-2xl">
+              <h3 className="text-xl font-bold text-center mb-8 text-foreground">{t('landing.whyChoose.statsTitle')}</h3>
               <div className="grid grid-cols-2 gap-8">
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">80%</div>
-                  <div className="text-muted-foreground">{t('landing.fasterHiring')}</div>
+                  <div className="text-5xl font-heading font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent mb-3">80%</div>
+                  <div className="text-muted-foreground font-medium">{t('landing.whyChoose.stat1')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">98%</div>
-                  <div className="text-muted-foreground">{t('landing.matchAccuracy')}</div>
+                  <div className="text-5xl font-heading font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent mb-3">98%</div>
+                  <div className="text-muted-foreground font-medium">{t('landing.whyChoose.stat2')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">50+</div>
-                  <div className="text-muted-foreground">{t('landing.companies')}</div>
+                  <div className="text-5xl font-heading font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent mb-3">10K+</div>
+                  <div className="text-muted-foreground font-medium">{t('landing.whyChoose.stat3')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">10K+</div>
-                  <div className="text-muted-foreground">{t('landing.profilesSearched')}</div>
+                  <div className="text-5xl font-heading font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent mb-3">12</div>
+                  <div className="text-muted-foreground font-medium">{t('landing.whyChoose.stat4')}</div>
                 </div>
               </div>
             </div>
@@ -334,26 +418,29 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary via-accent to-primary py-20">
+      {/* Final CTA Section */}
+      <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
-            {t('landing.readyToTransformCTA')}
+            {t('landing.finalCta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-12 max-w-3xl mx-auto">
-            {t('landing.ctaSubtitle')}
+            {t('landing.finalCta.subtitle')}
           </p>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-4">
             <Button 
               size="lg" 
-              variant="secondary" 
-              className="px-10 py-6 text-lg bg-white hover:bg-white/90 text-primary"
+              className="bg-teal-500 hover:bg-teal-400 text-white px-12 py-6 text-lg font-bold rounded-xl shadow-2xl hover:shadow-teal-500/25 transform hover:scale-105 transition-all"
               onClick={() => navigate('/auth?tab=signup')}
             >
-              {t('landing.startYourFreeTrial')}
+              👉 {t('landing.finalCta.cta')}
             </Button>
           </div>
+          
+          <p className="text-sm text-white/70">
+            {t('landing.finalCta.guarantee')}
+          </p>
         </div>
       </section>
 
