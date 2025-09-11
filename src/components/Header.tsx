@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -7,10 +8,15 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from './Logo';
 import LanguageSwitcher from './LanguageSwitcher';
+import { NotificationsDropdown } from './NotificationsDropdown';
+import { UserDropdown } from './UserDropdown';
+import { SettingsSheet } from './SettingsSheet';
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const handleSignOut = async () => {
     await signOut();
@@ -32,6 +38,14 @@ const Header = () => {
               <Input 
                 placeholder={t('header.searchCandidates')}
                 className="pl-10 bg-muted/50 border-none focus:bg-background"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    // TODO: Implement global search functionality
+                    console.log('Search for:', searchQuery);
+                  }
+                }}
               />
             </div>
           </div>
@@ -44,35 +58,28 @@ const Header = () => {
             </Button>
             
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-4 h-4" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-            </Button>
+            <NotificationsDropdown />
             
             {/* Language Switcher */}
             <LanguageSwitcher />
             
             {/* Settings */}
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setSettingsOpen(true)}
+            >
               <Settings className="w-4 h-4" />
             </Button>
             
             {/* User Menu */}
             <div className="flex items-center gap-3 pl-3 border-l border-border/50">
-              <div className="hidden sm:block text-right">
-                <p className="text-sm font-medium text-foreground">
-                  {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'HR Admin'}
-                </p>
-                <p className="text-xs text-muted-foreground">{t('header.recruiter')}</p>
-              </div>
-              <Button variant="ghost" size="icon">
-                <User className="w-4 h-4" />
-              </Button>
+              <UserDropdown onSettingsClick={() => setSettingsOpen(true)} />
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive lg:hidden"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline ml-2">{t('common.signOut')}</span>
@@ -81,6 +88,12 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Settings Sheet */}
+      <SettingsSheet 
+        open={settingsOpen} 
+        onOpenChange={setSettingsOpen} 
+      />
     </header>
   );
 };
