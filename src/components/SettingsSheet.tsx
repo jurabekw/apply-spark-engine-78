@@ -399,27 +399,6 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                     </Button>
                   </div>
 
-                  <div className="rounded-lg border p-4">
-                    <h4 className="font-medium">{t('settings.clearData', 'Clear Data')}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t('settings.clearDesc', 'Remove all your data from the system.')}
-                    </p>
-                    <Button 
-                      variant="destructive" 
-                      className="mt-3"
-                      onClick={() => {
-                        // TODO: Implement data clearing with confirmation dialog
-                        if (confirm(t('settings.confirmClear', 'Are you sure you want to clear all data? This action cannot be undone.'))) {
-                          toast({
-                            title: t('settings.clearingData', 'Clearing data'),
-                            description: t('settings.clearInProgress', 'Your data is being cleared.'),
-                          });
-                        }
-                      }}
-                    >
-                      {t('settings.clearAll', 'Clear All Data')}
-                    </Button>
-                  </div>
                 </div>
               </div>
             )}
