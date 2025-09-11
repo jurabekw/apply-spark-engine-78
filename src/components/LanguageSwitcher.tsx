@@ -65,15 +65,12 @@ const LanguageSwitcher = () => {
             className={`
               flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
               transition-all duration-200 ease-out
-              hover:bg-primary/5
-              focus:bg-primary/5
               ${currentLanguage?.code === lang.code 
                 ? 'bg-primary/10 text-primary font-medium' 
-                : 'text-foreground hover:text-primary'
+                : 'text-foreground'
               }
             `}
           >
-            <span className="text-base leading-none">{lang.flag}</span>
             <span className="text-sm flex-1">
               {lang.name} — {lang.code.toUpperCase()}
             </span>
