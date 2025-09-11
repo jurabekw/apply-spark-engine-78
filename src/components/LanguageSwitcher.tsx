@@ -49,7 +49,7 @@ const LanguageSwitcher = () => {
         >
           <Globe className="w-3.5 h-3.5 text-primary mr-2 transition-transform group-hover:rotate-12" />
           <span className="text-sm font-medium text-foreground mr-1">
-            {currentLanguage?.code === 'en' ? 'EN' : 'Русский'}
+            {currentLanguage?.code.toUpperCase()}
           </span>
           <ChevronDown className="w-3 h-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
         </Button>
@@ -72,7 +72,7 @@ const LanguageSwitcher = () => {
             `}
           >
             <span className="text-sm flex-1">
-              {lang.name} — {lang.code.toUpperCase()}
+              {lang.name}
             </span>
             {currentLanguage?.code === lang.code && (
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
