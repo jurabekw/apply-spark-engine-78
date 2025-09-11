@@ -177,43 +177,6 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                   </p>
                 </div>
 
-                {/* Avatar */}
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={profile?.avatar_url || ''} alt="Profile" />
-                    <AvatarFallback className="text-lg">
-                      {user?.email ? getInitials(user.email) : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.onchange = (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            // TODO: Implement avatar upload to Supabase storage
-                            toast({
-                              title: t('settings.uploadNotImplemented', 'Upload feature coming soon'),
-                              description: t('settings.uploadNotImplementedDesc', 'Avatar upload will be available soon.'),
-                            });
-                          }
-                        };
-                        input.click();
-                      }}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      {t('settings.uploadAvatar', 'Upload Avatar')}
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t('settings.avatarDesc', 'JPG, PNG up to 2MB')}
-                    </p>
-                  </div>
-                </div>
 
                 <Form {...profileForm}>
                   <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
