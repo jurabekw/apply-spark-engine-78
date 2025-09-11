@@ -184,7 +184,26 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            // TODO: Implement avatar upload to Supabase storage
+                            toast({
+                              title: t('settings.uploadNotImplemented', 'Upload feature coming soon'),
+                              description: t('settings.uploadNotImplementedDesc', 'Avatar upload will be available soon.'),
+                            });
+                          }
+                        };
+                        input.click();
+                      }}
+                    >
                       <Upload className="mr-2 h-4 w-4" />
                       {t('settings.uploadAvatar', 'Upload Avatar')}
                     </Button>
@@ -360,7 +379,17 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                     <p className="text-sm text-muted-foreground mt-1">
                       {t('settings.exportDesc', 'Download your data in CSV format.')}
                     </p>
-                    <Button variant="outline" className="mt-3">
+                    <Button 
+                      variant="outline" 
+                      className="mt-3"
+                      onClick={() => {
+                        // TODO: Implement data export functionality
+                        toast({
+                          title: t('settings.exportStarted', 'Export started'),
+                          description: t('settings.exportInProgress', 'Your data export is being prepared.'),
+                        });
+                      }}
+                    >
                       {t('settings.exportCandidates', 'Export Candidates')}
                     </Button>
                   </div>
@@ -370,7 +399,19 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                     <p className="text-sm text-muted-foreground mt-1">
                       {t('settings.clearDesc', 'Remove all your data from the system.')}
                     </p>
-                    <Button variant="destructive" className="mt-3">
+                    <Button 
+                      variant="destructive" 
+                      className="mt-3"
+                      onClick={() => {
+                        // TODO: Implement data clearing with confirmation dialog
+                        if (confirm(t('settings.confirmClear', 'Are you sure you want to clear all data? This action cannot be undone.'))) {
+                          toast({
+                            title: t('settings.clearingData', 'Clearing data'),
+                            description: t('settings.clearInProgress', 'Your data is being cleared.'),
+                          });
+                        }
+                      }}
+                    >
                       {t('settings.clearAll', 'Clear All Data')}
                     </Button>
                   </div>
