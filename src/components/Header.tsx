@@ -61,7 +61,7 @@ const Header = () => {
             <div className="flex items-center gap-3 pl-3 border-l border-border/50">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-foreground">
-                  {user?.email?.split('@')[0] || 'HR Admin'}
+                  {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'HR Admin'}
                 </p>
                 <p className="text-xs text-muted-foreground">{t('header.recruiter')}</p>
               </div>
