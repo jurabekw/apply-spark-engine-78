@@ -89,14 +89,26 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={onSettingsClick}>
+        <DropdownMenuItem 
+          onClick={(e) => {
+            e.preventDefault();
+            onSettingsClick();
+          }}
+          className="cursor-pointer"
+        >
           <Settings className="mr-2 h-4 w-4" />
           <span>{t('header.settings', 'Settings')}</span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={signOut} className="text-red-600">
+        <DropdownMenuItem 
+          onClick={(e) => {
+            e.preventDefault();
+            signOut();
+          }}
+          className="text-red-600 cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t('header.logout', 'Logout')}</span>
         </DropdownMenuItem>
