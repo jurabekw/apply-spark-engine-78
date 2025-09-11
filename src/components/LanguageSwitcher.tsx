@@ -39,7 +39,7 @@ const LanguageSwitcher = () => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="group relative min-w-[110px] h-9 px-3 py-1.5 
+          className="group relative min-w-[100px] h-9 px-3 py-1.5 
                      bg-gradient-to-r from-primary/5 to-secondary/5 
                      border-primary/20 hover:border-primary/40 
                      hover:from-primary/10 hover:to-secondary/10
@@ -47,41 +47,38 @@ const LanguageSwitcher = () => {
                      hover:shadow-md hover:shadow-primary/10
                      focus:ring-2 focus:ring-primary/20 focus:ring-offset-1"
         >
-          <Globe className="w-3.5 h-3.5 text-primary mr-1.5 transition-transform group-hover:rotate-12" />
-          <span className="text-xs font-medium text-foreground mr-1">
-            {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
+          <Globe className="w-3.5 h-3.5 text-primary mr-2 transition-transform group-hover:rotate-12" />
+          <span className="text-sm font-medium text-foreground mr-1">
+            {currentLanguage?.code === 'en' ? 'EN' : 'Русский'}
           </span>
           <ChevronDown className="w-3 h-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-48 p-1 bg-background/95 backdrop-blur-sm border border-border/50 shadow-lg"
+        className="w-44 p-1 bg-background/95 backdrop-blur-sm border border-border/50 shadow-lg"
       >
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => handleLanguageChange(lang.code)}
             className={`
-              flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer
+              flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
               transition-all duration-200 ease-out
-              hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10
-              focus:bg-gradient-to-r focus:from-primary/10 focus:to-secondary/10
+              hover:bg-primary/5
+              focus:bg-primary/5
               ${currentLanguage?.code === lang.code 
-                ? 'bg-gradient-to-r from-primary/5 to-secondary/5 text-primary font-medium border-l-2 border-primary' 
+                ? 'bg-primary/10 text-primary font-medium' 
                 : 'text-foreground hover:text-primary'
               }
             `}
           >
-            <span className="text-lg leading-none">{lang.flag}</span>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{lang.name}</span>
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                {lang.code}
-              </span>
-            </div>
+            <span className="text-base leading-none">{lang.flag}</span>
+            <span className="text-sm flex-1">
+              {lang.name} — {lang.code.toUpperCase()}
+            </span>
             {currentLanguage?.code === lang.code && (
-              <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
             )}
           </DropdownMenuItem>
         ))}
