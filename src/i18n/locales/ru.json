@@ -73,7 +73,19 @@
     "profileUpdateError": "Не удалось обновить профиль.",
     "preferencesUpdated": "Предпочтения обновлены",
     "preferencesUpdatedDesc": "Ваши предпочтения были успешно обновлены.",
-    "preferencesUpdateError": "Не удалось обновить предпочтения."
+    "preferencesUpdateError": "Не удалось обновить предпочтения.",
+    "uploadNotImplemented": "Функция загрузки скоро появится",
+    "uploadNotImplementedDesc": "Загрузка аватара будет доступна в ближайшее время.",
+    "exportStarted": "Экспорт начат",
+    "exportInProgress": "Ваш экспорт данных подготавливается.",
+    "clearingData": "Очистка данных",
+    "clearInProgress": "Ваши данные очищаются.",
+    "confirmClear": "Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.",
+    "theme": "Тема",
+    "themeDesc": "Выберите предпочитаемую тему.",
+    "lightMode": "Светлая",
+    "darkMode": "Тёмная",
+    "systemMode": "Системная"
   },
   "landing": {
     "title": "Умная платформа анализа резюме",

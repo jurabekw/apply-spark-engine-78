@@ -16,7 +16,7 @@ interface DatabaseUserPreferences {
 export interface UserPreferences {
   id: string;
   user_id: string;
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
   language: 'en' | 'ru';
   email_notifications: boolean;
   search_preferences: Record<string, any>;
@@ -45,7 +45,7 @@ export const useUserPreferences = () => {
         // Create default preferences
         const defaultPrefs = {
           user_id: user.id,
-          theme: 'light' as const,
+          theme: 'system' as const,
           language: 'en' as const,
           email_notifications: true,
           search_preferences: {},

@@ -73,7 +73,19 @@
     "profileUpdateError": "Failed to update profile.",
     "preferencesUpdated": "Preferences updated",
     "preferencesUpdatedDesc": "Your preferences have been updated successfully.",
-    "preferencesUpdateError": "Failed to update preferences."
+    "preferencesUpdateError": "Failed to update preferences.",
+    "uploadNotImplemented": "Upload feature coming soon",
+    "uploadNotImplementedDesc": "Avatar upload will be available soon.",
+    "exportStarted": "Export started",
+    "exportInProgress": "Your data export is being prepared.",
+    "clearingData": "Clearing data",
+    "clearInProgress": "Your data is being cleared.",
+    "confirmClear": "Are you sure you want to clear all data? This action cannot be undone.",
+    "theme": "Theme",
+    "themeDesc": "Choose your preferred theme.",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "systemMode": "System"
   },
   "landing": {
     "title": "Smart Resume Analysis Platform",

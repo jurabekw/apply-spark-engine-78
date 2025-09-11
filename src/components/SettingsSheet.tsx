@@ -38,6 +38,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/use-toast';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const profileFormSchema = z.object({
   company: z.string().optional(),
@@ -46,7 +47,7 @@ const profileFormSchema = z.object({
 });
 
 const preferencesFormSchema = z.object({
-  theme: z.enum(['light', 'dark']),
+  theme: z.enum(['light', 'dark', 'system']),
   language: z.enum(['en', 'ru']),
   email_notifications: z.boolean(),
 });
@@ -61,6 +62,7 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   const { user } = useAuth();
   const { profile, updateProfile } = useUserProfile();
   const { preferences, updatePreferences } = useUserPreferences();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'data'>('profile');
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -287,51 +289,54 @@ export const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                   </p>
                 </div>
 
+                <div className="space-y-6">
+                  <div>
+                    <div className="text-base font-medium">
+                      {t('settings.theme', 'Theme')}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('settings.themeDesc', 'Choose your preferred theme.')}
+                    </p>
+                    <Select value={theme} onValueChange={setTheme}>
+                      <SelectTrigger className="w-48 mt-3">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">{t('settings.lightMode', 'Light')}</SelectItem>
+                        <SelectItem value="dark">{t('settings.darkMode', 'Dark')}</SelectItem>
+                        <SelectItem value="system">{t('settings.systemMode', 'System')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <div className="text-base font-medium">
+                      {t('settings.language', 'Language')}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('settings.languageDesc', 'Choose your preferred language.')}
+                    </p>
+                    <Select 
+                      value={i18n.language} 
+                      onValueChange={(value) => {
+                        i18n.changeLanguage(value);
+                        updatePreferences({ language: value as 'en' | 'ru' });
+                      }}
+                    >
+                      <SelectTrigger className="w-48 mt-3">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="ru">Русский</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <Form {...preferencesForm}>
                   <form onSubmit={preferencesForm.handleSubmit(onPreferencesSubmit)} className="space-y-6">
-                    <FormField
-                      control={preferencesForm.control}
-                      name="theme"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('settings.theme', 'Theme')}</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="light">{t('settings.lightTheme', 'Light')}</SelectItem>
-                              <SelectItem value="dark">{t('settings.darkTheme', 'Dark')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
-                    <FormField
-                      control={preferencesForm.control}
-                      name="language"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('settings.language', 'Language')}</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="en">English</SelectItem>
-                              <SelectItem value="ru">Русский</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     <FormField
                       control={preferencesForm.control}
