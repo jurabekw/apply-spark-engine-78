@@ -395,7 +395,7 @@ const CandidateTable = () => {
                           className="flex-1 lg:flex-none"
                         >
                           <Eye className="w-4 h-4 mr-2" />
-                          {t('buttons.viewDetails')}
+                          Детали
                         </Button>
                         
                         <div className="flex gap-1">
