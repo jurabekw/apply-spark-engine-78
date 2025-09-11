@@ -115,7 +115,7 @@ const recentSearches = useMemo(() => {
                   {t('dashboard.welcome')}
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                  {t('dashboard.overview')} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  {t('dashboard.overview')} • {new Date().toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
                 <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
