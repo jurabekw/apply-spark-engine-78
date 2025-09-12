@@ -48,13 +48,36 @@ type DebugStats = {
   noDedupe: boolean;
 };
 
+// Cities data for Uzbekistan
+const UZBEKISTAN_CITIES = [
+  { code: "2759", nameEn: "Tashkent", nameRu: "Ташкент" },
+  { code: "2778", nameEn: "Samarkand", nameRu: "Самарканд" },
+  { code: "2781", nameEn: "Bukhara", nameRu: "Бухара" },
+  { code: "2768", nameEn: "Andijan", nameRu: "Андижан" },
+  { code: "2779", nameEn: "Namangan", nameRu: "Наманган" },
+  { code: "2782", nameEn: "Fergana", nameRu: "Фергана" },
+  { code: "2784", nameEn: "Kokand", nameRu: "Коканд" },
+  { code: "2785", nameEn: "Margilan", nameRu: "Маргилан" },
+  { code: "2783", nameEn: "Karshi", nameRu: "Карши" },
+  { code: "2789", nameEn: "Termez", nameRu: "Термез" },
+  { code: "2788", nameEn: "Urgench", nameRu: "Ургенч" },
+  { code: "2780", nameEn: "Nukus", nameRu: "Нукус" },
+  { code: "2790", nameEn: "Navoiy", nameRu: "Навои" },
+  { code: "2786", nameEn: "Jizzakh", nameRu: "Джизак" },
+  { code: "2787", nameEn: "Chirchiq", nameRu: "Чирчик" },
+  { code: "2791", nameEn: "Shakhrisabz", nameRu: "Шахрисабз" },
+  { code: "2766", nameEn: "Almaliq", nameRu: "Алмалык" },
+  { code: "2767", nameEn: "Angren", nameRu: "Ангрен" },
+];
+
 // Validation Schema
 const schema = z.object({
   jobTitle: z.string().min(2, "Please enter at least 2 characters"),
   requiredSkills: z.string().transform(s => s.replace(/\s*,\s*/g, ", ")).refine(s => s.split(",").map(t => t.trim()).filter(Boolean).length > 0, {
     message: "Please enter skills separated by commas"
   }),
-  experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"])
+  experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"]),
+  city: z.string().min(1, "Please select a city")
 });
 
 // Helpers
@@ -346,7 +369,8 @@ export default function ResumeSearch() {
     defaultValues: {
       jobTitle: "",
       requiredSkills: "",
-      experienceLevel: "between1And3"
+      experienceLevel: "between1And3",
+      city: "2759" // Default to Tashkent
     }
   });
 
@@ -407,10 +431,11 @@ export default function ResumeSearch() {
     const params = new URLSearchParams({
       title: v.jobTitle,
       skills: v.requiredSkills,
-      exp: v.experienceLevel
+      exp: v.experienceLevel,
+      city: v.city
     });
     return `${window.location.origin}/resume-search?${params.toString()}`;
-  }, [form.watch(["jobTitle", "requiredSkills", "experienceLevel"])]) as string;
+  }, [form.watch(["jobTitle", "requiredSkills", "experienceLevel", "city"])]) as string;
 
   // Prefill from URL
   useEffect(() => {
@@ -418,10 +443,12 @@ export default function ResumeSearch() {
     const title = url.searchParams.get("title") ?? "";
     const skills = url.searchParams.get("skills") ?? "";
     const exp = url.searchParams.get("exp") as any ?? "between1And3";
+    const city = url.searchParams.get("city") ?? "2759";
     form.reset({
       jobTitle: title,
       requiredSkills: skills,
-      experienceLevel: exp
+      experienceLevel: exp,
+      city: city
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -440,7 +467,8 @@ export default function ResumeSearch() {
         body: JSON.stringify({
           job_title: values.jobTitle.trim(),
           required_skills: values.requiredSkills.trim(),
-          experience_level: values.experienceLevel
+          experience_level: values.experienceLevel,
+          city: values.city
         }),
         timeout: 60000
       });
@@ -667,7 +695,7 @@ export default function ResumeSearch() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <form onSubmit={onSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <FormField control={form.control} name="jobTitle" render={({
               field
             }) => <FormItem className="md:col-span-1">
@@ -698,9 +726,33 @@ export default function ResumeSearch() {
                     <FormMessage />
                   </FormItem>} />
 
+              <FormField control={form.control} name="city" render={({
+              field
+            }) => <FormItem className="md:col-span-1">
+                    <FormLabel>City</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger aria-label="City">
+                          <SelectValue placeholder="Select city" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60">
+                        {UZBEKISTAN_CITIES.map((city) => (
+                          <SelectItem key={city.code} value={city.code}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{city.nameEn}</span>
+                              <span className="text-xs text-muted-foreground">{city.nameRu}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>} />
+
               <FormField control={form.control} name="requiredSkills" render={({
               field
-            }) => <FormItem className="md:col-span-2">
+            }) => <FormItem className="md:col-span-3">
                     <FormLabel>{t('tableHeaders.requiredSkills')}</FormLabel>
                     <FormControl>
                       <Textarea rows={4} placeholder={t('resumeSearch.skillsPlaceholder')} aria-label="Required Skills" {...field} />
@@ -709,7 +761,7 @@ export default function ResumeSearch() {
                     <FormMessage />
                   </FormItem>} />
 
-              <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+              <div className="md:col-span-3 flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
                   {loading ? t('resumeSearchPage.searchingHhRu') : t('resumeSearchPage.searchCandidatesButton')}
                 </Button>
@@ -720,11 +772,11 @@ export default function ResumeSearch() {
                 </div>
               </div>
 
-              {loading && <div className="md:col-span-2">
+              {loading && <div className="md:col-span-3">
                   <LoadingStatus />
                 </div>}
 
-              {error && !loading && <div className="md:col-span-2 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+              {error && !loading && <div className="md:col-span-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-destructive">
                   {error}
                 </div>}
             </form>
