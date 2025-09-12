@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,8 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
   const { searches, loading: loadingSearches } = useSearchHistory();
   const { candidates, loading: loadingCandidates } = useCandidates();
@@ -46,6 +48,33 @@ const recentSearches = useMemo(() => {
       .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 5);
   }, [candidates]);
+
+  // Handle global search from URL parameters or events
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setGlobalSearchTerm(searchQuery);
+      setActiveTab('candidates'); // Switch to candidates tab to show search results
+      // Clear the search parameter after applying it
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('search');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Listen for global search events from header
+  useEffect(() => {
+    const handleGlobalSearch = (event: any) => {
+      const query = event.detail?.query;
+      if (query) {
+        setGlobalSearchTerm(query);
+        setActiveTab('candidates'); // Switch to candidates tab to show search results
+      }
+    };
+
+    window.addEventListener('global-search', handleGlobalSearch);
+    return () => window.removeEventListener('global-search', handleGlobalSearch);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -294,7 +323,7 @@ const recentSearches = useMemo(() => {
         
         {activeTab === 'linkedin-search' && <LinkedinSearch />}
         
-        {activeTab === 'candidates' && <CandidateTable />}
+        {activeTab === 'candidates' && <CandidateTable initialSearchTerm={globalSearchTerm} />}
         
         {activeTab === 'forms' && (
           <div className="text-center py-12">

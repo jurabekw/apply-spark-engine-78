@@ -11,13 +11,22 @@ import { useCandidates } from '@/hooks/useCandidates';
 import CandidateDetailModal from './CandidateDetailModal';
 import { useTranslation } from 'react-i18next';
 
-const CandidateTable = () => {
+interface CandidateTableProps {
+  initialSearchTerm?: string;
+}
+
+const CandidateTable = ({ initialSearchTerm = '' }: CandidateTableProps) => {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'upload' | 'hh_search' | 'linkedin_search'>('all');
   const { candidates, loading, updateCandidateStatus, deleteCandidate, refetch } = useCandidates();
+
+  // Update search term when initialSearchTerm changes
+  useEffect(() => {
+    setSearchTerm(initialSearchTerm);
+  }, [initialSearchTerm]);
 
   // Listen for candidate updates from HH search
   useEffect(() => {

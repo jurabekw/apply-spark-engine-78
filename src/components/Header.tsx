@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Settings, User, Bell, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from './Logo';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -15,11 +15,35 @@ import { SettingsSheet } from './SettingsSheet';
 const Header = () => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleGlobalSearch = () => {
+    if (searchQuery.trim()) {
+      // Navigate to dashboard with search query parameter
+      const searchParams = new URLSearchParams();
+      searchParams.set('search', searchQuery.trim());
+      
+      if (location.pathname === '/dashboard') {
+        // If already on dashboard, trigger search by updating URL
+        navigate(`/dashboard?${searchParams.toString()}`, { replace: true });
+        // Trigger custom event to notify dashboard to update search
+        window.dispatchEvent(new CustomEvent('global-search', { 
+          detail: { query: searchQuery.trim() } 
+        }));
+      } else {
+        // Navigate to dashboard with search parameter
+        navigate(`/dashboard?${searchParams.toString()}`);
+      }
+      
+      setSearchQuery(''); // Clear search after performing search
+    }
   };
 
   return (
@@ -41,9 +65,8 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && searchQuery.trim()) {
-                    // TODO: Implement global search functionality
-                    console.log('Search for:', searchQuery);
+                  if (e.key === 'Enter') {
+                    handleGlobalSearch();
                   }
                 }}
               />
@@ -53,7 +76,13 @@ const Header = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-2">
             {/* Mobile Search Button */}
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden"
+              onClick={handleGlobalSearch}
+              disabled={!searchQuery.trim()}
+            >
               <Search className="w-4 h-4" />
             </Button>
             
