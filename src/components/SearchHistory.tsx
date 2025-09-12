@@ -11,8 +11,30 @@ import { useSearchHistory } from '@/hooks/useSearchHistory';
 import SearchResultsModal from './SearchResultsModal';
 import { useTranslation } from 'react-i18next';
 
+// Cities data for display
+const UZBEKISTAN_CITIES = [
+  { code: "2759", nameEn: "Tashkent", nameRu: "Ташкент" },
+  { code: "2778", nameEn: "Samarkand", nameRu: "Самарканд" },
+  { code: "2781", nameEn: "Bukhara", nameRu: "Бухара" },
+  { code: "2768", nameEn: "Andijan", nameRu: "Андижан" },
+  { code: "2779", nameEn: "Namangan", nameRu: "Наманган" },
+  { code: "2782", nameEn: "Fergana", nameRu: "Фергана" },
+  { code: "2784", nameEn: "Kokand", nameRu: "Коканд" },
+  { code: "2785", nameEn: "Margilan", nameRu: "Маргилан" },
+  { code: "2783", nameEn: "Karshi", nameRu: "Карши" },
+  { code: "2789", nameEn: "Termez", nameRu: "Термез" },
+  { code: "2788", nameEn: "Urgench", nameRu: "Ургенч" },
+  { code: "2780", nameEn: "Nukus", nameRu: "Нукус" },
+  { code: "2790", nameEn: "Navoiy", nameRu: "Навои" },
+  { code: "2786", nameEn: "Jizzakh", nameRu: "Джизак" },
+  { code: "2787", nameEn: "Chirchiq", nameRu: "Чирчик" },
+  { code: "2791", nameEn: "Shakhrisabz", nameRu: "Шахрисабз" },
+  { code: "2766", nameEn: "Almaliq", nameRu: "Алмалык" },
+  { code: "2767", nameEn: "Angren", nameRu: "Ангрен" },
+];
+
 interface SearchHistoryProps {
-  onRerunSearch?: (search: { job_title: string; required_skills: string; experience_level: string }) => void;
+  onRerunSearch?: (search: { job_title: string; required_skills: string; experience_level: string; city?: string }) => void;
 }
 
 const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
@@ -23,6 +45,12 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
   // State to handle viewing saved results
   const [isResultsOpen, setIsResultsOpen] = useState(false);
   const [selectedSearch, setSelectedSearch] = useState<any>(null);
+
+  const getCityLabel = (cityCode?: string) => {
+    if (!cityCode) return 'All cities';
+    const city = UZBEKISTAN_CITIES.find(c => c.code === cityCode);
+    return city ? city.nameEn : cityCode;
+  };
 
   const getExperienceLevelLabel = (level: string) => {
     const labels = {
@@ -54,7 +82,8 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
       onRerunSearch({
         job_title: search.job_title,
         required_skills: search.required_skills,
-        experience_level: search.experience_level
+        experience_level: search.experience_level,
+        city: search.city
       });
     }
   };
@@ -150,6 +179,7 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
                     <TableHead>{t('tableHeaders.jobTitle')}</TableHead>
                     <TableHead>{t('tableHeaders.requiredSkills')}</TableHead>
                     <TableHead>{t('tableHeaders.experienceLevel')}</TableHead>
+                    <TableHead>City</TableHead>
                     <TableHead>{t('tableHeaders.results')}</TableHead>
                     <TableHead>{t('tableHeaders.date')}</TableHead>
                     <TableHead>{t('tableHeaders.actions')}</TableHead>
@@ -178,6 +208,11 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
                       <TableCell>
                         <Badge variant="outline">
                           {getExperienceLevelLabel(search.experience_level)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                          {getCityLabel(search.city)}
                         </Badge>
                       </TableCell>
                       <TableCell>

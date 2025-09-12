@@ -8,6 +8,7 @@ interface SearchHistory {
   job_title: string;
   required_skills: string;
   experience_level: string;
+  city?: string;
   candidate_count: number;
   created_at: string;
   response: any;

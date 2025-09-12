@@ -149,6 +149,7 @@ export type Database = {
       hh_searches: {
         Row: {
           candidate_count: number
+          city: string | null
           created_at: string
           experience_level: string
           id: string
@@ -159,6 +160,7 @@ export type Database = {
         }
         Insert: {
           candidate_count?: number
+          city?: string | null
           created_at?: string
           experience_level: string
           id?: string
@@ -169,6 +171,7 @@ export type Database = {
         }
         Update: {
           candidate_count?: number
+          city?: string | null
           created_at?: string
           experience_level?: string
           id?: string

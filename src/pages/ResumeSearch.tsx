@@ -527,6 +527,7 @@ export default function ResumeSearch() {
           job_title: values.jobTitle.trim(),
           required_skills: values.requiredSkills.trim(),
           experience_level: values.experienceLevel,
+          city: values.city,
           response: raw,
           candidate_count: normalized.length
         });
@@ -631,15 +632,20 @@ export default function ResumeSearch() {
     job_title: string;
     required_skills: string;
     experience_level: string;
+    city?: string;
   }) => {
     form.setValue('jobTitle', search.job_title);
     form.setValue('requiredSkills', search.required_skills);
     form.setValue('experienceLevel', search.experience_level as any);
+    if (search.city) {
+      form.setValue('city', search.city);
+    }
     // Trigger the search
     handleSearch({
       jobTitle: search.job_title,
       requiredSkills: search.required_skills,
-      experienceLevel: search.experience_level as any
+      experienceLevel: search.experience_level as any,
+      city: search.city || form.getValues().city
     });
   };
   const renderCandidateCard = (c: Candidate, idx: number) => {
