@@ -677,6 +677,7 @@
     "jobTitle": "Название должности",
     "requiredSkills": "Требуемые навыки",
     "experienceLevel": "Уровень опыта",
+    "city": "Город",
     "results": "Результаты",
     "date": "Дата"
   },
@@ -687,7 +688,8 @@
     "moreThan6": "6+ лет"
   },
   "selects": {
-    "selectExperience": "Выберите уровень опыта"
+    "selectExperience": "Выберите уровень опыта",
+    "selectCity": "Выберите город"
   },
   "filters": {
     "minimumAiScore": "Минимальная оценка ИИ",

@@ -40,7 +40,7 @@ interface SearchHistoryProps {
 const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { searches, loading, deleteSearch, deleteAllSearches } = useSearchHistory();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // State to handle viewing saved results
   const [isResultsOpen, setIsResultsOpen] = useState(false);
@@ -49,7 +49,7 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
   const getCityLabel = (cityCode?: string) => {
     if (!cityCode) return 'All cities';
     const city = UZBEKISTAN_CITIES.find(c => c.code === cityCode);
-    return city ? city.nameEn : cityCode;
+    return city ? (i18n.language === 'ru' ? city.nameRu : city.nameEn) : cityCode;
   };
 
   const getExperienceLevelLabel = (level: string) => {
@@ -179,7 +179,7 @@ const SearchHistory = ({ onRerunSearch }: SearchHistoryProps) => {
                     <TableHead>{t('tableHeaders.jobTitle')}</TableHead>
                     <TableHead>{t('tableHeaders.requiredSkills')}</TableHead>
                     <TableHead>{t('tableHeaders.experienceLevel')}</TableHead>
-                    <TableHead>City</TableHead>
+                    <TableHead>{t('tableHeaders.city')}</TableHead>
                     <TableHead>{t('tableHeaders.results')}</TableHead>
                     <TableHead>{t('tableHeaders.date')}</TableHead>
                     <TableHead>{t('tableHeaders.actions')}</TableHead>

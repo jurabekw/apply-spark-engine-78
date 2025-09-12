@@ -361,7 +361,7 @@ export default function ResumeSearch() {
   const {
     toast
   } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Form
   const form = useForm<z.infer<typeof schema>>({
@@ -735,20 +735,17 @@ export default function ResumeSearch() {
               <FormField control={form.control} name="city" render={({
               field
             }) => <FormItem className="md:col-span-1">
-                    <FormLabel>City</FormLabel>
+                    <FormLabel>{t('tableHeaders.city')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger aria-label="City">
-                          <SelectValue placeholder="Select city" />
+                          <SelectValue placeholder={t('selects.selectCity')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-60">
                         {UZBEKISTAN_CITIES.map((city) => (
                           <SelectItem key={city.code} value={city.code}>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{city.nameEn}</span>
-                              <span className="text-xs text-muted-foreground">{city.nameRu}</span>
-                            </div>
+                            {i18n.language === 'ru' ? city.nameRu : city.nameEn}
                           </SelectItem>
                         ))}
                       </SelectContent>

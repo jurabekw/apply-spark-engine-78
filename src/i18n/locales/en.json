@@ -677,6 +677,7 @@
     "jobTitle": "Job Title",
     "requiredSkills": "Required Skills",
     "experienceLevel": "Experience Level",
+    "city": "City",
     "results": "Results",
     "date": "Date"
   },
@@ -687,7 +688,8 @@
     "moreThan6": "6+ Years"
   },
   "selects": {
-    "selectExperience": "Select experience level"
+    "selectExperience": "Select experience level",
+    "selectCity": "Select city"
   },
   "filters": {
     "minimumAiScore": "Minimum AI Score",
