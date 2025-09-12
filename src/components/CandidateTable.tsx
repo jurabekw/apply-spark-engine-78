@@ -459,8 +459,8 @@ const CandidateTable = ({ initialSearchTerm = '' }: CandidateTableProps) => {
                                  <AlertDialogTitle>{t('messages.deleteCandidate')}</AlertDialogTitle>
                                   <AlertDialogDescription>
                                     {candidate.source === 'upload' 
-                                      ? `Are you sure you want to delete ${candidate.name}? This action cannot be undone and will permanently remove all candidate data, including the resume.`
-                                      : `Are you sure you want to delete ${candidate.name}? This action cannot be undone and will permanently remove all candidate data.`
+                                      ? t('messages.deleteCandidateConfirmWithResume', { name: candidate.name })
+                                      : t('messages.deleteCandidateConfirmWithoutResume', { name: candidate.name })
                                     }
                                   </AlertDialogDescription>
                                </AlertDialogHeader>
