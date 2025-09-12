@@ -457,12 +457,12 @@ const CandidateTable = ({ initialSearchTerm = '' }: CandidateTableProps) => {
                              <AlertDialogContent>
                                <AlertDialogHeader>
                                  <AlertDialogTitle>{t('messages.deleteCandidate')}</AlertDialogTitle>
-                                 <AlertDialogDescription>
-                                   {t('messages.deleteCandidateConfirm', { 
-                                     name: candidate.name, 
-                                     hasResume: candidate.source === 'upload' ? t('messages.includingResume') : '' 
-                                   })}
-                                 </AlertDialogDescription>
+                                  <AlertDialogDescription>
+                                    {t('messages.deleteCandidateConfirm', { 
+                                      name: candidate.name, 
+                                      hasResume: candidate.source === 'upload' ? t('messages.includingResume') : '' 
+                                    })}
+                                  </AlertDialogDescription>
                                </AlertDialogHeader>
                                <AlertDialogFooter>
                                  <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
