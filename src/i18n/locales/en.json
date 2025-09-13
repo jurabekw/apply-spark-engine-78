@@ -294,7 +294,9 @@
     "successDescription": "Successfully analyzed {{candidateCount}} candidate from {{resumeCount}} resume.",
     "successDescription_candidatePlural": "Successfully analyzed {{candidateCount}} candidates from {{resumeCount}} resume.",
     "successDescription_resumePlural": "Successfully analyzed {{candidateCount}} candidate from {{resumeCount}} resumes.",
-    "successDescription_bothPlural": "Successfully analyzed {{candidateCount}} candidates from {{resumeCount}} resumes."
+    "successDescription_bothPlural": "Successfully analyzed {{candidateCount}} candidates from {{resumeCount}} resumes.",
+    "resume": "Resume",
+    "resumes": "Resumes"
   },
   "linkedinSearch": {
     "title": "LinkedIn Candidate Search",

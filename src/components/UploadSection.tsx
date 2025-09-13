@@ -434,7 +434,7 @@ const UploadSection = () => {
               ) : (
                 <>
                   <CloudUpload className="w-5 h-5 mr-3" />
-                  {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} {selectedFiles && selectedFiles.length === 1 ? 'Resume' : 'Resumes'}
+                  {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} {selectedFiles && selectedFiles.length === 1 ? t('upload.resume') : t('upload.resumes')}
                 </>
               )}
             </Button>
