@@ -264,7 +264,7 @@
     "dragDropFiles": "Drag & drop PDF files",
     "dropFilesHere": "Drop files here",
     "browseFiles": "browse files",
-    "fileRestrictions": "PDF files only • Maximum 10 files • Up to 10MB each",
+    "fileRestrictions": "PDF files only • Maximum 10 files • 1MB max each",
     "selectedFiles": "Selected Files",
     "processingStatus": "Processing Status",
     "analyze": "Analyze",

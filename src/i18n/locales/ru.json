@@ -264,7 +264,7 @@
     "dragDropFiles": "Перетащите PDF файлы",
     "dropFilesHere": "Отпустите файлы здесь",
     "browseFiles": "выберите файлы",
-    "fileRestrictions": "Только PDF файлы • Максимум 10 файлов • До 10 МБ каждый",
+    "fileRestrictions": "Только PDF файлы • Максимум 10 файлов • До 1 МБ каждый",
     "selectedFiles": "Выбранные файлы",
     "processingStatus": "Статус обработки",
     "analyze": "Анализировать",
