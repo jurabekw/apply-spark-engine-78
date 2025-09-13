@@ -21,7 +21,7 @@ const UploadSection = () => {
   
   const { toast } = useToast();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const validateAndSetFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
@@ -149,7 +149,8 @@ const UploadSection = () => {
           jobRequirements,
           jobTitle,
           userId: user?.id,
-          uploadedResumes
+          uploadedResumes,
+          language: i18n.language // Pass user's language preference
         }
       });
       

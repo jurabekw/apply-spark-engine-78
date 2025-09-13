@@ -17,7 +17,8 @@ serve(async (req) => {
       jobRequirements, 
       jobTitle, 
       userId, 
-      uploadedResumes 
+      uploadedResumes,
+      language = 'en' // Default to English if no language provided
     } = await req.json()
 
     console.log('Processing resumes for job:', jobTitle)
@@ -60,7 +61,8 @@ serve(async (req) => {
       job_requirements: jobRequirements,
       files: fileUrls,
       batch_id: batchId,
-      user_id: userId
+      user_id: userId,
+      language: language // Pass language to Make.com for AI analysis
     }
 
     console.log('Calling Make.com webhook with file URLs...')
