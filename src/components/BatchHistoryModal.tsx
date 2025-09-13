@@ -95,7 +95,7 @@ const BatchHistoryModal = ({ batch, isOpen, onClose }: BatchHistoryModalProps) =
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs">
-                            {candidate.status}
+                            {t(`status.${candidate.status}`, candidate.status) as string}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -103,7 +103,7 @@ const BatchHistoryModal = ({ batch, isOpen, onClose }: BatchHistoryModalProps) =
                             variant="ghost"
                             size="sm"
                             onClick={() => handleViewCandidate(candidate)}
-                            title="View candidate details"
+                            title={t('tooltips.viewCandidateDetails')}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>

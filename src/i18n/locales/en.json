@@ -712,5 +712,16 @@
     "showAll": "Show All",
     "applyFilters": "Apply Filters",
     "clearFilters": "Clear Filters"
+  },
+  "status": {
+    "new": "New",
+    "reviewed": "Reviewed", 
+    "contacted": "Contacted",
+    "interview": "Interview",
+    "hired": "Hired",
+    "rejected": "Rejected"
+  },
+  "tooltips": {
+    "viewCandidateDetails": "View candidate details"
   }
 }

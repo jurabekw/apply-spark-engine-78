@@ -712,5 +712,16 @@
     "showAll": "Показать все",
     "applyFilters": "Применить фильтры",
     "clearFilters": "Очистить фильтры"
+  },
+  "status": {
+    "new": "Новый",
+    "reviewed": "Рассмотрен",
+    "contacted": "Связались",
+    "interview": "Собеседование", 
+    "hired": "Принят",
+    "rejected": "Отклонен"
+  },
+  "tooltips": {
+    "viewCandidateDetails": "Просмотр деталей кандидата"
   }
 }
