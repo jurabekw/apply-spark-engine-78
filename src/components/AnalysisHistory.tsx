@@ -145,7 +145,7 @@ const AnalysisHistory = () => {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="text-xs">
-                          {t('analysisHistory.candidatesCount', { count: batch.total_candidates })}
+                          {batch.total_candidates || 0} {t('analysisHistory.candidates')}
                         </Badge>
                       </TableCell>
                       <TableCell>
