@@ -723,5 +723,16 @@
   },
   "tooltips": {
     "viewCandidateDetails": "View candidate details"
+  },
+  "errors": {
+    "noCandidatesFound": "No candidates found matching your criteria. Try adjusting your requirements.",
+    "searchTimeout": "Search timeout. The request is taking too long. Please try again.",
+    "searchCancelled": "Search was cancelled. Please try again.",
+    "connectionFailed": "Failed to connect. Please check your internet connection.",
+    "searchFailed": "Search failed: {{message}}. Please try again."
+  },
+  "success": {
+    "candidatesSaved": "Candidates saved",
+    "candidatesSavedDescription": "{{saved}}/{{total}} saved. All {{shown}} shown in results."
   }
 }

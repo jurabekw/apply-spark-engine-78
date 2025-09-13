@@ -516,7 +516,7 @@ export default function ResumeSearch() {
       setCandidates(normalized);
       console.debug("STATE SET. Current candidates length should be:", normalized.length);
       if (normalized.length === 0) {
-        setError("No candidates found matching your criteria. Try adjusting your requirements.");
+        setError(t('errors.noCandidatesFound'));
       }
       if (user?.id) {
         // Save search record
@@ -605,8 +605,12 @@ export default function ResumeSearch() {
           }
 
           toast({
-            title: 'Candidates saved',
-            description: `${inserted}/${records.length} saved. All ${normalized.length} shown in results.`,
+            title: t('success.candidatesSaved'),
+            description: t('success.candidatesSavedDescription', { 
+              saved: inserted, 
+              total: records.length, 
+              shown: normalized.length 
+            }),
           });
 
           // Refresh the main candidates view on dashboard
@@ -615,13 +619,13 @@ export default function ResumeSearch() {
       }
     } catch (err: any) {
       if (err?.name === "TimeoutError") {
-        setError("Search timeout. The request is taking too long. Please try again.");
+        setError(t('errors.searchTimeout'));
       } else if (err?.name === "AbortError") {
-        setError("Search was cancelled. Please try again.");
+        setError(t('errors.searchCancelled'));
       } else if (err?.message?.includes("Failed to fetch")) {
-        setError("Failed to connect. Please check your internet connection.");
+        setError(t('errors.connectionFailed'));
       } else {
-        setError(`Search failed: ${err?.message || "Unknown error"}. Please try again.`);
+        setError(t('errors.searchFailed', { message: err?.message || "Unknown error" }));
       }
     } finally {
       setLoading(false);
