@@ -206,7 +206,7 @@ const UploadSection = () => {
       // Step 1: Upload all resumes
       setProcessingProgress([t('upload.uploadingResumes')]);
       const uploadedResumes = await uploadAllResumes(files);
-      setProcessingProgress(prev => [...prev, `✅ Uploaded ${uploadedResumes.length} resume${uploadedResumes.length > 1 ? 's' : ''}`]);
+      setProcessingProgress(prev => [...prev, `✅ ${t('upload.uploadedResumes', { count: uploadedResumes.length })}`]);
       
       // Step 2: Process all resumes together
       setProcessingProgress(prev => [...prev, t('upload.analyzingWithAi')]);
@@ -214,11 +214,23 @@ const UploadSection = () => {
       
       if (result.success) {
         const candidateCount = result.candidates?.length || 0;
-        setProcessingProgress(prev => [...prev, `✅ Successfully processed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''}`]);
+        setProcessingProgress(prev => [...prev, `✅ ${t('upload.processedCandidates', { count: candidateCount })}`]);
         
+        const getSuccessDescription = () => {
+          if (candidateCount === 1 && files.length === 1) {
+            return t('upload.successDescription', { candidateCount, resumeCount: files.length });
+          } else if (candidateCount === 1 && files.length > 1) {
+            return t('upload.successDescription_resumePlural', { candidateCount, resumeCount: files.length });
+          } else if (candidateCount > 1 && files.length === 1) {
+            return t('upload.successDescription_candidatePlural', { candidateCount, resumeCount: files.length });
+          } else {
+            return t('upload.successDescription_bothPlural', { candidateCount, resumeCount: files.length });
+          }
+        };
+
         toast({
           title: t('upload.processingComplete'),
-          description: `Successfully analyzed ${candidateCount} candidate${candidateCount > 1 ? 's' : ''} from ${files.length} resume${files.length > 1 ? 's' : ''}.`
+          description: getSuccessDescription()
         });
         
         // Reset form on success
@@ -421,7 +433,7 @@ const UploadSection = () => {
               ) : (
                 <>
                   <CloudUpload className="w-5 h-5 mr-3" />
-                  {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} Resume{selectedFiles && selectedFiles.length !== 1 ? 's' : ''}
+                  {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} {selectedFiles && selectedFiles.length === 1 ? 'Resume' : 'Resumes'}
                 </>
               )}
             </Button>

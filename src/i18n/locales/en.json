@@ -286,7 +286,15 @@
     "missingInformation": "Missing information",
     "provideTitleAndRequirements": "Please provide both job title and requirements.",
     "processingComplete": "Processing Complete!",
-    "processingFailed": "Processing Failed"
+    "processingFailed": "Processing Failed",
+    "uploadedResumes": "Uploaded {{count}} resume",
+    "uploadedResumes_plural": "Uploaded {{count}} resumes",
+    "processedCandidates": "Successfully processed {{count}} candidate",
+    "processedCandidates_plural": "Successfully processed {{count}} candidates",
+    "successDescription": "Successfully analyzed {{candidateCount}} candidate from {{resumeCount}} resume.",
+    "successDescription_candidatePlural": "Successfully analyzed {{candidateCount}} candidates from {{resumeCount}} resume.",
+    "successDescription_resumePlural": "Successfully analyzed {{candidateCount}} candidate from {{resumeCount}} resumes.",
+    "successDescription_bothPlural": "Successfully analyzed {{candidateCount}} candidates from {{resumeCount}} resumes."
   },
   "linkedinSearch": {
     "title": "LinkedIn Candidate Search",

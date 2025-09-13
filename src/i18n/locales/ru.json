@@ -286,7 +286,15 @@
     "missingInformation": "Недостающая информация",
     "provideTitleAndRequirements": "Пожалуйста, укажите название позиции и требования.",
     "processingComplete": "Обработка завершена!",
-    "processingFailed": "Обработка не удалась"
+    "processingFailed": "Обработка не удалась",
+    "uploadedResumes": "Загружено {{count}} резюме",
+    "uploadedResumes_plural": "Загружено {{count}} резюме",
+    "processedCandidates": "Успешно обработан {{count}} кандидат",
+    "processedCandidates_plural": "Успешно обработано {{count}} кандидатов",
+    "successDescription": "Успешно проанализировано {{candidateCount}} кандидат из {{resumeCount}} резюме.",
+    "successDescription_candidatePlural": "Успешно проанализировано {{candidateCount}} кандидатов из {{resumeCount}} резюме.",
+    "successDescription_resumePlural": "Успешно проанализировано {{candidateCount}} кандидат из {{resumeCount}} резюме.",
+    "successDescription_bothPlural": "Успешно проанализировано {{candidateCount}} кандидатов из {{resumeCount}} резюме."
   },
   "linkedinSearch": {
     "title": "Поиск кандидатов LinkedIn",
