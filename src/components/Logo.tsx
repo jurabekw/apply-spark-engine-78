@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import logoImage from '@/assets/logo.png';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -31,9 +31,12 @@ const Logo = ({ size = 'md', variant = 'light', showText = true }: LogoProps) =>
 
   return (
     <div className="flex items-center gap-3">
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 animate-pulse"></div>
-        <Sparkles className={`${iconSizeClasses[size]} text-white relative z-10`} />
+      <div className={`${sizeClasses[size]} flex items-center justify-center`}>
+        <img 
+          src={logoImage} 
+          alt="TalentSpark Logo" 
+          className={`${sizeClasses[size]} object-contain`}
+        />
       </div>
       {showText && (
         <div>
