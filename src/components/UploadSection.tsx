@@ -44,6 +44,19 @@ const UploadSection = () => {
       return false;
     }
 
+    // Check file size limit (1MB = 1024 * 1024 bytes)
+    const maxFileSize = 1024 * 1024; // 1MB
+    const oversizedFiles = pdfFiles.filter(file => file.size > maxFileSize);
+    
+    if (oversizedFiles.length > 0) {
+      toast({
+        title: t('upload.fileTooLarge'),
+        description: t('upload.maxFileSize'),
+        variant: "destructive"
+      });
+      return false;
+    }
+
     const dataTransfer = new DataTransfer();
     pdfFiles.forEach(file => dataTransfer.items.add(file));
     setSelectedFiles(dataTransfer.files);
