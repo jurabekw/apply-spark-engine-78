@@ -47,18 +47,24 @@ const UploadSection = () => {
     // Check file size limit (1MB = 1024 * 1024 bytes)
     const maxFileSize = 1024 * 1024; // 1MB
     const oversizedFiles = pdfFiles.filter(file => file.size > maxFileSize);
+    const validFiles = pdfFiles.filter(file => file.size <= maxFileSize);
     
     if (oversizedFiles.length > 0) {
+      const skippedFileNames = oversizedFiles.map(f => f.name).join(', ');
       toast({
-        title: t('upload.fileTooLarge'),
-        description: t('upload.maxFileSize'),
+        title: t('upload.filesSkipped'),
+        description: t('upload.filesSkippedDescription', { files: skippedFileNames }),
         variant: "destructive"
       });
+    }
+
+    // If no valid files remain, return false
+    if (validFiles.length === 0) {
       return false;
     }
 
     const dataTransfer = new DataTransfer();
-    pdfFiles.forEach(file => dataTransfer.items.add(file));
+    validFiles.forEach(file => dataTransfer.items.add(file));
     setSelectedFiles(dataTransfer.files);
     return true;
   };

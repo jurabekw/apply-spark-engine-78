@@ -279,6 +279,8 @@
     "maxTenFiles": "Please select maximum 10 files at once.",
     "fileTooLarge": "File size too large",
     "maxFileSize": "Each file must be smaller than 1MB",
+    "filesSkipped": "Some files were skipped",
+    "filesSkippedDescription": "The following files exceed 1MB and were skipped: {{files}}",
     "noFilesSelected": "No files selected",
     "selectPdfFiles": "Please select at least one PDF file to process.",
     "missingInformation": "Missing information",
