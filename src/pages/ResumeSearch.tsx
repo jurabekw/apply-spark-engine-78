@@ -770,15 +770,10 @@ export default function ResumeSearch() {
                     <FormMessage />
                   </FormItem>} />
 
-              <div className="md:col-span-3 flex flex-wrap items-center gap-3">
+              <div className="md:col-span-3">
                 <Button type="submit" variant="brand" disabled={loading} aria-disabled={loading}>
                   {loading ? t('resumeSearchPage.searchingHhRu') : t('resumeSearchPage.searchCandidatesButton')}
                 </Button>
-                
-                <div className="ml-auto flex items-center gap-2">
-                  <Checkbox id="noDedupe" checked={noDedupe} onCheckedChange={v => setNoDedupe(Boolean(v))} />
-                  <Label htmlFor="noDedupe" className="text-sm">{t('resumeSearchPage.dontMergeDuplicates')}</Label>
-                </div>
               </div>
 
               {loading && <div className="md:col-span-3">
