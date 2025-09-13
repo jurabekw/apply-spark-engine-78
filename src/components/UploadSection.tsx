@@ -342,7 +342,7 @@ const UploadSection = () => {
                     or <Button variant="link" className="p-0 h-auto text-primary">{t('upload.browseFiles')}</Button>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('upload.fileRestrictions')}
+                    {t('upload.fileRestrictions')} • До 1 МБ каждый
                   </p>
                 </div>
               </div>
