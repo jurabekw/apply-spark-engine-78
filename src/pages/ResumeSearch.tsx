@@ -624,6 +624,8 @@ export default function ResumeSearch() {
         setError(t('errors.searchCancelled'));
       } else if (err?.message?.includes("Failed to fetch")) {
         setError(t('errors.connectionFailed'));
+      } else if (err?.message?.includes("Unexpected token") && err?.message?.includes("Accepted")) {
+        setError(t('errors.invalidResponse'));
       } else {
         setError(t('errors.searchFailed', { message: err?.message || "Unknown error" }));
       }

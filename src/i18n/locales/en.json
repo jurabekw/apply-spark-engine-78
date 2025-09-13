@@ -729,7 +729,8 @@
     "searchTimeout": "Search timeout. The request is taking too long. Please try again.",
     "searchCancelled": "Search was cancelled. Please try again.",
     "connectionFailed": "Failed to connect. Please check your internet connection.",
-    "searchFailed": "Search failed: {{message}}. Please try again."
+    "searchFailed": "Search failed: {{message}}. Please try again.",
+    "invalidResponse": "No candidates found matching your criteria. The search service returned an invalid response."
   },
   "success": {
     "candidatesSaved": "Candidates saved",
