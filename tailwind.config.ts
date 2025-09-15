@@ -19,8 +19,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        heading: ['Source Sans Pro', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -107,13 +107,14 @@ export default {
         'xxl': 'var(--space-xxl)',
       },
       fontSize: {
-        'xs': ['var(--text-xs)', { lineHeight: '1.4' }],
-        'sm': ['var(--text-sm)', { lineHeight: '1.5' }],
-        'base': ['var(--text-base)', { lineHeight: '1.6' }],
-        'lg': ['var(--text-lg)', { lineHeight: '1.6' }],
-        'xl': ['var(--text-xl)', { lineHeight: '1.5' }],
-        '2xl': ['var(--text-2xl)', { lineHeight: '1.4' }],
-        '3xl': ['var(--text-3xl)', { lineHeight: '1.2' }],
+        'xs': ['var(--text-xs)', { lineHeight: 'var(--leading-normal)', letterSpacing: '0' }],
+        'sm': ['var(--text-sm)', { lineHeight: 'var(--leading-normal)', letterSpacing: '-0.005em' }],
+        'base': ['var(--text-base)', { lineHeight: 'var(--leading-normal)', letterSpacing: '-0.01em' }],
+        'lg': ['var(--text-lg)', { lineHeight: 'var(--leading-normal)', letterSpacing: '-0.01em' }],
+        'xl': ['var(--text-xl)', { lineHeight: 'var(--leading-snug)', letterSpacing: '-0.015em' }],
+        '2xl': ['var(--text-2xl)', { lineHeight: 'var(--leading-snug)', letterSpacing: '-0.02em' }],
+        '3xl': ['var(--text-3xl)', { lineHeight: 'var(--leading-tight)', letterSpacing: '-0.025em' }],
+        '4xl': ['var(--text-4xl)', { lineHeight: 'var(--leading-tight)', letterSpacing: '-0.03em' }],
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
