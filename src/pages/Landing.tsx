@@ -335,8 +335,10 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary via-accent to-primary py-20">
-        <div className="container mx-auto px-4 text-center">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent)] opacity-70"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-6">
             {t('landing.readyToTransformCTA')}
           </h2>
