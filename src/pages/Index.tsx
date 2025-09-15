@@ -155,7 +155,7 @@ const recentSearches = useMemo(() => {
 
             <StatsCards />
 
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-3 gap-6">
               <Card className="group bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 hover-lift animate-slide-up">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -203,31 +203,30 @@ const recentSearches = useMemo(() => {
                   </Button>
                 </CardContent>
               </Card>
-            </div>
 
-            {/* LinkedIn Search Widget */}
-            <Card className="group bg-gradient-to-br from-blue-500/5 to-blue-600/5 border-blue-500/20 hover-lift animate-slide-up" style={{ animationDelay: '150ms' }}>
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md group-hover:scale-110 transition-transform">
-                    <Users className="w-6 h-6 text-white" />
+              <Card className="group bg-gradient-to-br from-blue-500/5 to-blue-600/5 border-blue-500/20 hover-lift animate-slide-up" style={{ animationDelay: '150ms' }}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
-                </div>
-                <CardTitle className="text-xl">{t('dashboard.linkedinSearch')}</CardTitle>
-                <CardDescription>
-                  {t('dashboard.linkedinSearchDescription')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={() => setActiveTab('linkedin-search')} 
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
-                >
-                  {t('dashboard.linkedinSearchButton')}
-                </Button>
-              </CardContent>
-            </Card>
+                  <CardTitle className="text-xl">{t('dashboard.linkedinSearch')}</CardTitle>
+                  <CardDescription>
+                    {t('dashboard.linkedinSearchDescription')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={() => setActiveTab('linkedin-search')} 
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                  >
+                    {t('dashboard.linkedinSearchButton')}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
 
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Recent HH Searches */}
