@@ -147,10 +147,6 @@ const recentSearches = useMemo(() => {
                   {t('dashboard.overview')} • {new Date().toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </p>
               </div>
-                <Badge variant="brand" className="px-4 py-2 text-sm font-medium animate-bounce-in">
-                <Clock className="w-4 h-4 mr-2" />
-                {t('status.online')}
-              </Badge>
             </div>
 
             <StatsCards />
