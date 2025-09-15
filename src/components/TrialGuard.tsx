@@ -78,32 +78,7 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
 
   const urgency = getTrialUrgency();
 
-  // Trial banner component
-  const TrialBanner = () => {
-    if (!hasActiveTrial || !showTrialBanner) return null;
-
-    const bannerVariants = {
-      low: 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200',
-      medium: 'border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200',
-      high: 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200'
-    };
-
-    return (
-      <Alert className={`mb-4 ${bannerVariants[urgency]}`}>
-        <Clock className="h-4 w-4" />
-        <AlertDescription className="flex items-center justify-between">
-          <span>
-            {t('trial.banner.message')} <strong>{timeRemaining}</strong> {t('trial.banner.remaining')}
-          </span>
-          {urgency === 'high' && (
-            <span className="text-sm font-medium">
-              {t('trial.banner.urgent')}
-            </span>
-          )}
-        </AlertDescription>
-      </Alert>
-    );
-  };
+  // Trial banner is now handled by Header component
 
   // Expired trial modal
   const ExpiredTrialModal = () => {
@@ -151,7 +126,6 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
 
   return (
     <>
-      <TrialBanner />
       {!isExpired || !blockOnExpired ? children : null}
       <ExpiredTrialModal />
     </>
