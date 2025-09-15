@@ -205,6 +205,30 @@ const recentSearches = useMemo(() => {
               </Card>
             </div>
 
+            {/* LinkedIn Search Widget */}
+            <Card className="group bg-gradient-to-br from-blue-500/5 to-blue-600/5 border-blue-500/20 hover-lift animate-slide-up" style={{ animationDelay: '150ms' }}>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                </div>
+                <CardTitle className="text-xl">Поиск в Линкедин</CardTitle>
+                <CardDescription>
+                  Найдите профессионалов в LinkedIn с помощью ИИ-анализа
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => setActiveTab('linkedin-search')} 
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                >
+                  Поиск в LinkedIn
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Recent HH Searches */}
               <Card className="animate-slide-up" style={{ animationDelay: '200ms' }}>
