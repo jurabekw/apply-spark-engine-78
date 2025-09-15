@@ -411,9 +411,7 @@ const LinkedinSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <TrialGuard>
-        <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
               <Linkedin className="h-6 w-6" />
@@ -485,8 +483,6 @@ const LinkedinSearch = () => {
 
             <LinkedinSearchHistory onRerunSearch={handleRerunSearch} />
           </div>
-        </div>
-      </TrialGuard>
     </div>
   );
 };
