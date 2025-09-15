@@ -19,9 +19,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        heading: ['Montserrat', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Montserrat', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -108,15 +107,13 @@ export default {
         'xxl': 'var(--space-xxl)',
       },
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0' }], // 12px
-        'sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '-0.005em' }], // 14px
-        'base': ['1rem', { lineHeight: '1.6', letterSpacing: '-0.005em' }], // 16px - body text
-        'lg': ['1.125rem', { lineHeight: '1.5', letterSpacing: '-0.01em' }], // 18px
-        'xl': ['1.25rem', { lineHeight: '1.4', letterSpacing: '-0.01em' }], // 20px
-        '2xl': ['1.5rem', { lineHeight: '1.3', letterSpacing: '-0.015em' }], // 24px - section headings
-        '3xl': ['1.875rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }], // 30px - page headings
-        '4xl': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.025em' }], // 36px - main headings
-        '5xl': ['3rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }], // 48px - hero headings
+        'xs': ['var(--text-xs)', { lineHeight: '1.4' }],
+        'sm': ['var(--text-sm)', { lineHeight: '1.5' }],
+        'base': ['var(--text-base)', { lineHeight: '1.6' }],
+        'lg': ['var(--text-lg)', { lineHeight: '1.6' }],
+        'xl': ['var(--text-xl)', { lineHeight: '1.5' }],
+        '2xl': ['var(--text-2xl)', { lineHeight: '1.4' }],
+        '3xl': ['var(--text-3xl)', { lineHeight: '1.2' }],
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
