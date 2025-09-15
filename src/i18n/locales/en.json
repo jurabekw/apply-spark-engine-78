@@ -348,7 +348,12 @@
     "aiScore": "AI Score",
     "viewProfile": "View Profile",
     "noCandidatesFound": "No candidates found matching your criteria.",
-    "tryAdjusting": "Try adjusting your requirements."
+    "tryAdjusting": "Try adjusting your requirements.",
+    "validation": {
+      "jobTitleMinLength": "Please enter at least 2 characters",
+      "skillsRequired": "Please enter skills separated by commas",
+      "cityRequired": "Please select a city"
+    }
   },
   "candidates": {
     "viewAll": "View all"

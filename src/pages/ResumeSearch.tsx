@@ -70,15 +70,7 @@ const UZBEKISTAN_CITIES = [
   { code: "2767", nameEn: "Angren", nameRu: "Ангрен" },
 ];
 
-// Validation Schema
-const schema = z.object({
-  jobTitle: z.string().min(2, "Please enter at least 2 characters"),
-  requiredSkills: z.string().transform(s => s.replace(/\s*,\s*/g, ", ")).refine(s => s.split(",").map(t => t.trim()).filter(Boolean).length > 0, {
-    message: "Please enter skills separated by commas"
-  }),
-  experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"]),
-  city: z.string().min(1, "Please select a city")
-});
+// Validation Schema - will be created inside component to access t function
 
 // Helpers
 const parseScore = (score: string): number => {
@@ -362,6 +354,16 @@ export default function ResumeSearch() {
     toast
   } = useToast();
   const { t, i18n } = useTranslation();
+
+  // Validation Schema
+  const schema = useMemo(() => z.object({
+    jobTitle: z.string().min(2, t('resumeSearch.validation.jobTitleMinLength')),
+    requiredSkills: z.string().transform(s => s.replace(/\s*,\s*/g, ", ")).refine(s => s.split(",").map(t => t.trim()).filter(Boolean).length > 0, {
+      message: t('resumeSearch.validation.skillsRequired')
+    }),
+    experienceLevel: z.enum(["noExperience", "between1And3", "between3And6", "moreThan6"]),
+    city: z.string().min(1, t('resumeSearch.validation.cityRequired'))
+  }), [t]);
 
   // Form
   const form = useForm<z.infer<typeof schema>>({
