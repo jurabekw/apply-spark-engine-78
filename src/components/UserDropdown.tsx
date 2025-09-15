@@ -88,39 +88,39 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.avatar_url || ''} alt="User" />
-            <AvatarFallback className="text-xs">
-              {user?.email ? getInitials(user.email) : 'U'}
-            </AvatarFallback>
-          </Avatar>
-          {/* Circular Progress Indicator */}
+          {/* Circular Progress Ring */}
           {hasActiveTrial && (
-            <div className="absolute -top-1 -right-1 w-4 h-4">
-              <svg className="w-4 h-4 transform -rotate-90" viewBox="0 0 24 24">
+            <div className="absolute inset-0 w-8 h-8">
+              <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
                 <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
+                  cx="16"
+                  cy="16"
+                  r="15"
                   stroke="currentColor"
                   strokeWidth="2"
                   fill="none"
                   className="text-muted-foreground/20"
                 />
                 <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
+                  cx="16"
+                  cy="16"
+                  r="15"
                   stroke="currentColor"
                   strokeWidth="2"
                   fill="none"
-                  strokeDasharray="62.83"
-                  strokeDashoffset={62.83 - (62.83 * getCircularProgress()) / 100}
+                  strokeDasharray="94.25"
+                  strokeDashoffset={94.25 - (94.25 * getCircularProgress()) / 100}
                   className={`${getCircularProgressColor()} transition-all duration-300`}
                 />
               </svg>
             </div>
           )}
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={profile?.avatar_url || ''} alt="User" />
+            <AvatarFallback className="text-xs">
+              {user?.email ? getInitials(user.email) : 'U'}
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       
