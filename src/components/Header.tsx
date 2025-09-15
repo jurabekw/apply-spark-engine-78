@@ -105,28 +105,6 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Trial Banner */}
-          {hasActiveTrial && (
-            <div className="hidden md:flex flex-1 max-w-sm mx-4">
-              <Alert className={`border-l-4 ${
-                urgency === 'low' 
-                  ? 'border-l-green-500 bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200' 
-                  : urgency === 'medium'
-                  ? 'border-l-yellow-500 bg-yellow-50 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200'
-                  : 'border-l-red-500 bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200'
-              }`}>
-                <Clock className="h-4 w-4" />
-                <AlertDescription className="text-xs font-medium">
-                  {t('trial.banner.message')} <strong>{formatTimeRemaining(timeRemaining)}</strong> {t('trial.banner.remaining')}
-                  {urgency === 'high' && (
-                    <span className="ml-2 text-xs font-bold">
-                      {t('trial.banner.urgent')}
-                    </span>
-                  )}
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
