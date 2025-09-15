@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface BatchHistory {
   id: string;
@@ -17,6 +18,7 @@ export const useBatchHistory = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchBatchHistory = async () => {
     if (!user) return;
@@ -52,8 +54,8 @@ export const useBatchHistory = () => {
     } catch (error) {
       console.error('Error fetching batch history:', error);
       toast({
-        title: "Error loading batch history",
-        description: "Please try again later.",
+        title: t('hooks.batchHistory.errorLoadingBatchHistory'),
+        description: t('hooks.batchHistory.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -82,14 +84,14 @@ export const useBatchHistory = () => {
       setBatches(prev => prev.filter(batch => batch.id !== batchId));
 
       toast({
-        title: "Batch deleted",
-        description: "Batch and all associated candidates have been removed.",
+        title: t('hooks.batchHistory.batchDeleted'),
+        description: t('hooks.batchHistory.batchAndCandidatesRemoved'),
       });
     } catch (error) {
       console.error('Error deleting batch:', error);
       toast({
-        title: "Error deleting batch",
-        description: "Please try again.",
+        title: t('hooks.batchHistory.errorDeletingBatch'),
+        description: t('hooks.batchHistory.tryAgain'),
         variant: "destructive",
       });
     }
@@ -120,14 +122,14 @@ export const useBatchHistory = () => {
       window.dispatchEvent(new CustomEvent('batches-deleted'));
 
       toast({
-        title: "All batches deleted",
-        description: "All batch history has been cleared.",
+        title: t('hooks.batchHistory.allBatchesDeleted'),
+        description: t('hooks.batchHistory.allBatchHistoryCleared'),
       });
     } catch (error) {
       console.error('Error deleting all batches:', error);
       toast({
-        title: "Error deleting batches",
-        description: "Please try again.",
+        title: t('hooks.batchHistory.errorDeletingBatches'),
+        description: t('hooks.batchHistory.tryAgain'),
         variant: "destructive",
       });
     }

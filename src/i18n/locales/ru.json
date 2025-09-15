@@ -850,5 +850,136 @@
     "quotaExceeded": "Превышена квота",
     "rateLimitExceeded": "Превышен лимит запросов",
     "maintenanceMode": "Сервис находится на техническом обслуживании"
+  },
+  "hooks": {
+    "analysisHistory": {
+      "errorLoadingHistory": "Ошибка загрузки истории анализа",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "analysisDeleted": "Анализ удален",
+      "analysisRemoved": "Запись истории анализа была удалена.",
+      "errorDeletingAnalysis": "Ошибка удаления анализа",
+      "tryAgain": "Пожалуйста, попробуйте еще раз.",
+      "allAnalysesDeleted": "Все анализы удалены",
+      "historyCleared": "История анализа очищена.",
+      "errorDeletingAnalyses": "Ошибка удаления анализов"
+    },
+    "batchHistory": {
+      "errorLoadingBatchHistory": "Ошибка загрузки истории пакетов",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "batchDeleted": "Пакет удален",
+      "batchAndCandidatesRemoved": "Пакет и все связанные кандидаты были удалены.",
+      "errorDeletingBatch": "Ошибка удаления пакета",
+      "tryAgain": "Пожалуйста, попробуйте еще раз.",
+      "allBatchesDeleted": "Все пакеты удалены",
+      "allBatchHistoryCleared": "Вся история пакетов очищена.",
+      "errorDeletingBatches": "Ошибка удаления пакетов"
+    },
+    "candidates": {
+      "errorLoadingCandidates": "Ошибка загрузки кандидатов",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "statusUpdated": "Статус обновлен",
+      "statusUpdatedSuccessfully": "Статус кандидата был успешно обновлен.",
+      "errorUpdatingStatus": "Ошибка обновления статуса",
+      "tryAgain": "Пожалуйста, попробуйте еще раз.",
+      "candidateDeleted": "Кандидат удален",
+      "candidatePermanentlyDeleted": "Кандидат был навсегда удален.",
+      "errorDeletingCandidate": "Ошибка удаления кандидата"
+    },
+    "jobPostings": {
+      "errorLoadingJobPostings": "Ошибка загрузки вакансий",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "jobPostingCreated": "Вакансия создана",
+      "jobPostingCreatedSuccessfully": "Новая вакансия успешно создана.",
+      "errorCreatingJobPosting": "Ошибка создания вакансии",
+      "tryAgain": "Пожалуйста, попробуйте еще раз."
+    },
+    "linkedinSearchHistory": {
+      "errorLoadingSearchHistory": "Ошибка загрузки истории поиска",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "searchDeleted": "Поиск удален",
+      "linkedinSearchRemoved": "Запись истории поиска LinkedIn была удалена.",
+      "errorDeletingSearch": "Ошибка удаления поиска",
+      "tryAgain": "Пожалуйста, попробуйте еще раз.",
+      "allSearchesDeleted": "Все поиски удалены",
+      "linkedinHistoryCleared": "История поиска LinkedIn очищена.",
+      "errorDeletingSearches": "Ошибка удаления поисков"
+    },
+    "notifications": {
+      "errorLoadingNotifications": "Ошибка загрузки уведомлений",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "notificationCreated": "Уведомление создано",
+      "notificationAddedSuccessfully": "Уведомление было успешно добавлено."
+    },
+    "searchHistory": {
+      "errorLoadingSearchHistory": "Ошибка загрузки истории поиска",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "searchDeleted": "Поиск удален",
+      "searchHistoryRemoved": "Запись истории поиска была удалена.",
+      "errorDeletingSearch": "Ошибка удаления поиска",
+      "tryAgain": "Пожалуйста, попробуйте еще раз.",
+      "allSearchesDeleted": "Все поиски удалены",
+      "searchHistoryCleared": "История поиска очищена.",
+      "errorDeletingSearches": "Ошибка удаления поисков"
+    },
+    "userPreferences": {
+      "errorLoadingPreferences": "Ошибка загрузки настроек",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "preferencesUpdated": "Настройки обновлены",
+      "preferencesUpdatedSuccessfully": "Ваши настройки были успешно обновлены.",
+      "errorUpdatingPreferences": "Ошибка обновления настроек",
+      "tryAgain": "Пожалуйста, попробуйте еще раз."
+    },
+    "userProfile": {
+      "errorFetchingProfile": "Ошибка получения профиля пользователя",
+      "errorUpdatingProfile": "Ошибка обновления профиля пользователя"
+    }
+  },
+  "toasts": {
+    "authError": "Ошибка аутентификации",
+    "welcomeBack": "Добро пожаловать!",
+    "signInFailed": "Вход не удался",
+    "accountExists": "Аккаунт уже существует"
+  },
+  "pages": {
+    "auth": {
+      "accountAlreadyExists": "Аккаунт уже существует",
+      "accountExistsSignIn": "Аккаунт с этим email уже существует. Пожалуйста, войдите вместо этого.",
+      "checkYourEmail": "Проверьте вашу почту!",
+      "verificationLinkSent": "Мы отправили вам ссылку для подтверждения регистрации.",
+      "signUpFailed": "Регистрация не удалась",
+      "passwordResetEmailSent": "Письмо для сброса пароля отправлено",
+      "checkEmailForReset": "Проверьте вашу почту для инструкций по сбросу пароля.",
+      "passwordResetFailed": "Сброс пароля не удался",
+      "passwordsDontMatch": "Пароли не совпадают",
+      "passwordsMustMatch": "Пожалуйста, убедитесь, что оба пароля одинаковые.",
+      "passwordTooShort": "Пароль слишком короткий",
+      "passwordMinLength": "Пароль должен содержать не менее 6 символов.",
+      "passwordUpdatedSuccessfully": "Пароль успешно обновлен",
+      "passwordResetComplete": "Ваш пароль был сброшен. Теперь вы можете войти с новым паролем."
+    },
+    "resumeSearch": {
+      "searchingCandidates": "Поиск кандидатов...",
+      "searchFailed": "Поиск не удался",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "candidatesSaved": "Кандидаты сохранены",
+      "candidatesSavedSuccess": "{{saved}} из {{total}} кандидатов сохранены в вашу базу данных.",
+      "noMatchingCandidates": "Подходящие кандидаты не найдены",
+      "noMatchingCandidatesDesc": "Попробуйте изменить критерии поиска.",
+      "noCandidatesFound": "Кандидаты не найдены",
+      "searchCompleted": "Поиск завершен",
+      "candidatesFound": "Найдено {{count}} кандидатов",
+      "searchInProgress": "Идет поиск"
+    },
+    "linkedinSearch": {
+      "searchingLinkedin": "Поиск в LinkedIn...",
+      "searchCompleted": "Поиск завершен",
+      "candidatesFound": "Найдено {{count}} кандидатов",
+      "searchFailed": "Поиск не удался",
+      "tryAgainLater": "Пожалуйста, попробуйте позже.",
+      "candidatesSaved": "Кандидаты сохранены",
+      "candidatesSavedDescription": "Успешно сохранено {{inserted}} из {{total}} кандидатов в вашу базу данных (показано {{shown}} результатов).",
+      "noMatchingCandidates": "Подходящие кандидаты не найдены",
+      "tryAdjustingSearch": "Попробуйте изменить критерии поиска."
+    }
   }
 }

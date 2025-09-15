@@ -164,7 +164,7 @@ const Auth = () => {
         // Email exists but password is wrong - user should sign in
         toast({
           title: t('toasts.accountExists'),
-          description: "An account with this email already exists. Please sign in instead.",
+          description: t('pages.auth.accountExistsSignIn'),
           variant: "destructive",
         });
         setLoginEmail(signupEmail);
@@ -192,8 +192,8 @@ const Auth = () => {
         // Check if error indicates user already exists
         if (error.message.includes('already registered') || error.message.includes('already exists')) {
           toast({
-            title: "Account already exists",
-            description: "An account with this email already exists. Please sign in instead.",
+            title: t('pages.auth.accountAlreadyExists'),
+            description: t('pages.auth.accountExistsSignIn'),
             variant: "destructive",
           });
           setLoginEmail(signupEmail);
@@ -207,13 +207,13 @@ const Auth = () => {
         setVerificationEmail(signupEmail);
         setVerificationSent(true);
         toast({
-          title: "Check your email!",
-          description: "We've sent you a verification link to complete your registration.",
+          title: t('pages.auth.checkYourEmail'),
+          description: t('pages.auth.verificationLinkSent'),
         });
       }
     } catch (error: any) {
       toast({
-        title: "Sign up failed",
+        title: t('pages.auth.signUpFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -235,12 +235,12 @@ const Auth = () => {
 
       setResetEmailSent(true);
       toast({
-        title: "Password reset email sent",
-        description: "Check your email for instructions to reset your password.",
+        title: t('pages.auth.passwordResetEmailSent'),
+        description: t('pages.auth.checkEmailForReset'),
       });
     } catch (error: any) {
       toast({
-        title: "Password reset failed",
+        title: t('pages.auth.passwordResetFailed'),
         description: error.message,
         variant: "destructive",
       });
@@ -254,8 +254,8 @@ const Auth = () => {
     
     if (newPassword !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same.",
+        title: t('pages.auth.passwordsDontMatch'),
+        description: t('pages.auth.passwordsMustMatch'),
         variant: "destructive",
       });
       return;
@@ -263,8 +263,8 @@ const Auth = () => {
 
     if (newPassword.length < 6) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
+        title: t('pages.auth.passwordTooShort'),
+        description: t('pages.auth.passwordMinLength'),
         variant: "destructive",
       });
       return;
@@ -280,8 +280,8 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Password updated successfully",
-        description: "Your password has been reset. You can now sign in with your new password.",
+        title: t('pages.auth.passwordUpdatedSuccessfully'),
+        description: t('pages.auth.passwordResetComplete'),
       });
 
       // Reset state and redirect to sign in

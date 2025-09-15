@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface LinkedinSearchHistory {
   id: string;
@@ -18,6 +19,7 @@ export const useLinkedinSearchHistory = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchSearchHistory = async () => {
     if (!user) return;

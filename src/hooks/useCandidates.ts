@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export interface Candidate {
   id: string;
@@ -30,6 +31,7 @@ export const useCandidates = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchCandidates = async () => {
     if (!user) return;
@@ -45,8 +47,8 @@ export const useCandidates = () => {
     } catch (error) {
       console.error('Error fetching candidates:', error);
       toast({
-        title: "Error loading candidates",
-        description: "Please try again later.",
+        title: t('hooks.candidates.errorLoadingCandidates'),
+        description: t('hooks.candidates.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -72,14 +74,14 @@ export const useCandidates = () => {
       );
 
       toast({
-        title: "Status updated",
-        description: "Candidate status has been updated successfully.",
+        title: t('hooks.candidates.statusUpdated'),
+        description: t('hooks.candidates.statusUpdatedSuccessfully'),
       });
     } catch (error) {
       console.error('Error updating candidate status:', error);
       toast({
-        title: "Error updating status",
-        description: "Please try again.",
+        title: t('hooks.candidates.errorUpdatingStatus'),
+        description: t('hooks.candidates.tryAgain'),
         variant: "destructive",
       });
     }
@@ -113,14 +115,14 @@ export const useCandidates = () => {
       setCandidates(prev => prev.filter(candidate => candidate.id !== candidateId));
 
       toast({
-        title: "Candidate deleted",
-        description: "Candidate has been permanently deleted.",
+        title: t('hooks.candidates.candidateDeleted'),
+        description: t('hooks.candidates.candidatePermanentlyDeleted'),
       });
     } catch (error) {
       console.error('Error deleting candidate:', error);
       toast({
-        title: "Error deleting candidate",
-        description: "Please try again.",
+        title: t('hooks.candidates.errorDeletingCandidate'),
+        description: t('hooks.candidates.tryAgain'),
         variant: "destructive",
       });
     }

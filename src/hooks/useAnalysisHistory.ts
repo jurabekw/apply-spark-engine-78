@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AnalysisHistory {
   id: string;
@@ -21,6 +22,7 @@ export const useAnalysisHistory = () => {
   const [totalCount, setTotalCount] = useState(0);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchAnalysisHistory = async () => {
     if (!user) return;
@@ -40,8 +42,8 @@ export const useAnalysisHistory = () => {
     } catch (error) {
       console.error('Error fetching analysis history:', error);
       toast({
-        title: "Error loading analysis history",
-        description: "Please try again later.",
+        title: t('hooks.analysisHistory.errorLoadingHistory'),
+        description: t('hooks.analysisHistory.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -62,14 +64,14 @@ export const useAnalysisHistory = () => {
       setTotalCount(prev => prev - 1);
 
       toast({
-        title: "Analysis deleted",
-        description: "Analysis history entry has been removed.",
+        title: t('hooks.analysisHistory.analysisDeleted'),
+        description: t('hooks.analysisHistory.analysisRemoved'),
       });
     } catch (error) {
       console.error('Error deleting analysis:', error);
       toast({
-        title: "Error deleting analysis",
-        description: "Please try again.",
+        title: t('hooks.analysisHistory.errorDeletingAnalysis'),
+        description: t('hooks.analysisHistory.tryAgain'),
         variant: "destructive",
       });
     }
@@ -92,14 +94,14 @@ export const useAnalysisHistory = () => {
       window.dispatchEvent(new CustomEvent('candidates-deleted'));
 
       toast({
-        title: "All analyses deleted",
-        description: "Analysis history has been cleared.",
+        title: t('hooks.analysisHistory.allAnalysesDeleted'),
+        description: t('hooks.analysisHistory.historyCleared'),
       });
     } catch (error) {
       console.error('Error deleting all analyses:', error);
       toast({
-        title: "Error deleting analyses",
-        description: "Please try again.",
+        title: t('hooks.analysisHistory.errorDeletingAnalyses'),
+        description: t('hooks.analysisHistory.tryAgain'),
         variant: "destructive",
       });
     }

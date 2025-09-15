@@ -739,5 +739,136 @@
   "success": {
     "candidatesSaved": "Candidates saved",
     "candidatesSavedDescription": "{{saved}}/{{total}} saved. All {{shown}} shown in results."
+  },
+  "hooks": {
+    "analysisHistory": {
+      "errorLoadingHistory": "Error loading analysis history",
+      "tryAgainLater": "Please try again later.",
+      "analysisDeleted": "Analysis deleted",
+      "analysisRemoved": "Analysis history entry has been removed.",
+      "errorDeletingAnalysis": "Error deleting analysis",
+      "tryAgain": "Please try again.",
+      "allAnalysesDeleted": "All analyses deleted",
+      "historyCleared": "Analysis history has been cleared.",
+      "errorDeletingAnalyses": "Error deleting analyses"
+    },
+    "batchHistory": {
+      "errorLoadingBatchHistory": "Error loading batch history",
+      "tryAgainLater": "Please try again later.",
+      "batchDeleted": "Batch deleted",
+      "batchAndCandidatesRemoved": "Batch and all associated candidates have been removed.",
+      "errorDeletingBatch": "Error deleting batch",
+      "tryAgain": "Please try again.",
+      "allBatchesDeleted": "All batches deleted",
+      "allBatchHistoryCleared": "All batch history has been cleared.",
+      "errorDeletingBatches": "Error deleting batches"
+    },
+    "candidates": {
+      "errorLoadingCandidates": "Error loading candidates",
+      "tryAgainLater": "Please try again later.",
+      "statusUpdated": "Status updated",
+      "statusUpdatedSuccessfully": "Candidate status has been updated successfully.",
+      "errorUpdatingStatus": "Error updating status",
+      "tryAgain": "Please try again.",
+      "candidateDeleted": "Candidate deleted",
+      "candidatePermanentlyDeleted": "Candidate has been permanently deleted.",
+      "errorDeletingCandidate": "Error deleting candidate"
+    },
+    "jobPostings": {
+      "errorLoadingJobPostings": "Error loading job postings",
+      "tryAgainLater": "Please try again later.",
+      "jobPostingCreated": "Job posting created",
+      "jobPostingCreatedSuccessfully": "Successfully created new job posting.",
+      "errorCreatingJobPosting": "Error creating job posting",
+      "tryAgain": "Please try again."
+    },
+    "linkedinSearchHistory": {
+      "errorLoadingSearchHistory": "Error loading search history",
+      "tryAgainLater": "Please try again later.",
+      "searchDeleted": "Search deleted",
+      "linkedinSearchRemoved": "LinkedIn search history entry has been removed.",
+      "errorDeletingSearch": "Error deleting search",
+      "tryAgain": "Please try again.",
+      "allSearchesDeleted": "All searches deleted",
+      "linkedinHistoryCleared": "LinkedIn search history has been cleared.",
+      "errorDeletingSearches": "Error deleting searches"
+    },
+    "notifications": {
+      "errorLoadingNotifications": "Error loading notifications",
+      "tryAgainLater": "Please try again later.",
+      "notificationCreated": "Notification created",
+      "notificationAddedSuccessfully": "Notification has been added successfully."
+    },
+    "searchHistory": {
+      "errorLoadingSearchHistory": "Error loading search history",
+      "tryAgainLater": "Please try again later.",
+      "searchDeleted": "Search deleted",
+      "searchHistoryRemoved": "Search history entry has been removed.",
+      "errorDeletingSearch": "Error deleting search",
+      "tryAgain": "Please try again.",
+      "allSearchesDeleted": "All searches deleted",
+      "searchHistoryCleared": "Search history has been cleared.",
+      "errorDeletingSearches": "Error deleting searches"
+    },
+    "userPreferences": {
+      "errorLoadingPreferences": "Error loading preferences",
+      "tryAgainLater": "Please try again later.",
+      "preferencesUpdated": "Preferences updated",
+      "preferencesUpdatedSuccessfully": "Your preferences have been updated successfully.",
+      "errorUpdatingPreferences": "Error updating preferences",
+      "tryAgain": "Please try again."
+    },
+    "userProfile": {
+      "errorFetchingProfile": "Error fetching user profile",
+      "errorUpdatingProfile": "Error updating user profile"
+    }
+  },
+  "toasts": {
+    "authError": "Authentication Error",
+    "welcomeBack": "Welcome back!",
+    "signInFailed": "Sign in failed",
+    "accountExists": "Account already exists"
+  },
+  "pages": {
+    "auth": {
+      "accountAlreadyExists": "Account already exists",
+      "accountExistsSignIn": "An account with this email already exists. Please sign in instead.",
+      "checkYourEmail": "Check your email!",
+      "verificationLinkSent": "We've sent you a verification link to complete your registration.",
+      "signUpFailed": "Sign up failed",
+      "passwordResetEmailSent": "Password reset email sent",
+      "checkEmailForReset": "Check your email for instructions to reset your password.",
+      "passwordResetFailed": "Password reset failed",
+      "passwordsDontMatch": "Passwords don't match",
+      "passwordsMustMatch": "Please make sure both passwords are the same.",
+      "passwordTooShort": "Password too short",
+      "passwordMinLength": "Password must be at least 6 characters long.",
+      "passwordUpdatedSuccessfully": "Password updated successfully",
+      "passwordResetComplete": "Your password has been reset. You can now sign in with your new password."
+    },
+    "resumeSearch": {
+      "searchingCandidates": "Searching for candidates...",
+      "searchFailed": "Search failed",
+      "tryAgainLater": "Please try again later.",
+      "candidatesSaved": "Candidates saved",
+      "candidatesSavedSuccess": "{{saved}} out of {{total}} candidates have been saved to your database.",
+      "noMatchingCandidates": "No matching candidates found",
+      "noMatchingCandidatesDesc": "Try adjusting your search criteria.",
+      "noCandidatesFound": "No candidates found",
+      "searchCompleted": "Search completed",
+      "candidatesFound": "Found {{count}} candidates",
+      "searchInProgress": "Search in progress"
+    },
+    "linkedinSearch": {
+      "searchingLinkedin": "Searching LinkedIn...",
+      "searchCompleted": "Search completed",
+      "candidatesFound": "Found {{count}} candidates",
+      "searchFailed": "Search failed",
+      "tryAgainLater": "Please try again later.",
+      "candidatesSaved": "Candidates saved",
+      "candidatesSavedDescription": "Successfully saved {{inserted}} out of {{total}} candidates to your database (showing {{shown}} results).",
+      "noMatchingCandidates": "No matching candidates found",
+      "tryAdjustingSearch": "Try adjusting your search criteria."
+    }
   }
 }

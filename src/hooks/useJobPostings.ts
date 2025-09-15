@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export interface JobPosting {
   id: string;
@@ -24,6 +25,7 @@ export const useJobPostings = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchJobPostings = async () => {
     if (!user) return;
@@ -39,8 +41,8 @@ export const useJobPostings = () => {
     } catch (error) {
       console.error('Error fetching job postings:', error);
       toast({
-        title: "Error loading job postings",
-        description: "Please try again later.",
+        title: t('hooks.jobPostings.errorLoadingJobPostings'),
+        description: t('hooks.jobPostings.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -65,16 +67,16 @@ export const useJobPostings = () => {
       
       setJobPostings(prev => [data, ...prev]);
       toast({
-        title: "Job posting created",
-        description: "Successfully created new job posting.",
+        title: t('hooks.jobPostings.jobPostingCreated'),
+        description: t('hooks.jobPostings.jobPostingCreatedSuccessfully'),
       });
       
       return data;
     } catch (error) {
       console.error('Error creating job posting:', error);
       toast({
-        title: "Error creating job posting",
-        description: "Please try again.",
+        title: t('hooks.jobPostings.errorCreatingJobPosting'),
+        description: t('hooks.jobPostings.tryAgain'),
         variant: "destructive",
       });
       return null;

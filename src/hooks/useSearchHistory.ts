@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface SearchHistory {
   id: string;
@@ -19,6 +20,7 @@ export const useSearchHistory = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchSearchHistory = async () => {
     if (!user) return;
@@ -35,8 +37,8 @@ export const useSearchHistory = () => {
     } catch (error) {
       console.error('Error fetching search history:', error);
       toast({
-        title: "Error loading search history",
-        description: "Please try again later.",
+        title: t('hooks.searchHistory.errorLoadingSearchHistory'),
+        description: t('hooks.searchHistory.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -56,14 +58,14 @@ export const useSearchHistory = () => {
       setSearches(prev => prev.filter(search => search.id !== searchId));
 
       toast({
-        title: "Search deleted",
-        description: "Search history entry has been removed.",
+        title: t('hooks.searchHistory.searchDeleted'),
+        description: t('hooks.searchHistory.searchHistoryRemoved'),
       });
     } catch (error) {
       console.error('Error deleting search:', error);
       toast({
-        title: "Error deleting search",
-        description: "Please try again.",
+        title: t('hooks.searchHistory.errorDeletingSearch'),
+        description: t('hooks.searchHistory.tryAgain'),
         variant: "destructive",
       });
     }
@@ -84,14 +86,14 @@ export const useSearchHistory = () => {
       window.dispatchEvent(new CustomEvent('searches-deleted'));
 
       toast({
-        title: "All searches deleted",
-        description: "Search history has been cleared.",
+        title: t('hooks.searchHistory.allSearchesDeleted'),
+        description: t('hooks.searchHistory.searchHistoryCleared'),
       });
     } catch (error) {
       console.error('Error deleting all searches:', error);
       toast({
-        title: "Error deleting searches",
-        description: "Please try again.",
+        title: t('hooks.searchHistory.errorDeletingSearches'),
+        description: t('hooks.searchHistory.tryAgain'),
         variant: "destructive",
       });
     }
