@@ -229,7 +229,7 @@
     "enterNewPassword": "Enter your new password",
     "confirmNewPassword": "Confirm your new password",
     "enterFullName": "Enter your full name",
-    "enterCompany": "Enter your company name (optional)",
+    "enterCompany": "Enter your company name",
     "signInDescription": "Enter your credentials to access your account",
     "signUpDescription": "Create an account to get started",
     "resetPasswordDescription": "Enter your new password",

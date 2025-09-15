@@ -233,7 +233,7 @@
     "enterNewPassword": "Введите новый пароль",
     "confirmNewPassword": "Подтвердите новый пароль",
     "enterFullName": "Введите ваше полное имя",
-    "enterCompany": "Введите название компании (необязательно)",
+    "enterCompany": "Введите название компании",
     "signInDescription": "Введите данные для доступа к аккаунту",
     "signUpDescription": "Создайте аккаунт для начала работы",
     "resetPasswordDescription": "Введите новый пароль",
