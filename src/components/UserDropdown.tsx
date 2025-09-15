@@ -97,125 +97,68 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent className="w-60" align="end">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile?.avatar_url || ''} alt="User" />
-                <AvatarFallback className="text-xs">
-                  {user?.email ? getInitials(user.email) : 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <p className="text-sm font-medium leading-none">
-                  {getDisplayName()}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground mt-1">
-                  {profile?.role || 'Recruiter'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-1 text-xs text-muted-foreground">
+      <DropdownMenuContent className="w-64 bg-background/95 backdrop-blur-sm border shadow-lg" align="end">
+        <DropdownMenuLabel className="font-normal p-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 ring-2 ring-border">
+              <AvatarImage src={profile?.avatar_url || ''} alt="User" />
+              <AvatarFallback className="text-sm font-medium">
+                {user?.email ? getInitials(user.email) : 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0 flex-1">
+              <p className="text-base font-semibold text-foreground leading-tight">
+                {getDisplayName()}
+              </p>
+              <p className="text-sm text-muted-foreground/80 font-medium mt-0.5">
+                {profile?.role || 'Recruiter'}
+              </p>
               {user?.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-3 w-3" />
-                  <span className="truncate">{user.email}</span>
-                </div>
+                <p className="text-xs text-muted-foreground/60 mt-1 truncate">
+                  {user.email}
+                </p>
               )}
               {profile?.company && (
-                <div className="flex items-center gap-2">
-                  <Building className="h-3 w-3" />
-                  <span className="truncate">{profile.company}</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Building className="h-3 w-3 text-muted-foreground/50" />
+                  <span className="text-xs text-muted-foreground/60 truncate">
+                    {profile.company}
+                  </span>
                 </div>
               )}
             </div>
           </div>
         </DropdownMenuLabel>
         
-        {/* Trial Status Section */}
+        {/* Simplified Trial Status Section */}
         {hasActiveTrial && (
           <>
-            <DropdownMenuSeparator />
-            <div className="px-2 py-3 space-y-3">
+            <DropdownMenuSeparator className="my-1" />
+            <div className="px-4 py-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {React.createElement(getTrialIcon(), { 
-                    className: `h-4 w-4 ${getTrialUrgency() === 'critical' ? 'text-destructive' : 'text-primary'}` 
-                  })}
-                  <span className="text-sm font-medium">
+                  <div className={`w-2 h-2 rounded-full ${
+                    getTrialUrgency() === 'critical' ? 'bg-destructive' : 
+                    getTrialUrgency() === 'warning' ? 'bg-yellow-500' : 'bg-primary'
+                  }`} />
+                  <span className="text-sm text-foreground">
                     {t('trial.title', 'Free Trial')}
                   </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3">
-                    <svg className="w-3 h-3 transform -rotate-90" viewBox="0 0 24 24">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        fill="none"
-                        className="text-muted-foreground/20"
-                      />
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        fill="none"
-                        strokeDasharray="62.83"
-                        strokeDashoffset={62.83 - (62.83 * getCircularProgress()) / 100}
-                        className={`${getCircularProgressColor()} transition-all duration-300`}
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-xs font-medium">
+                  <span className="text-sm text-muted-foreground">•</span>
+                  <span className="text-sm text-muted-foreground">
                     {isExpired ? t('trial.expired', 'Expired') : 
-                     daysRemaining > 0 ? `${daysRemaining}d` : `${hoursRemaining}h`}
+                     daysRemaining > 0 ? `${daysRemaining} days left` : `${hoursRemaining} hours left`}
                   </span>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Progress 
-                  value={getTrialProgressPercent()} 
-                  className={`h-2 ${
-                    getTrialUrgency() === 'critical' ? 'bg-destructive/20' : 
-                    getTrialUrgency() === 'warning' ? 'bg-warning/20' : 'bg-primary/20'
-                  }`}
-                />
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    {t(`trial.stage.${getTrialUrgency()}.timeLeft`, `${timeRemaining} remaining`)}
-                  </span>
-                  <span className="text-primary font-medium">
-                    {Math.round(getTrialProgressPercent())}%
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  {t(`trial.stage.${getTrialUrgency()}.message`, 
-                    getTrialUrgency() === 'critical' 
-                      ? 'Your trial expires soon! Upgrade now to keep access.'
-                      : getTrialUrgency() === 'warning'
-                      ? 'Less than 24 hours left. Don\'t lose your progress!'
-                      : 'Explore all features during your free trial.'
-                  )}
-                </p>
-                <Button 
-                  size="sm" 
-                  className="w-full text-xs" 
-                  variant={getTrialUrgency() === 'critical' ? 'destructive' : 'default'}
-                >
-                  {t(`trial.stage.${getTrialUrgency()}.cta`, 'Upgrade Now')}
-                </Button>
-              </div>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="w-full text-xs font-medium h-8 border-primary/20 text-primary hover:bg-primary/5"
+              >
+                {getTrialUrgency() === 'critical' ? 'Upgrade Now' : 'Upgrade Plan'}
+              </Button>
             </div>
           </>
         )}
