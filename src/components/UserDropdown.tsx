@@ -87,40 +87,42 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-          {/* Circular Progress Ring */}
-          {hasActiveTrial && (
-            <div className="absolute inset-0 w-8 h-8">
-              <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="15"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  className="text-muted-foreground/20"
-                />
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="15"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeDasharray="94.25"
-                  strokeDashoffset={94.25 - (94.25 * getCircularProgress()) / 100}
-                  className={`${getCircularProgressColor()} transition-all duration-300`}
-                />
-              </svg>
-            </div>
-          )}
+        <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full p-0">
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url || ''} alt="User" />
             <AvatarFallback className="text-xs">
               {user?.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
           </Avatar>
+          {/* Progress Ring Border */}
+          {hasActiveTrial && (
+            <svg 
+              className="absolute inset-0 w-8 h-8 transform -rotate-90 pointer-events-none" 
+              viewBox="0 0 32 32"
+            >
+              <circle
+                cx="16"
+                cy="16"
+                r="15"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                className="text-muted-foreground/20"
+              />
+              <circle
+                cx="16"
+                cy="16"
+                r="15"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray="94.25"
+                strokeDashoffset={94.25 - (94.25 * getCircularProgress()) / 100}
+                className={`${getCircularProgressColor()} transition-all duration-500 drop-shadow-sm`}
+              />
+            </svg>
+          )}
         </Button>
       </DropdownMenuTrigger>
       
