@@ -191,108 +191,176 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
-    font-size: var(--text-base);
-    line-height: var(--leading-normal);
+    font-size: 1rem; /* 16px - Primary body text */
+    line-height: 1.6; /* Improved readability */
     font-weight: 400;
-    letter-spacing: -0.01em; /* Improved character spacing for Cyrillic */
+    letter-spacing: -0.005em; /* Optimized for Inter font */
+    color: hsl(var(--foreground));
   }
   
-  /* Typography Hierarchy - Optimized for Russian/Cyrillic */
+  /* Typography Hierarchy - Two-Font System for Professional UI */
   h1 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-4xl);
-    line-height: var(--leading-tight);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 2.25rem; /* 36px - Main page headings */
+    line-height: 1.2;
     font-weight: 700;
     letter-spacing: -0.025em;
+    color: hsl(var(--foreground));
   }
   
   h2 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-3xl);
-    line-height: var(--leading-tight);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1.875rem; /* 30px - Section headings */
+    line-height: 1.2;
     font-weight: 600;
     letter-spacing: -0.02em;
+    color: hsl(var(--foreground));
   }
   
   h3 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-2xl);
-    line-height: var(--leading-snug);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1.5rem; /* 24px - Subsection headings */
+    line-height: 1.3;
     font-weight: 600;
     letter-spacing: -0.015em;
+    color: hsl(var(--foreground));
   }
   
   h4 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-xl);
-    line-height: var(--leading-snug);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1.25rem; /* 20px - Small headings */
+    line-height: 1.4;
     font-weight: 600;
     letter-spacing: -0.01em;
+    color: hsl(var(--foreground));
   }
   
   h5 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-lg);
-    line-height: var(--leading-normal);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1.125rem; /* 18px - Minor headings */
+    line-height: 1.4;
     font-weight: 500;
     letter-spacing: -0.005em;
+    color: hsl(var(--foreground));
   }
   
   h6 {
-    font-family: 'Source Sans Pro', 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: var(--text-base);
-    line-height: var(--leading-normal);
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1rem; /* 16px - Card/component titles */
+    line-height: 1.4;
     font-weight: 500;
+    letter-spacing: 0;
+    color: hsl(var(--foreground));
   }
   
-  /* Improved text styles for better readability */
+  /* Professional Typography Utility Classes */
+  .text-display {
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: hsl(var(--foreground));
+  }
+  
+  .text-hero {
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 3rem; /* 48px - Hero text */
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: hsl(var(--foreground));
+  }
+  
   .text-primary-heading {
-    @apply text-foreground font-heading;
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 700;
     letter-spacing: -0.025em;
+    color: hsl(var(--foreground));
   }
   
   .text-secondary-heading {
-    @apply text-foreground font-heading;
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 600;
     letter-spacing: -0.015em;
+    color: hsl(var(--foreground));
   }
   
   .text-body {
-    @apply text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 400;
-    line-height: var(--leading-normal);
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    color: hsl(var(--foreground));
   }
   
   .text-body-medium {
-    @apply text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 500;
-    line-height: var(--leading-normal);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    color: hsl(var(--foreground));
+  }
+  
+  .text-body-secondary {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    color: hsl(var(--muted-foreground));
   }
   
   .text-caption {
-    @apply text-muted-foreground;
-    font-size: var(--text-sm);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem; /* 14px */
     font-weight: 400;
-    line-height: var(--leading-normal);
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: hsl(var(--muted-foreground));
   }
   
   .text-label {
-    @apply text-foreground;
-    font-size: var(--text-sm);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem; /* 14px */
     font-weight: 500;
-    line-height: var(--leading-normal);
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    color: hsl(var(--foreground));
   }
   
-  /* Form elements optimized for Cyrillic */
-  input, textarea, select {
+  .text-button {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-weight: 400;
+    font-weight: 500;
+    line-height: 1.4;
     letter-spacing: -0.005em;
   }
   
-  /* Button text optimization */
+  /* Form and UI Elements Typography */
+  input, textarea, select {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 1rem; /* 16px - Standard readable size */
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    color: hsl(var(--foreground));
+  }
+  
+  input::placeholder, textarea::placeholder {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    color: hsl(var(--muted-foreground));
+    letter-spacing: 0;
+  }
+  
+  /* Button typography optimization */
   button {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    line-height: 1.4;
+  }
+  
+  /* Navigation and UI typography */
+  nav, .nav-item {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 500;
     letter-spacing: -0.005em;
