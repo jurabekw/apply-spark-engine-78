@@ -214,9 +214,9 @@ const recentSearches = useMemo(() => {
                   </div>
                   <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                 </div>
-                <CardTitle className="text-xl">Поиск в Линкедин</CardTitle>
+                <CardTitle className="text-xl">{t('dashboard.linkedinSearch')}</CardTitle>
                 <CardDescription>
-                  Найдите профессионалов в LinkedIn с помощью ИИ-анализа
+                  {t('dashboard.linkedinSearchDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -224,7 +224,7 @@ const recentSearches = useMemo(() => {
                   onClick={() => setActiveTab('linkedin-search')} 
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                 >
-                  Поиск в LinkedIn
+                  {t('dashboard.linkedinSearchButton')}
                 </Button>
               </CardContent>
             </Card>
