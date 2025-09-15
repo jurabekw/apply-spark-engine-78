@@ -605,6 +605,22 @@
     "invalidEmail": "Please enter a valid email address",
     "fieldRequired": "This field is required"
   },
+  "trial": {
+    "banner": {
+      "message": "Free trial active -",
+      "remaining": "remaining",
+      "urgent": "⚠ Trial ending soon!"
+    },
+    "expired": {
+      "title": "Free Trial Expired",
+      "message": "Your free trial period has ended. To continue using our service, please contact us.",
+      "contact": {
+        "title": "Get Full Access",
+        "description": "Contact us on Telegram to upgrade your account and continue using all features.",
+        "telegram": "Contact on Telegram: @shakhnoz_burkhan"
+      }
+    }
+  },
   "toasts": {
     "authError": "Authentication Error",
     "welcomeBack": "Welcome back!",

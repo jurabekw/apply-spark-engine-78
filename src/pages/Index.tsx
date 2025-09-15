@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import UploadSection from '@/components/UploadSection';
 import CandidateTable from '@/components/CandidateTable';
 import StatsCards from '@/components/StatsCards';
+import { TrialGuard } from '@/components/TrialGuard';
 import ResumeSearch from '@/pages/ResumeSearch';
 import LinkedinSearch from '@/pages/LinkedinSearch';
 import { useCandidates, type Candidate } from '@/hooks/useCandidates';
@@ -102,8 +103,8 @@ const recentSearches = useMemo(() => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      <div className="container mx-auto px-6 py-8">
+      <TrialGuard>
+        <div className="container mx-auto px-6 py-8">
         {/* Modern Tab Navigation */}
         <div className="bg-card rounded-xl border border-border/50 p-2 mb-8 shadow-sm">
           <div className="flex flex-wrap gap-1">
@@ -372,6 +373,7 @@ const recentSearches = useMemo(() => {
         isOpen={candidateModalOpen}
         onClose={() => setCandidateModalOpen(false)}
       />
+      </TrialGuard>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
 import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
+import { TrialGuard } from '@/components/TrialGuard';
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -411,80 +412,81 @@ const LinkedinSearch = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
-            <Linkedin className="h-6 w-6" />
+      <TrialGuard>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+              <Linkedin className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{t('linkedinSearch.title')}</h1>
+              <p className="text-gray-600">{t('linkedinSearch.subtitle')}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">{t('linkedinSearch.title')}</h1>
-            <p className="text-gray-600">{t('linkedinSearch.subtitle')}</p>
-          </div>
-        </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                   <FormField
-                     control={form.control}
-                     name="job_title"
-                     render={({ field }) => (
-                       <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder={t('linkedinSearch.placeholder')}
-                              {...field} 
-                            />
-                          </FormControl>
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
-
-                     <Button type="submit" disabled={isLoading} className="w-full">
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          {t('linkedinSearch.searchingLinkedin')}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Search className="h-4 w-4" />
-                          {t('linkedinSearch.searchLinkedin')}
-                        </div>
-                      )}
-                    </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          {lastSearch && (
+          <div className="space-y-6">
             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                   {t('linkedinSearch.searchResults')}
-                   <Badge variant="secondary">{searchResults.length} {t('linkedinSearch.candidates')}</Badge>
-                 </CardTitle>
-                  <div className="text-sm text-gray-600">
-                    <p><strong>{t('linkedinSearch.searchQuery')}:</strong> {lastSearch.job_title}</p>
-                  </div>
-               </CardHeader>
+              <CardHeader>
+                <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
+              </CardHeader>
               <CardContent>
-                <ResumeSearchTable candidates={searchResults} loading={isLoading} />
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                     <FormField
+                       control={form.control}
+                       name="job_title"
+                       render={({ field }) => (
+                         <FormItem>
+                            <FormControl>
+                              <Input 
+                                placeholder={t('linkedinSearch.placeholder')}
+                                {...field} 
+                              />
+                            </FormControl>
+                           <FormMessage />
+                         </FormItem>
+                       )}
+                     />
+
+                       <Button type="submit" disabled={isLoading} className="w-full">
+                        {isLoading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            {t('linkedinSearch.searchingLinkedin')}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Search className="h-4 w-4" />
+                            {t('linkedinSearch.searchLinkedin')}
+                          </div>
+                        )}
+                      </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
-          )}
 
-          <LinkedinSearchHistory onRerunSearch={handleRerunSearch} />
+            {lastSearch && (
+              <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     {t('linkedinSearch.searchResults')}
+                     <Badge variant="secondary">{searchResults.length} {t('linkedinSearch.candidates')}</Badge>
+                   </CardTitle>
+                    <div className="text-sm text-gray-600">
+                      <p><strong>{t('linkedinSearch.searchQuery')}:</strong> {lastSearch.job_title}</p>
+                    </div>
+                 </CardHeader>
+                <CardContent>
+                  <ResumeSearchTable candidates={searchResults} loading={isLoading} />
+                </CardContent>
+              </Card>
+            )}
+
+            <LinkedinSearchHistory onRerunSearch={handleRerunSearch} />
+          </div>
         </div>
-      </div>
+      </TrialGuard>
     </div>
   );
 };
