@@ -50,10 +50,17 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
     return 'low';
   };
 
-  const getTrialBadgeText = () => {
-    if (isExpired) return t('trial.expired', 'Expired');
-    if (daysRemaining > 0) return `${daysRemaining}d`;
-    return `${hoursRemaining}h`;
+  const getCircularProgress = () => {
+    if (isExpired) return 0;
+    const totalHours = 72; // 3 days
+    return Math.max(0, Math.min(100, (hoursRemaining / totalHours) * 100));
+  };
+
+  const getCircularProgressColor = () => {
+    const progress = getCircularProgress();
+    if (progress > 66) return 'text-emerald-500'; // 3 days - green
+    if (progress > 33) return 'text-yellow-500'; // 2 days - yellow
+    return 'text-orange-500'; // 1 day - orange
   };
 
   const getTrialProgressPercent = () => {
@@ -87,16 +94,32 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
               {user?.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
           </Avatar>
-          {/* Trial Badge Overlay */}
+          {/* Circular Progress Indicator */}
           {hasActiveTrial && (
-            <Badge 
-              variant={getTrialVariant()} 
-              className={`absolute -top-1 -right-1 h-5 px-1.5 text-xs font-semibold transition-all ${
-                getTrialUrgency() === 'critical' ? 'animate-pulse' : ''
-              }`}
-            >
-              {getTrialBadgeText()}
-            </Badge>
+            <div className="absolute -top-1 -right-1 w-4 h-4">
+              <svg className="w-4 h-4 transform -rotate-90" viewBox="0 0 24 24">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  className="text-muted-foreground/20"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeDasharray="62.83"
+                  strokeDashoffset={62.83 - (62.83 * getCircularProgress()) / 100}
+                  className={`${getCircularProgressColor()} transition-all duration-300`}
+                />
+              </svg>
+            </div>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -152,9 +175,36 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
                     {t('trial.title', 'Free Trial')}
                   </span>
                 </div>
-                <Badge variant={getTrialVariant()} className="text-xs">
-                  {getTrialBadgeText()}
-                </Badge>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3">
+                    <svg className="w-3 h-3 transform -rotate-90" viewBox="0 0 24 24">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="none"
+                        className="text-muted-foreground/20"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray="62.83"
+                        strokeDashoffset={62.83 - (62.83 * getCircularProgress()) / 100}
+                        className={`${getCircularProgressColor()} transition-all duration-300`}
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium">
+                    {isExpired ? t('trial.expired', 'Expired') : 
+                     daysRemaining > 0 ? `${daysRemaining}d` : `${hoursRemaining}h`}
+                  </span>
+                </div>
               </div>
               
               <div className="space-y-2">
