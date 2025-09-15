@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,11 +20,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
 
-const searchSchema = z.object({
-  job_title: z.string().min(1, "Please describe what candidate you're looking for"),
-});
+// Validation schema is defined inside the component to use translations
 
-type SearchFormData = z.infer<typeof searchSchema>;
+type SearchFormData = { job_title: string };
 
 const LinkedinSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +31,11 @@ const LinkedinSearch = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useTranslation();
+
+  // Validation Schema
+  const searchSchema = useMemo(() => z.object({
+    job_title: z.string().min(1, t('linkedinSearch.validation.describeCandidate')),
+  }), [t]);
 
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
@@ -284,8 +287,8 @@ const LinkedinSearch = () => {
       if (dbError) {
         console.error('Error saving search to database:', dbError);
         toast({
-          title: "Warning",
-          description: "Search completed but couldn't save to history.",
+          title: t('toasts.warning'),
+          description: t('toasts.errorSavingSearch'),
           variant: "destructive",
         });
       }
@@ -393,7 +396,7 @@ const LinkedinSearch = () => {
       console.error('LinkedIn search error:', error);
       toast({
         title: t('linkedinSearch.searchFailed'),
-        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+        description: error instanceof Error ? error.message : t('errors.unexpectedErrorTryAgain'),
         variant: "destructive",
       });
     } finally {

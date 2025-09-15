@@ -36,8 +36,8 @@ export const useLinkedinSearchHistory = () => {
     } catch (error) {
       console.error('Error fetching LinkedIn search history:', error);
       toast({
-        title: "Error loading search history",
-        description: "Please try again later.",
+        title: t('linkedinSearch.toasts.loadErrorTitle'),
+        description: t('linkedinSearch.toasts.loadErrorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -57,14 +57,14 @@ export const useLinkedinSearchHistory = () => {
       setSearches(prev => prev.filter(search => search.id !== searchId));
 
       toast({
-        title: "Search deleted",
-        description: "LinkedIn search history entry has been removed.",
+        title: t('linkedinSearch.toasts.deletedTitle'),
+        description: t('linkedinSearch.toasts.deletedDesc'),
       });
     } catch (error) {
       console.error('Error deleting LinkedIn search:', error);
       toast({
-        title: "Error deleting search",
-        description: "Please try again.",
+        title: t('linkedinSearch.toasts.deleteErrorTitle'),
+        description: t('linkedinSearch.toasts.deleteErrorDesc'),
         variant: "destructive",
       });
     }
@@ -85,14 +85,14 @@ export const useLinkedinSearchHistory = () => {
       window.dispatchEvent(new CustomEvent('linkedin-searches-deleted'));
 
       toast({
-        title: "All searches deleted",
-        description: "LinkedIn search history has been cleared.",
+        title: t('linkedinSearch.toasts.clearedAllTitle'),
+        description: t('linkedinSearch.toasts.clearedAllDesc'),
       });
     } catch (error) {
       console.error('Error deleting all LinkedIn searches:', error);
       toast({
-        title: "Error deleting searches",
-        description: "Please try again.",
+        title: t('linkedinSearch.toasts.clearErrorTitle'),
+        description: t('linkedinSearch.toasts.clearErrorDesc'),
         variant: "destructive",
       });
     }

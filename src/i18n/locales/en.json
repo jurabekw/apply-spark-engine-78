@@ -329,7 +329,22 @@
     "noSearchHistoryYet": "No LinkedIn search history yet",
     "noMatchingSearches": "No matching LinkedIn searches",
     "searchHistoryDescription": "Your LinkedIn search history will appear here after you run your first search.",
-    "searchHistoryTryAdjusting": "Try adjusting your search terms."
+    "searchHistoryTryAdjusting": "Try adjusting your search terms.",
+    "validation": {
+      "describeCandidate": "Please describe what candidate you're looking for"
+    },
+    "toasts": {
+      "loadErrorTitle": "Error loading search history",
+      "loadErrorDesc": "Please try again later.",
+      "deletedTitle": "Search deleted",
+      "deletedDesc": "LinkedIn search history entry has been removed.",
+      "deleteErrorTitle": "Error deleting search",
+      "deleteErrorDesc": "Please try again.",
+      "clearedAllTitle": "All searches deleted",
+      "clearedAllDesc": "LinkedIn search history has been cleared.",
+      "clearErrorTitle": "Error deleting searches",
+      "clearErrorDesc": "Please try again."
+    }
   },
   "resumeSearch": {
     "title": "HH Candidate Search",
@@ -618,6 +633,7 @@
     "confirmationFailed": "Confirmation Failed",
     "confirmationTimedOut": "Email confirmation timed out. Please try again.",
     "failedToConfirm": "Failed to confirm email",
+    "unexpectedErrorTryAgain": "An unexpected error occurred. Please try again.",
     "pageNotFound": "Oops! Page not found",
     "returnToHome": "Return to Home",
     "404": "404"
@@ -849,7 +865,10 @@
       "passwordTooShort": "Password too short",
       "passwordMinLength": "Password must be at least 6 characters long.",
       "passwordUpdatedSuccessfully": "Password updated successfully",
-      "passwordResetComplete": "Your password has been reset. You can now sign in with your new password."
+      "passwordResetComplete": "Your password has been reset. You can now sign in with your new password.",
+      "authenticationFailed": "Authentication failed",
+      "verificationLinkExpired": "Email verification link has expired. Please sign up again to receive a new verification email.",
+      "signedInSuccess": "You have been successfully signed in."
     },
     "resumeSearch": {
       "searchingCandidates": "Searching for candidates...",

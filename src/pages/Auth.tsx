@@ -73,9 +73,9 @@ const Auth = () => {
     const errorDescription = searchParams.get('error_description');
     
     if (error) {
-      let message = 'Authentication failed';
+      let message = t('pages.auth.authenticationFailed');
       if (error === 'access_denied' && errorDescription?.includes('otp_expired')) {
-        message = 'Email verification link has expired. Please sign up again to receive a new verification email.';
+        message = t('pages.auth.verificationLinkExpired');
       } else if (errorDescription) {
         message = errorDescription.replace(/\+/g, ' ');
       }
@@ -127,7 +127,7 @@ const Auth = () => {
       if (data.user) {
         toast({
           title: t('toasts.welcomeBack'),
-          description: "You have been successfully signed in.",
+          description: t('pages.auth.signedInSuccess'),
         });
         // Force page reload for clean state
         window.location.href = '/dashboard';
@@ -291,7 +291,7 @@ const Auth = () => {
       navigate('/auth?tab=signin', { replace: true });
     } catch (error: any) {
       toast({
-        title: "Password reset failed",
+        title: t('pages.auth.passwordResetFailed'),
         description: error.message,
         variant: "destructive",
       });

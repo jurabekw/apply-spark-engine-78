@@ -652,6 +652,7 @@
     "confirmationFailed": "Подтверждение не удалось",
     "confirmationTimedOut": "Время подтверждения email истекло. Пожалуйста, попробуйте снова.",
     "failedToConfirm": "Не удалось подтвердить email",
+    "unexpectedErrorTryAgain": "Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.",
     "pageNotFound": "Упс! Страница не найдена",
     "returnToHome": "Вернуться на главную",
     "404": "404"
@@ -960,7 +961,10 @@
       "passwordTooShort": "Пароль слишком короткий",
       "passwordMinLength": "Пароль должен содержать не менее 6 символов.",
       "passwordUpdatedSuccessfully": "Пароль успешно обновлен",
-      "passwordResetComplete": "Ваш пароль был сброшен. Теперь вы можете войти с новым паролем."
+      "passwordResetComplete": "Ваш пароль был сброшен. Теперь вы можете войти с новым паролем.",
+      "authenticationFailed": "Ошибка аутентификации",
+      "verificationLinkExpired": "Ссылка для подтверждения email истекла. Пожалуйста, зарегистрируйтесь снова, чтобы получить новое письмо с подтверждением.",
+      "signedInSuccess": "Вы успешно вошли в систему."
     },
     "resumeSearch": {
       "searchingCandidates": "Поиск кандидатов...",

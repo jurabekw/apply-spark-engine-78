@@ -24,7 +24,7 @@ const EmailConfirmation = () => {
         
         if (error) {
           setStatus('error');
-          setMessage(errorDescription || 'Email confirmation failed');
+          setMessage(errorDescription || t('errors.failedToConfirm'));
           
           toast({
             title: t('toasts.confirmationFailed'),
@@ -38,11 +38,11 @@ const EmailConfirmation = () => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
             setStatus('success');
-            setMessage('Email confirmed successfully! You can now sign in.');
+            setMessage(t('toasts.accountVerified'));
             
             toast({
-              title: "Email Confirmed",
-              description: "Your account has been verified. You can now sign in.",
+              title: t('toasts.emailConfirmed'),
+              description: t('toasts.accountVerified'),
             });
 
             // Redirect to dashboard after 3 seconds
@@ -55,11 +55,11 @@ const EmailConfirmation = () => {
               const { data: { session } } = await supabase.auth.getSession();
               if (session?.user) {
                 setStatus('success');
-                setMessage('Email confirmed successfully! You can now sign in.');
+                setMessage(t('toasts.accountVerified'));
                 
                 toast({
-                  title: "Email Confirmed",
-                  description: "Your account has been verified. You can now sign in.",
+                  title: t('toasts.emailConfirmed'),
+                  description: t('toasts.accountVerified'),
                 });
 
                 setTimeout(() => {
@@ -75,11 +75,11 @@ const EmailConfirmation = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setStatus('success');
-          setMessage('Email confirmed successfully! You can now sign in.');
+          setMessage(t('toasts.accountVerified'));
           
           toast({
-            title: "Email Confirmed",
-            description: "Your account has been verified. You can now sign in.",
+            title: t('toasts.emailConfirmed'),
+            description: t('toasts.accountVerified'),
           });
 
           setTimeout(() => {
@@ -91,7 +91,7 @@ const EmailConfirmation = () => {
             // If still loading after 5 seconds, show error
             if (status === 'loading') {
               setStatus('error');
-              setMessage('Email confirmation timed out. Please try again.');
+              setMessage(t('errors.confirmationTimedOut'));
             }
           }, 5000);
         }
@@ -103,11 +103,11 @@ const EmailConfirmation = () => {
       } catch (error: any) {
         console.error('Email confirmation error:', error);
         setStatus('error');
-        setMessage(error.message || 'Failed to confirm email');
+        setMessage(error.message || t('errors.failedToConfirm'));
         
         toast({
-          title: "Confirmation Failed",
-          description: error.message || "Failed to confirm email",
+          title: t('toasts.confirmationFailed'),
+          description: error.message || t('errors.failedToConfirm'),
           variant: "destructive",
         });
       }
