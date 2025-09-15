@@ -156,8 +156,9 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
                 size="sm" 
                 variant="outline"
                 className="w-full text-xs font-medium h-8 border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => window.open('https://t.me/shakhnoz_burkhan', '_blank')}
               >
-                {getTrialUrgency() === 'critical' ? 'Upgrade Now' : 'Upgrade Plan'}
+                {t('trial.upgradeButton', getTrialUrgency() === 'critical' ? 'Upgrade Now' : 'Upgrade Plan')}
               </Button>
             </div>
           </>

@@ -19,6 +19,7 @@
     "title": "Бесплатный период",
     "expired": "Истёк",
     "upgrade": "Обновить тариф",
+    "upgradeButton": "Обновить тариф",
     "timeLeft": "Осталось {{time}}",
     "stage": {
       "low": {

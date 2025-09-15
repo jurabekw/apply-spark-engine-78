@@ -15,6 +15,7 @@
     "title": "Free Trial",
     "expired": "Expired",
     "upgrade": "Upgrade Now",
+    "upgradeButton": "Upgrade Plan",
     "timeLeft": "{{time}} remaining",
     "stage": {
       "low": {
