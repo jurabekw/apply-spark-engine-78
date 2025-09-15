@@ -329,7 +329,7 @@
   },
   "resumeSearch": {
     "title": "HH Candidate Search",
-    "subtitle": "Search HH.ru candidates with AI scoring",
+    "subtitle": "Search hh.uz candidates with AI scoring",
     "jobTitle": "Job Title",
     "jobTitlePlaceholder": "e.g., Senior Frontend Developer",
     "requiredSkills": "Required Skills",
@@ -438,7 +438,7 @@
     "searchHistoryTryAdjusting": "Try adjusting your search terms.",
     "candidatesDescription": "Upload some resumes or search HH candidates to get started with AI-powered screening.",
     "candidatesTryAdjusting": "Try adjusting your search terms or filters.",
-    "runSearchDescription": "Run a search to find matching candidates from HH.ru",
+    "runSearchDescription": "Run a search to find matching candidates from hh.uz",
     "noCandidatesMatch": "No candidates match your filters.",
     "notAvailable": "Not available",
     "notProvided": "Not provided",
@@ -463,12 +463,12 @@
     "deleteCandidateConfirmWithoutResume": "Are you sure you want to delete {name}? This action cannot be undone and will permanently remove all candidate data.",
     "includingResume": " including their resume",
     "viewLinkedinProfile": "View LinkedIn Profile",
-    "viewOnHH": "View on HH.ru",
+    "viewOnHH": "View on hh.uz",
     "candidateDatabase": "Candidate Database",
     "manageCandidates": "Manage and review all candidate submissions",
     "more": "more",
     "sources": "Sources",
-    "hhruLabel": "HH.ru",
+    "hhruLabel": "hh.uz",
     "linkedinLabel": "LinkedIn", 
     "uploadedLabel": "Uploaded",
     "csvHeaders": {
@@ -506,7 +506,7 @@
     "workHistory": "Work History",
     "profileLinks": "Profile Links",
     "linkedinProfile": "LinkedIn Profile",
-    "hhProfile": "HH.ru Profile",
+    "hhProfile": "hh.uz Profile",
     "viewProfile": "View Profile",
     "resumeDocument": "Resume Document",
     "originalFilename": "Original filename",
@@ -524,7 +524,7 @@
     "openProfile": "Open Profile",
     "recommendation": "Recommendation",
     "close": "Close",
-    "viewFullHhProfile": "View full HH.ru profile"
+    "viewFullHhProfile": "View full hh.uz profile"
   },
   "analysisHistory": {
     "title": "Batch Analysis History",
@@ -657,10 +657,10 @@
     "searchCandidates": "Search Candidates",
     "enterRequirements": "Enter your requirements below",
     "separateSkills": "Separate multiple skills with commas",
-    "searchingHhRu": "Searching HH.ru...",
+    "searchingHhRu": "Searching hh.uz...",
     "searchCandidatesButton": "Search candidates",
     "dontMergeDuplicates": "Don't merge duplicates",
-    "connectingToHhRu": "Connecting to HH.ru...",
+    "connectingToHhRu": "Connecting to hh.uz...",
     "analyzingResumesWithAi": "Analyzing resumes with AI...",
     "preparingResults": "Preparing results...",
     "usuallyTakes": "This usually takes 30-60 seconds",
@@ -669,7 +669,7 @@
     "resumeLinkUnavailable": "Resume link unavailable",
     "experience": "Experience",
     "education": "Education",
-    "viewProfileOnHhRu": "View profile on HH.ru"
+    "viewProfileOnHhRu": "View profile on hh.uz"
   },
   "searchHistory": {
     "title": "Search History",

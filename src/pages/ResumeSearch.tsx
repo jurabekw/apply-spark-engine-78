@@ -337,7 +337,7 @@ export default function ResumeSearch() {
   // SEO
   useEffect(() => {
     document.title = "HH Candidate Search | TalentSpark";
-    const desc = "Search HH.ru candidates with AI scoring. Enter role, skills, and experience to find top candidates.";
+    const desc = "Search hh.uz candidates with AI scoring. Enter role, skills, and experience to find top candidates.";
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");
@@ -675,7 +675,7 @@ export default function ResumeSearch() {
               </Badge>)}
           </div>
           <div className="pt-2">
-            {c.alternate_url?.trim() ? <a href={c.alternate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" aria-label="View resume on HH.ru">
+            {c.alternate_url?.trim() ? <a href={c.alternate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" aria-label="View resume on hh.uz">
                 {t('resumeSearchPage.viewResume')} <ExternalLink className="h-4 w-4" />
               </a> : <span className="text-sm text-muted-foreground">{t('resumeSearchPage.resumeLinkUnavailable')}</span>}
           </div>
