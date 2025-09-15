@@ -188,7 +188,7 @@ const recentSearches = useMemo(() => {
                     </div>
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-success transition-colors" />
                   </div>
-                  <CardTitle className="text-xl">Поиск по hh.uz</CardTitle>
+                  <CardTitle className="text-xl">{t('dashboard.hhSearchTitle')}</CardTitle>
                   <CardDescription>
                     {t('dashboard.hhSearchDescription')}
                   </CardDescription>
