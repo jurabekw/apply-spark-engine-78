@@ -538,6 +538,7 @@ const Auth = () => {
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           className="pl-10"
+                          required
                         />
                       </div>
                     </div>
