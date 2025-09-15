@@ -11,6 +11,39 @@
     "comingSoon": "Coming Soon",
     "signOut": "Sign Out"
   },
+  "trial": {
+    "title": "Free Trial",
+    "expired": "Expired",
+    "upgrade": "Upgrade Now",
+    "timeLeft": "{{time}} remaining",
+    "stage": {
+      "low": {
+        "message": "Explore all features during your free trial period.",
+        "cta": "Upgrade Plan",
+        "timeLeft": "{{time}} remaining"
+      },
+      "medium": {
+        "message": "You're making great progress! Consider upgrading soon.",
+        "cta": "Upgrade Now",
+        "timeLeft": "{{time}} remaining"
+      },
+      "warning": {
+        "message": "Less than 24 hours left. Don't lose your progress!",
+        "cta": "Upgrade Now",
+        "timeLeft": "{{time}} remaining"
+      },
+      "critical": {
+        "message": "Your trial expires soon! Upgrade now to keep access.",
+        "cta": "Upgrade Now",
+        "timeLeft": "{{time}} remaining"
+      },
+      "expired": {
+        "message": "Your trial has ended. Upgrade to continue using all features.",
+        "cta": "Contact Support",
+        "timeLeft": "Trial ended"
+      }
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "uploadResumes": "Upload Resumes",

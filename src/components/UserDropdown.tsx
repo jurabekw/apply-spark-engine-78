@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Settings, LogOut, Building, Mail } from 'lucide-react';
+import { User, Settings, LogOut, Building, Mail, Clock, Zap, AlertTriangle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useTrialStatus } from '@/hooks/useTrialStatus';
 import { useTranslation } from 'react-i18next';
 
 interface UserDropdownProps {
@@ -22,6 +25,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
+  const { hasActiveTrial, isExpired, hoursRemaining, daysRemaining, timeRemaining, trialEndsAt } = useTrialStatus();
 
   const getInitials = (email: string) => {
     return email.split('@')[0].slice(0, 2).toUpperCase();
@@ -37,6 +41,42 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
     return 'User';
   };
 
+  // Trial urgency levels
+  const getTrialUrgency = () => {
+    if (isExpired) return 'expired';
+    if (hoursRemaining <= 6) return 'critical';
+    if (hoursRemaining <= 24) return 'warning';
+    if (daysRemaining <= 1) return 'medium';
+    return 'low';
+  };
+
+  const getTrialBadgeText = () => {
+    if (isExpired) return t('trial.expired', 'Expired');
+    if (daysRemaining > 0) return `${daysRemaining}d`;
+    return `${hoursRemaining}h`;
+  };
+
+  const getTrialProgressPercent = () => {
+    if (isExpired) return 0;
+    const totalHours = 72; // 3 days
+    return Math.max(0, Math.min(100, (hoursRemaining / totalHours) * 100));
+  };
+
+  const getTrialIcon = () => {
+    const urgency = getTrialUrgency();
+    if (urgency === 'expired' || urgency === 'critical') return AlertTriangle;
+    if (urgency === 'warning') return Clock;
+    return Zap;
+  };
+
+  const getTrialVariant = () => {
+    const urgency = getTrialUrgency();
+    if (urgency === 'expired') return 'destructive';
+    if (urgency === 'critical') return 'destructive';
+    if (urgency === 'warning') return 'warning';
+    return 'brand';
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -47,6 +87,17 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
               {user?.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
           </Avatar>
+          {/* Trial Badge Overlay */}
+          {hasActiveTrial && (
+            <Badge 
+              variant={getTrialVariant()} 
+              className={`absolute -top-1 -right-1 h-5 px-1.5 text-xs font-semibold transition-all ${
+                getTrialUrgency() === 'critical' ? 'animate-pulse' : ''
+              }`}
+            >
+              {getTrialBadgeText()}
+            </Badge>
+          )}
         </Button>
       </DropdownMenuTrigger>
       
@@ -86,6 +137,65 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
             </div>
           </div>
         </DropdownMenuLabel>
+        
+        {/* Trial Status Section */}
+        {hasActiveTrial && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {React.createElement(getTrialIcon(), { 
+                    className: `h-4 w-4 ${getTrialUrgency() === 'critical' ? 'text-destructive' : 'text-primary'}` 
+                  })}
+                  <span className="text-sm font-medium">
+                    {t('trial.title', 'Free Trial')}
+                  </span>
+                </div>
+                <Badge variant={getTrialVariant()} className="text-xs">
+                  {getTrialBadgeText()}
+                </Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <Progress 
+                  value={getTrialProgressPercent()} 
+                  className={`h-2 ${
+                    getTrialUrgency() === 'critical' ? 'bg-destructive/20' : 
+                    getTrialUrgency() === 'warning' ? 'bg-warning/20' : 'bg-primary/20'
+                  }`}
+                />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    {t(`trial.stage.${getTrialUrgency()}.timeLeft`, `${timeRemaining} remaining`)}
+                  </span>
+                  <span className="text-primary font-medium">
+                    {Math.round(getTrialProgressPercent())}%
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  {t(`trial.stage.${getTrialUrgency()}.message`, 
+                    getTrialUrgency() === 'critical' 
+                      ? 'Your trial expires soon! Upgrade now to keep access.'
+                      : getTrialUrgency() === 'warning'
+                      ? 'Less than 24 hours left. Don\'t lose your progress!'
+                      : 'Explore all features during your free trial.'
+                  )}
+                </p>
+                <Button 
+                  size="sm" 
+                  className="w-full text-xs" 
+                  variant={getTrialUrgency() === 'critical' ? 'destructive' : 'default'}
+                >
+                  {t(`trial.stage.${getTrialUrgency()}.cta`, 'Upgrade Now')}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
         
         <DropdownMenuSeparator />
         
