@@ -134,24 +134,7 @@ export const HeaderTrialBanner: React.FC = () => {
                 />
               </div>
               
-              {/* Percentage */}
-              <div className="flex items-center gap-1 mt-1">
-                <span className={`text-xs ${colors.text}`}>
-                  {t('trial.banner.creditsRemaining', { remaining: remainingPercent })}
-                </span>
-                {status === 'low' && (
-                  <Zap className="w-3 h-3 text-red-500" />
-                )}
-              </div>
             </div>
-
-            {/* Status Badge */}
-            <Badge 
-              variant={status === 'low' ? 'destructive' : status === 'medium' ? 'secondary' : 'default'}
-              className="text-xs px-1 py-0"
-            >
-              {analysesRemaining}
-            </Badge>
           </button>
         </TooltipTrigger>
         
