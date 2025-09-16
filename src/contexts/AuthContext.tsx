@@ -31,14 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
         
-        if (event === 'PASSWORD_RECOVERY') {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-          
-          // Redirect to password reset form
-          window.location.href = '/auth?mode=password-reset';
-        } else if (event === 'SIGNED_IN' && session) {
+        if (event === 'SIGNED_IN' && session) {
           setSession(session);
           setUser(session.user);
           setLoading(false);
@@ -48,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const mode = urlParams.get('mode');
           
           // Don't redirect to dashboard if we're in password reset mode
-          if (mode !== 'reset' && mode !== 'password-reset') {
+          if (mode !== 'reset') {
             // Redirect to dashboard after successful sign-in
             setTimeout(() => {
               if (window.location.pathname === '/auth' || window.location.pathname === '/') {
