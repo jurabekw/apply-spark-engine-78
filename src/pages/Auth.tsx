@@ -229,10 +229,8 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const redirectTo = 'https://talentspark.uz/auth?mode=password-reset';
-
     try {
-      // Local cooldown to avoid Supabase 60s rate limit
+      // Local cooldown to avoid rate limiting
       const key = `ts_reset_ts_${resetEmail}`;
       const last = parseInt(localStorage.getItem(key) || '0', 10);
       const now = Date.now();
@@ -246,26 +244,32 @@ const Auth = () => {
         return;
       }
 
-      // Use Supabase native password reset email
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo,
+      // Call our custom edge function that validates email existence
+      const response = await fetch('/supabase/functions/v1/send-password-reset-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
+        },
+        body: JSON.stringify({
+          email: resetEmail,
+          language: i18n.language
+        }),
       });
 
-      if (error) {
-        const msg = error.message?.toLowerCase?.() || '';
-        const isRateLimited = msg.includes('for security purposes') || msg.includes('request this after') || msg.includes('rate limit');
-        if (isRateLimited) {
-          // Treat rate-limit as success because an email was already sent recently
-          localStorage.setItem(key, String(now));
-          setResetEmailSent(true);
+      const result = await response.json();
+
+      if (!result.success) {
+        if (result.error === 'email_not_registered') {
           toast({
-            title: t('pages.auth.passwordResetEmailSent'),
-            description: t('pages.auth.checkEmailForReset'),
+            title: t('auth.emailNotRegistered'),
+            description: t('auth.emailNotRegisteredDescription'),
+            variant: 'destructive',
           });
         } else {
           toast({
             title: t('pages.auth.passwordResetFailed'),
-            description: error.message,
+            description: result.message || 'Failed to send reset email',
             variant: 'destructive',
           });
         }
@@ -277,6 +281,13 @@ const Auth = () => {
           description: t('pages.auth.checkEmailForReset'),
         });
       }
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      toast({
+        title: t('pages.auth.passwordResetFailed'),
+        description: 'Network error. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }

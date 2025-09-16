@@ -238,6 +238,8 @@
     "alreadyHaveAccount": "Already have an account?",
     "passwordsDoNotMatch": "Passwords do not match",
     "passwordUpdatedSuccess": "Password updated successfully!",
+    "emailNotRegistered": "Email not registered",
+    "emailNotRegisteredDescription": "This email address is not registered. Please check your email or sign up for a new account.",
     "getStarted": "Get Started",
     "signInToAccount": "Sign in to your account or create a new one",
     "platformSubtitle": "AI-Powered HR Recruitment Platform",

@@ -29,7 +29,64 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, language }: PasswordResetRequest = await req.json();
 
-    console.log("Sending password reset email to:", email, "in language:", language);
+    console.log("Checking password reset for email:", email, "in language:", language);
+
+    // First, check if the email exists in the database
+    const { data: userCheck, error: userError } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1
+    });
+
+    if (userError) {
+      console.error("Error checking user existence:", userError);
+      throw new Error(`Failed to verify email: ${userError.message}`);
+    }
+
+    // Get all users and check if email exists
+    const { data: allUsers, error: getAllError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (getAllError) {
+      console.error("Error fetching users:", getAllError);
+      throw new Error(`Failed to verify email: ${getAllError.message}`);
+    }
+
+    const emailExists = allUsers.users.some(user => 
+      user.email?.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!emailExists) {
+      console.log("Email not registered:", email);
+      
+      // Return localized error for unregistered email
+      const errorMessages = {
+        en: {
+          error: "email_not_registered",
+          message: "This email address is not registered. Please check your email or sign up for a new account."
+        },
+        ru: {
+          error: "email_not_registered", 
+          message: "Этот адрес электронной почты не зарегистрирован. Пожалуйста, проверьте ваш email или зарегистрируйтесь."
+        }
+      };
+
+      const errorResponse = errorMessages[language as keyof typeof errorMessages] || errorMessages.en;
+      
+      return new Response(
+        JSON.stringify({
+          success: false,
+          ...errorResponse
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
+    console.log("Email registered, generating reset link for:", email);
 
     // Generate password reset link using Supabase Admin client
     // This generates the link WITHOUT sending an email
