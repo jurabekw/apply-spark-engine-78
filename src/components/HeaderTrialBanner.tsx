@@ -115,7 +115,7 @@ export const HeaderTrialBanner: React.FC = () => {
             aria-label={t('trial.banner.viewDetails')}
           >
             {/* Credit Info */}
-            <div className="flex flex-col items-start min-w-0">
+            <div className="flex flex-col items-start min-w-0 gap-0.5">
               {/* Usage Text */}
               <div className="flex items-center gap-1">
                 <span className={`text-xs font-medium ${colors.text}`}>
@@ -127,7 +127,7 @@ export const HeaderTrialBanner: React.FC = () => {
               </div>
               
               {/* Progress Bar */}
-              <div className="w-20 mt-1">
+              <div className="w-20">
                 <Progress 
                   value={usagePercentage} 
                   className="h-1.5"
