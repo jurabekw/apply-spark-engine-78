@@ -43,6 +43,27 @@
         "cta": "Contact Support",
         "timeLeft": "Trial ended"
       }
+    },
+    "analysesRemaining": "analyses remaining",
+    "errors": {
+      "limitReached": "Analysis Limit Reached",
+      "limitReachedDesc": "You've reached your trial limit. Please upgrade to continue.",
+      "notAuthenticated": "Not Authenticated",
+      "pleaseSignIn": "Please sign in to continue",
+      "trialNotFound": "Trial Not Found",
+      "contactSupport": "Please contact support",
+      "recordingFailed": "Failed to Record Usage",
+      "tryAgain": "Please try again",
+      "unexpected": "Unexpected Error"
+    },
+    "warnings": {
+      "approaching": "Approaching Limit",
+      "fiveLeft": "You have 5 analyses remaining",
+      "lastAnalysis": "Last Analysis",
+      "lastAnalysisDesc": "This is your last free analysis. Consider upgrading!"
+    },
+    "banner": {
+      "analysesLeft": "analyses left"
     }
   },
   "navigation": {

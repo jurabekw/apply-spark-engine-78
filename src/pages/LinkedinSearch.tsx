@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrialUsage } from '@/hooks/useTrialUsage';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
 import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
@@ -32,6 +33,7 @@ const LinkedinSearch = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { canUseAnalysis, recordUsage, analysesRemaining } = useTrialUsage();
 
   // Validation Schema
   const searchSchema = useMemo(() => z.object({
@@ -228,6 +230,16 @@ const LinkedinSearch = () => {
       return;
     }
 
+    // Check if user can use analysis
+    if (!canUseAnalysis) {
+      toast({
+        title: t('trial.errors.limitReached'),
+        description: t('trial.errors.limitReachedDesc'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setSearchResults([]);
 
@@ -272,6 +284,18 @@ const LinkedinSearch = () => {
       // Normalize the candidates from the response
       const normalizedCandidates = normalizeCandidates(webhookData);
       console.log('Normalized candidates:', normalizedCandidates);
+
+      // Record usage for this search
+      const usageRecorded = await recordUsage('linkedin_search', {
+        job_title: data.job_title,
+        candidate_count: normalizedCandidates.length,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!usageRecorded) {
+        // If usage recording failed, stop the process
+        return;
+      }
 
       // Store the search in the database
       const { error: dbError } = await supabase
@@ -425,7 +449,12 @@ const LinkedinSearch = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
+                  <Badge variant="secondary" className="text-xs">
+                    {analysesRemaining} {t('trial.analysesRemaining')}
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <Form {...form}>

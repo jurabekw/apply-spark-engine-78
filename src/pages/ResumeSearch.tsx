@@ -14,6 +14,7 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { useTrialUsage } from '@/hooks/useTrialUsage';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -354,6 +355,7 @@ export default function ResumeSearch() {
     toast
   } = useToast();
   const { t, i18n } = useTranslation();
+  const { canUseAnalysis, recordUsage, analysesRemaining } = useTrialUsage();
 
   // Validation Schema
   const schema = useMemo(() => z.object({
@@ -455,6 +457,16 @@ export default function ResumeSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const handleSearch = async (values: z.infer<typeof schema>) => {
+    // Check if user can use analysis
+    if (!canUseAnalysis) {
+      toast({
+        title: t('trial.errors.limitReached'),
+        description: t('trial.errors.limitReachedDesc'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setCandidates([]);
@@ -515,6 +527,21 @@ export default function ResumeSearch() {
         allTitles: normalized.map(c => c.title)
       });
       console.debug("ABOUT TO SET CANDIDATES STATE:", normalized);
+      // Record usage for this search
+      const usageRecorded = await recordUsage('hh_search', {
+        job_title: values.jobTitle.trim(),
+        required_skills: values.requiredSkills.trim(),
+        experience_level: values.experienceLevel,
+        city: values.city,
+        candidate_count: normalized.length,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!usageRecorded) {
+        // If usage recording failed, stop the process
+        return;
+      }
+
       setCandidates(normalized);
       console.debug("STATE SET. Current candidates length should be:", normalized.length);
       if (normalized.length === 0) {
@@ -704,8 +731,15 @@ export default function ResumeSearch() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('resumeSearchPage.searchCandidates')}</CardTitle>
-          <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>{t('resumeSearchPage.searchCandidates')}</CardTitle>
+              <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              {analysesRemaining} {t('trial.analysesRemaining')}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
