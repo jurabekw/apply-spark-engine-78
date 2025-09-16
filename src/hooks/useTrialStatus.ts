@@ -74,18 +74,24 @@ export const useTrialStatus = (): TrialStatus => {
       }
 
       if (existingTrial) {
-        // User already has a trial
-        setTrialData(existingTrial);
+        // User already has a trial - ensure it has all required fields
+        const trialWithDefaults = {
+          ...existingTrial,
+          analyses_used: existingTrial.analyses_used || 0,
+          analyses_limit: existingTrial.analyses_limit || 20
+        };
+        setTrialData(trialWithDefaults);
       } else {
-        // Create new trial for user (auto-triggered by database trigger)
-        // This should happen automatically, but we'll check again
+        // Create new trial for user
         const { data: newTrial, error: createError } = await supabase
           .from('user_trials')
           .insert({
             user_id: user.id,
             trial_started_at: new Date().toISOString(),
             trial_ends_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72 hours from now
-            is_active: true
+            is_active: true,
+            analyses_used: 0,
+            analyses_limit: 20
           })
           .select()
           .single();

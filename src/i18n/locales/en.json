@@ -641,18 +641,44 @@
   },
   "trial": {
     "banner": {
+      "title": "Free Trial Active",
       "message": "Free trial active -",
       "remaining": "remaining",
-      "urgent": "⚠ Trial ending soon!"
+      "urgent": "⚠ Trial ending soon!",
+      "analysesLeft": "analyses left",
+      "usage": "Analyses used",
+      "timeExpired": "Trial time has expired",
+      "usageExpired": "Analysis limit reached",
+      "timeRunningOut": "Less than 24 hours remaining",
+      "usageRunningOut": "Approaching analysis limit"
     },
     "expired": {
-      "title": "Free Trial Expired",
-      "message": "Your free trial period has ended. To continue using our service, please contact us.",
+      "title": "Trial Expired",
+      "message": "Your free trial has ended. Contact our team to continue using our services.",
+      "timeMessage": "Your 3-day trial period has ended. Contact our team to continue using our services.",
+      "usageMessage": "You've reached your 20 analysis limit. Contact our team to continue using our services.",
       "contact": {
-        "title": "Get Full Access",
-        "description": "Contact us on Telegram to upgrade your account and continue using all features.",
-        "telegram": "Contact on Telegram: @shakhnoz_burkhan"
+        "title": "Contact Us",
+        "description": "Get in touch to upgrade your account and unlock unlimited features.",
+        "telegram": "Contact via Telegram"
       }
+    },
+    "errors": {
+      "notAuthenticated": "Authentication Required",
+      "pleaseSignIn": "Please sign in to continue",
+      "limitReached": "Trial Limit Reached",
+      "limitReachedDesc": "You've reached your trial limit. Contact us to continue.",
+      "trialNotFound": "Trial Not Found",
+      "contactSupport": "Please contact support for assistance",
+      "recordingFailed": "Failed to Record Usage",
+      "tryAgain": "Please try again or contact support",
+      "unexpected": "Unexpected Error"
+    },
+    "warnings": {
+      "approaching": "Trial Limit Approaching",
+      "fiveLeft": "You have 5 analyses remaining in your trial",
+      "lastAnalysis": "Last Analysis",
+      "lastAnalysisDesc": "This is your final analysis in the trial period"
     }
   },
   "toasts": {
