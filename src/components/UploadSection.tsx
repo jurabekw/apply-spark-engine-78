@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
 import AnalysisHistory from '@/components/AnalysisHistory';
 import { useTranslation } from 'react-i18next';
+import { useTrialUsage } from '@/hooks/useTrialUsage';
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobRequirements, setJobRequirements] = useState('');
@@ -22,6 +23,7 @@ const UploadSection = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
+  const { checkAndIncrementUsage, canUseModule, usageInfo } = useTrialUsage();
   const validateAndSetFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
@@ -182,6 +184,18 @@ const UploadSection = () => {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check trial usage before proceeding
+    const canProceed = await checkAndIncrementUsage('resume_upload', {
+      jobTitle: jobTitle.trim(),
+      fileCount: selectedFiles?.length || 0,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (!canProceed) {
+      return; // Error message already shown by checkAndIncrementUsage
+    }
+    
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({
         title: t('upload.noFilesSelected'),
@@ -419,17 +433,35 @@ const UploadSection = () => {
               </Card>
             )}
 
+            {/* Trial Usage Warning */}
+            {canUseModule && usageInfo.remaining <= 5 && usageInfo.remaining > 0 && (
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ {t('trial.warning.remaining', { 
+                    defaultValue: 'You have {{remaining}} analyses remaining in your trial.', 
+                    remaining: usageInfo.remaining 
+                  })}
+                </p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <Button 
               type="submit" 
               size="lg"
               className="w-full h-12" 
-              disabled={isProcessing || !selectedFiles || selectedFiles.length === 0}
+              disabled={isProcessing || !selectedFiles || selectedFiles.length === 0 || !canUseModule}
+              variant={!canUseModule ? "secondary" : "default"}
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-3 animate-spin" />
                   {t('upload.analyzing')}
+                </>
+              ) : !canUseModule ? (
+                <>
+                  <AlertCircle className="w-5 h-5 mr-3" />
+                  {t('trial.usage.disabled', { defaultValue: 'Trial Limit Reached' })}
                 </>
               ) : (
                 <>
