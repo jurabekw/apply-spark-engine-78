@@ -111,7 +111,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
                 {getDisplayName()}
               </p>
               <p className="text-sm text-muted-foreground/80 font-medium mt-0.5">
-                {profile?.role || 'Recruiter'}
+                {profile?.role || t('userDropdown.role.recruiter', 'Recruiter')}
               </p>
               {user?.email && (
                 <p className="text-xs text-muted-foreground/60 mt-1 truncate">
@@ -147,7 +147,8 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
                   <span className="text-sm text-muted-foreground">•</span>
                   <span className="text-sm text-muted-foreground">
                     {isExpired ? t('trial.expired', 'Expired') : 
-                     daysRemaining > 0 ? `${daysRemaining} days left` : `${hoursRemaining} hours left`}
+                     daysRemaining > 0 ? t('userDropdown.timeLeft.daysLeft', '{{count}} days left', { count: daysRemaining }) : 
+                     t('userDropdown.timeLeft.hoursLeft', '{{count}} hours left', { count: hoursRemaining })}
                   </span>
                 </div>
               </div>

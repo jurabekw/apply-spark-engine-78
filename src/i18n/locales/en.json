@@ -696,6 +696,15 @@
       "lastAnalysisDesc": "This is your final analysis in the trial period"
     }
   },
+  "userDropdown": {
+    "role": {
+      "recruiter": "Recruiter"
+    },
+    "timeLeft": {
+      "daysLeft": "{{count}} days left",
+      "hoursLeft": "{{count}} hours left"
+    }
+  },
   "toasts": {
     "authError": "Authentication Error",
     "welcomeBack": "Welcome back!",
@@ -984,6 +993,15 @@
       "candidatesSavedDescription": "Successfully saved {{inserted}} out of {{total}} candidates to your database (showing {{shown}} results).",
       "noMatchingCandidates": "No matching candidates found",
       "tryAdjustingSearch": "Try adjusting your search criteria."
+    }
+  },
+  "userDropdown": {
+    "role": {
+      "recruiter": "Recruiter"
+    },
+    "timeLeft": {
+      "daysLeft": "{{count}} days left",
+      "hoursLeft": "{{count}} hours left"
     }
   }
 }

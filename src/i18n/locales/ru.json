@@ -715,6 +715,15 @@
       "lastAnalysisDesc": "Это ваш последний анализ в пробном периоде"
     }
   },
+  "userDropdown": {
+    "role": {
+      "recruiter": "Рекрутер"
+    },
+    "timeLeft": {
+      "daysLeft": "{{count}} дн. осталось",
+      "hoursLeft": "{{count}} ч. осталось"
+    }
+  },
   "toasts": {
     "authError": "Ошибка аутентификации",
     "welcomeBack": "Добро пожаловать!",
@@ -1096,6 +1105,15 @@
           "telegram": "Написать в Telegram"
         }
       }
+    }
+  },
+  "userDropdown": {
+    "role": {
+      "recruiter": "Рекрутер"
+    },
+    "timeLeft": {
+      "daysLeft": "{{count}} дн. осталось",
+      "hoursLeft": "{{count}} ч. осталось"
     }
   }
 }
