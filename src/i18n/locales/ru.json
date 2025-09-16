@@ -242,8 +242,6 @@
     "alreadyHaveAccount": "Уже есть аккаунт?",
     "passwordsDoNotMatch": "Пароли не совпадают",
     "passwordUpdatedSuccess": "Пароль успешно обновлен!",
-    "emailNotRegistered": "Email не зарегистрирован",
-    "emailNotRegisteredDescription": "Этот адрес электронной почты не зарегистрирован. Пожалуйста, проверьте ваш email или зарегистрируйтесь.",
     "getStarted": "Начать работу",
     "signInToAccount": "Войдите в аккаунт или создайте новый",
     "platformSubtitle": "ИИ-платформа для HR и рекрутинга",

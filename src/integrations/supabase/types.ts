@@ -296,63 +296,6 @@ export type Database = {
         }
         Relationships: []
       }
-      rate_limits: {
-        Row: {
-          action_type: string
-          count: number
-          created_at: string
-          id: string
-          user_id: string
-          window_start: string
-        }
-        Insert: {
-          action_type: string
-          count?: number
-          created_at?: string
-          id?: string
-          user_id: string
-          window_start?: string
-        }
-        Update: {
-          action_type?: string
-          count?: number
-          created_at?: string
-          id?: string
-          user_id?: string
-          window_start?: string
-        }
-        Relationships: []
-      }
-      trial_usage_log: {
-        Row: {
-          action_type: string
-          created_at: string
-          id: string
-          metadata: Json | null
-          module_type: string
-          trial_id: string
-          user_id: string
-        }
-        Insert: {
-          action_type?: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          module_type: string
-          trial_id: string
-          user_id: string
-        }
-        Update: {
-          action_type?: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          module_type?: string
-          trial_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_preferences: {
         Row: {
           created_at: string
@@ -418,8 +361,6 @@ export type Database = {
       }
       user_trials: {
         Row: {
-          analyses_limit: number
-          analyses_used: number
           created_at: string
           id: string
           is_active: boolean
@@ -429,8 +370,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          analyses_limit?: number
-          analyses_used?: number
           created_at?: string
           id?: string
           is_active?: boolean
@@ -440,8 +379,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          analyses_limit?: number
-          analyses_used?: number
           created_at?: string
           id?: string
           is_active?: boolean
@@ -490,10 +427,6 @@ export type Database = {
       }
     }
     Functions: {
-      increment_trial_usage: {
-        Args: { p_metadata?: Json; p_module_type: string; p_user_id: string }
-        Returns: Json
-      }
       refresh_analytics_views: {
         Args: Record<PropertyKey, never>
         Returns: undefined

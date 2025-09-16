@@ -48,18 +48,7 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
   blockOnExpired = true 
 }) => {
   const { t } = useTranslation();
-  const { 
-    loading, 
-    hasActiveTrial, 
-    isExpired, 
-    timeRemaining, 
-    hoursRemaining, 
-    analysesUsed, 
-    analysesLimit, 
-    analysesRemaining, 
-    usagePercentage, 
-    error 
-  } = useTrialStatus();
+  const { loading, hasActiveTrial, isExpired, timeRemaining, hoursRemaining, error } = useTrialStatus();
 
   // Show loading state
   if (loading) {
@@ -99,19 +88,6 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
       window.open('https://t.me/shakhnoz_burkhan', '_blank');
     };
 
-    // Determine expiry reason
-    const timeExpired = hoursRemaining <= 0;
-    const usageExpired = analysesUsed >= analysesLimit;
-    
-    let expiryMessage = t('trial.expired.message');
-    if (timeExpired && usageExpired) {
-      expiryMessage = t('trial.expired.both', { defaultValue: 'Your trial has expired due to both time limit (3 days) and usage limit (20 analyses) being reached.' });
-    } else if (timeExpired) {
-      expiryMessage = t('trial.expired.time', { defaultValue: 'Your 3-day trial period has expired.' });
-    } else if (usageExpired) {
-      expiryMessage = t('trial.expired.usage', { defaultValue: 'You have reached your trial limit of 20 analyses.' });
-    }
-
     return (
       <Dialog open={true}>
         <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
@@ -121,26 +97,9 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
               {t('trial.expired.title')}
             </DialogTitle>
             <DialogDescription>
-              {expiryMessage}
+              {t('trial.expired.message')}
             </DialogDescription>
           </DialogHeader>
-          
-          {/* Trial Usage Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t('trial.summary.title', { defaultValue: 'Trial Summary' })}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t('trial.summary.analyses', { defaultValue: 'Analyses Used' })}</span>
-                <span className="font-medium">{analysesUsed} / {analysesLimit}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t('trial.summary.timeUsed', { defaultValue: 'Time Used' })}</span>
-                <span className="font-medium">{hoursRemaining <= 0 ? '3 days' : timeRemaining + ' remaining'}</span>
-              </div>
-            </CardContent>
-          </Card>
           
           <Card>
             <CardHeader>

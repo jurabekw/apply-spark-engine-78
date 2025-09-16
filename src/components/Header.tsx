@@ -13,7 +13,6 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserDropdown } from './UserDropdown';
 import { SettingsSheet } from './SettingsSheet';
-import { TrialStatusBanner } from './TrialStatusBanner';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -80,10 +79,9 @@ const Header = () => {
   };
 
   return (
-    <>
-      <header className="bg-card border-b border-border/50 shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+    <header className="bg-card border-b border-border/50 shadow-sm">
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
           {/* Logo & Brand */}
           <Link to="/dashboard" className="hover-lift">
             <Logo size="md" variant="light" />
@@ -152,21 +150,13 @@ const Header = () => {
           </div>
         </div>
       </div>
-      </header>
-
-      {/* Trial Status Banner */}
-      {user && (
-        <div className="container mx-auto px-6">
-          <TrialStatusBanner />
-        </div>
-      )}
 
       {/* Settings Sheet */}
       <SettingsSheet 
         open={settingsOpen} 
         onOpenChange={setSettingsOpen} 
       />
-    </>
+    </header>
   );
 };
 export default Header;

@@ -8,8 +8,6 @@ interface TrialData {
   trial_started_at: string;
   trial_ends_at: string;
   is_active: boolean;
-  analyses_used: number;
-  analyses_limit: number;
   created_at: string;
   updated_at: string;
 }
@@ -22,12 +20,7 @@ interface TrialStatus {
   daysRemaining: number;
   timeRemaining: string;
   trialEndsAt: Date | null;
-  analysesUsed: number;
-  analysesLimit: number;
-  analysesRemaining: number;
-  usagePercentage: number;
   error: string | null;
-  incrementUsage: (moduleType: 'resume_upload' | 'hh_search' | 'linkedin_search', metadata?: any) => Promise<{ success: boolean; error?: string; message?: string }>;
 }
 
 /**
@@ -154,53 +147,10 @@ export const useTrialStatus = (): TrialStatus => {
     }
   }, [user]);
 
-  // Increment usage function
-  const incrementUsage = async (
-    moduleType: 'resume_upload' | 'hh_search' | 'linkedin_search', 
-    metadata: any = {}
-  ): Promise<{ success: boolean; error?: string; message?: string }> => {
-    if (!user) {
-      return { success: false, error: 'no_user', message: 'User not authenticated' };
-    }
-
-    try {
-      const { data, error } = await supabase.rpc('increment_trial_usage', {
-        p_user_id: user.id,
-        p_module_type: moduleType,
-        p_metadata: metadata
-      });
-
-      if (error) {
-        console.error('Error incrementing trial usage:', error);
-        return { success: false, error: 'database_error', message: error.message };
-      }
-
-      // Type the response properly
-      const result = data as { success: boolean; error?: string; message?: string; analyses_used?: number; analyses_limit?: number; remaining?: number; trial_active?: boolean };
-
-      // Refresh trial data after successful increment
-      if (result?.success) {
-        fetchTrialData();
-      }
-
-      return result || { success: false, error: 'invalid_response', message: 'Invalid response from server' };
-    } catch (err) {
-      console.error('Unexpected error incrementing usage:', err);
-      return { success: false, error: 'unexpected_error', message: 'An unexpected error occurred' };
-    }
-  };
-
   // Calculate current trial status
   const timeCalculation = calculateTimeRemaining();
-  const usageExpired = trialData ? trialData.analyses_used >= trialData.analyses_limit : false;
-  const isExpired = timeCalculation.expired || !trialData?.is_active || usageExpired;
+  const isExpired = timeCalculation.expired || !trialData?.is_active;
   const hasActiveTrial = !isExpired && trialData !== null;
-
-  // Calculate usage statistics
-  const analysesUsed = trialData?.analyses_used || 0;
-  const analysesLimit = trialData?.analyses_limit || 20;
-  const analysesRemaining = Math.max(0, analysesLimit - analysesUsed);
-  const usagePercentage = analysesLimit > 0 ? (analysesUsed / analysesLimit) * 100 : 0;
 
   return {
     loading,
@@ -210,11 +160,6 @@ export const useTrialStatus = (): TrialStatus => {
     daysRemaining: timeCalculation.days,
     timeRemaining: timeCalculation.timeString,
     trialEndsAt: trialData ? new Date(trialData.trial_ends_at) : null,
-    analysesUsed,
-    analysesLimit,
-    analysesRemaining,
-    usagePercentage,
-    error,
-    incrementUsage
+    error
   };
 };

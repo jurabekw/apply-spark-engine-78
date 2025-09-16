@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import i18n from '@/i18n/config';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +17,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'signin');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isRecoverySession } = useAuth();
+  const { user } = useAuth();
   const { t } = useTranslation();
 
   // Login form state
@@ -62,10 +61,9 @@ const Auth = () => {
   useEffect(() => {
     // Check for password reset mode first
     const mode = searchParams.get('mode');
-    const urlType = searchParams.get('type');
     
-    // Don't redirect to dashboard if we're in password reset mode or recovery session
-    if (user && mode !== 'reset' && mode !== 'password-reset' && urlType !== 'recovery' && !isRecoverySession) {
+    // Don't redirect to dashboard if we're in password reset mode
+    if (user && mode !== 'reset') {
       navigate('/dashboard');
       return;
     }
@@ -92,9 +90,8 @@ const Auth = () => {
       navigate('/auth', { replace: true });
     }
 
-    // Check for password reset mode (supports legacy 'reset' and 'password-reset')
-    const recoveryType = searchParams.get('type');
-    if (mode === 'reset' || mode === 'password-reset' || recoveryType === 'recovery' || isRecoverySession) {
+    // Check for password reset mode (using existing mode variable)
+    if (mode === 'reset') {
       setResetMode(true);
       setActiveTab('signin');
     }
@@ -103,7 +100,7 @@ const Auth = () => {
     if (tab && (tab === 'signin' || tab === 'signup')) {
       setActiveTab(tab);
     }
-  }, [searchParams, user, navigate, toast, isRecoverySession]);
+  }, [searchParams, user, navigate, toast]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,60 +227,22 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Local cooldown to avoid rate limiting
-      const key = `ts_reset_ts_${resetEmail}`;
-      const last = parseInt(localStorage.getItem(key) || '0', 10);
-      const now = Date.now();
-      const elapsed = Math.floor((now - last) / 1000);
-      if (last && elapsed < 60) {
-        setResetEmailSent(true);
-        toast({
-          title: t('pages.auth.passwordResetEmailSent'),
-          description: t('pages.auth.checkEmailForReset'),
-        });
-        return;
-      }
-
-      // Call our custom edge function that validates email existence
-      const { data: result, error: functionError } = await supabase.functions.invoke('send-password-reset-email', {
-        body: {
-          email: resetEmail,
-          language: i18n.language
-        }
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `https://talentspark.uz/auth?mode=reset`,
       });
 
-      if (functionError) {
-        throw new Error(functionError.message || 'Failed to call reset function');
-      }
+      if (error) throw error;
 
-      if (!result.success) {
-        if (result.error === 'email_not_registered') {
-          toast({
-            title: t('auth.emailNotRegistered'),
-            description: t('auth.emailNotRegisteredDescription'),
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: t('pages.auth.passwordResetFailed'),
-            description: result.message || 'Failed to send reset email',
-            variant: 'destructive',
-          });
-        }
-      } else {
-        localStorage.setItem(key, String(now));
-        setResetEmailSent(true);
-        toast({
-          title: t('pages.auth.passwordResetEmailSent'),
-          description: t('pages.auth.checkEmailForReset'),
-        });
-      }
+      setResetEmailSent(true);
+      toast({
+        title: t('pages.auth.passwordResetEmailSent'),
+        description: t('pages.auth.checkEmailForReset'),
+      });
     } catch (error: any) {
-      console.error('Password reset error:', error);
       toast({
         title: t('pages.auth.passwordResetFailed'),
-        description: 'Network error. Please try again.',
-        variant: 'destructive',
+        description: error.message,
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -325,13 +284,11 @@ const Auth = () => {
         description: t('pages.auth.passwordResetComplete'),
       });
 
-      // Reset state and redirect to dashboard after successful password reset
+      // Reset state and redirect to sign in
       setResetMode(false);
       setNewPassword('');
       setConfirmPassword('');
-      
-      // Force redirect to dashboard after password reset completion
-      window.location.href = '/dashboard';
+      navigate('/auth?tab=signin', { replace: true });
     } catch (error: any) {
       toast({
         title: t('pages.auth.passwordResetFailed'),
@@ -431,7 +388,7 @@ const Auth = () => {
                         </div>
                         <h3 className="text-xl font-semibold">{t('auth.checkYourEmail')}</h3>
                         <p className="text-muted-foreground">
-                          {t('auth.resetLinkSent').replace('{email}', resetEmail)}
+                          {t('auth.resetLinkSent', { email: resetEmail })}
                         </p>
                         <Button 
                           variant="outline" 
