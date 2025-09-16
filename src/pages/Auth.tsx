@@ -244,39 +244,17 @@ const Auth = () => {
         return;
       }
 
-      // Try sending via Edge Function (Resend) first for localized emails
-      const response = await supabase.functions.invoke('send-password-reset-email', {
-        body: {
-          email: resetEmail,
-          language: i18n.language || 'en',
-        },
-      });
-
-      // If the Edge Function returned an error or success=false, trigger fallback
-      if (response.error || (response.data && (response.data as any).success === false)) {
-        throw new Error(response.error?.message || (response.data as any)?.error || 'Edge function failed');
-      }
-
-      localStorage.setItem(key, String(now));
-      setResetEmailSent(true);
-      toast({
-        title: t('pages.auth.passwordResetEmailSent'),
-        description: t('pages.auth.checkEmailForReset'),
-      });
-    } catch (error: any) {
-      console.error('Edge function failed, falling back to Supabase resetPasswordForEmail:', error);
-
-      // Fallback: use Supabase native email (does not depend on Resend domain verification)
-      const { error: fallbackError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      // Use Supabase native password reset email
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo,
       });
 
-      if (fallbackError) {
-        const msg = fallbackError.message?.toLowerCase?.() || '';
+      if (error) {
+        const msg = error.message?.toLowerCase?.() || '';
         const isRateLimited = msg.includes('for security purposes') || msg.includes('request this after') || msg.includes('rate limit');
         if (isRateLimited) {
           // Treat rate-limit as success because an email was already sent recently
-          localStorage.setItem(`ts_reset_ts_${resetEmail}`, String(Date.now()));
+          localStorage.setItem(key, String(now));
           setResetEmailSent(true);
           toast({
             title: t('pages.auth.passwordResetEmailSent'),
@@ -285,12 +263,12 @@ const Auth = () => {
         } else {
           toast({
             title: t('pages.auth.passwordResetFailed'),
-            description: fallbackError.message,
+            description: error.message,
             variant: 'destructive',
           });
         }
       } else {
-        localStorage.setItem(`ts_reset_ts_${resetEmail}`, String(Date.now()));
+        localStorage.setItem(key, String(now));
         setResetEmailSent(true);
         toast({
           title: t('pages.auth.passwordResetEmailSent'),
