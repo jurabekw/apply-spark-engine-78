@@ -245,19 +245,16 @@ const Auth = () => {
       }
 
       // Call our custom edge function that validates email existence
-      const response = await fetch('/supabase/functions/v1/send-password-reset-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
-        },
-        body: JSON.stringify({
+      const { data: result, error: functionError } = await supabase.functions.invoke('send-password-reset-email', {
+        body: {
           email: resetEmail,
           language: i18n.language
-        }),
+        }
       });
 
-      const result = await response.json();
+      if (functionError) {
+        throw new Error(functionError.message || 'Failed to call reset function');
+      }
 
       if (!result.success) {
         if (result.error === 'email_not_registered') {
