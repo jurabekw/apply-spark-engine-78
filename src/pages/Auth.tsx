@@ -92,7 +92,8 @@ const Auth = () => {
     }
 
     // Check for password reset mode (supports legacy 'reset' and 'password-reset')
-    if (mode === 'reset' || mode === 'password-reset') {
+    const type = searchParams.get('type');
+    if (mode === 'reset' || mode === 'password-reset' || type === 'recovery') {
       setResetMode(true);
       setActiveTab('signin');
     }
