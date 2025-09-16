@@ -115,6 +115,18 @@ export const useTrialUsage = (): TrialUsageResult => {
       return false;
     }
 
+    // Helper to call RPC and normalize response shape
+    const callIncrement = async () => {
+      const { data, error } = await supabase.rpc('increment_trial_usage', {
+        p_user_id: user.id,
+        p_module_type: moduleType,
+        p_metadata: metadata
+      });
+      if (error) return { ok: false as const, message: error.message };
+      const row = Array.isArray(data) ? data?.[0] : data;
+      return { ok: Boolean(row?.success), message: String(row?.message || ''), analyses_used: row?.analyses_used, analyses_remaining: row?.analyses_remaining };
+    };
+
     try {
       // First check if user can still use analyses
       if (!usageData.canUseAnalysis) {
@@ -126,57 +138,74 @@ export const useTrialUsage = (): TrialUsageResult => {
         return false;
       }
 
-      // Use the increment_trial_usage function to safely record usage
-      const { data, error } = await supabase.rpc('increment_trial_usage', {
-        p_user_id: user.id,
-        p_module_type: moduleType,
-        p_metadata: metadata
-      });
+      // Try to record usage
+      let result = await callIncrement();
 
-      if (error) {
-        console.error('Error recording usage:', error);
-        
-        // Handle specific error cases
-        if (error.message?.includes('Trial has expired') || error.message?.includes('limit reached')) {
-          toast({
-            title: t('trial.errors.limitReached'),
-            description: t('trial.errors.limitReachedDesc'),
-            variant: "destructive",
-          });
-        } else if (error.message?.includes('Trial not found')) {
+      // If trial not found, try to create it and retry once
+      if (!result.ok && /trial not found/i.test(result.message || '')) {
+        const { error: insertErr } = await supabase
+          .from('user_trials')
+          .insert({ user_id: user.id })
+          .select('id')
+          .single();
+
+        if (insertErr) {
+          console.error('Failed to create trial for user:', insertErr);
           toast({
             title: t('trial.errors.trialNotFound'),
             description: t('trial.errors.contactSupport'),
-            variant: "destructive",
+            variant: 'destructive',
+          });
+          return false;
+        }
+
+        // Retry once after creating the trial
+        result = await callIncrement();
+      }
+
+      if (!result.ok) {
+        console.error('Error recording usage (handled):', result.message);
+        if (/expired|limit/i.test(result.message || '')) {
+          toast({
+            title: t('trial.errors.limitReached'),
+            description: t('trial.errors.limitReachedDesc'),
+            variant: 'destructive',
           });
         } else {
           toast({
             title: t('trial.errors.recordingFailed'),
             description: t('trial.errors.tryAgain'),
-            variant: "destructive",
+            variant: 'destructive',
           });
         }
+        // Ensure local state reflects latest from server
+        await fetchUsageData();
         return false;
       }
 
       // Refresh usage data after successful recording
       await fetchUsageData();
+      // Notify other parts of the app (e.g., headers using useTrialStatus)
+      try {
+        window.dispatchEvent(new Event('trial-usage-updated'));
+      } catch {}
 
-      // Show usage warning if approaching limit
-      const newUsed = usageData.analysesUsed + 1;
-      const remaining = usageData.analysesLimit - newUsed;
-      
+      // Show usage warning if approaching limit using server-returned remaining when available
+      const remaining = typeof result.analyses_remaining === 'number'
+        ? result.analyses_remaining
+        : (usageData.analysesLimit - (usageData.analysesUsed + 1));
+
       if (remaining === 5) {
         toast({
           title: t('trial.warnings.approaching'),
           description: t('trial.warnings.fiveLeft'),
-          variant: "default",
+          variant: 'default',
         });
       } else if (remaining === 1) {
         toast({
           title: t('trial.warnings.lastAnalysis'),
           description: t('trial.warnings.lastAnalysisDesc'),
-          variant: "default",
+          variant: 'default',
         });
       }
 

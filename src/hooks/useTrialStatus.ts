@@ -161,6 +161,17 @@ export const useTrialStatus = (): TrialStatus => {
     }
   }, [user]);
 
+  // Refresh when other parts of the app update usage
+  useEffect(() => {
+    const handler = () => {
+      if (!loading) {
+        fetchTrialData();
+      }
+    };
+    window.addEventListener('trial-usage-updated', handler);
+    return () => window.removeEventListener('trial-usage-updated', handler);
+  }, [loading]);
+
   // Calculate current trial status
   const timeCalculation = calculateTimeRemaining();
   const isTimeExpired = timeCalculation.expired;
