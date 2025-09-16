@@ -1,7 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+// Initialize Supabase Admin client
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,33 +31,27 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending password reset email to:", email, "in language:", language);
 
-    // Generate password reset link using Supabase admin
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Missing Supabase configuration");
-    }
-
-    // Generate reset link - this will be used in both languages
-    const resetResponse = await fetch(`${supabaseUrl}/auth/v1/recover`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-        'apikey': supabaseServiceKey
-      },
-      body: JSON.stringify({
-        email: email,
-        gotrue_meta_security: {}
-      })
+    // Generate password reset link using Supabase Admin client
+    // This generates the link WITHOUT sending an email
+    const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email: email,
+      options: {
+        redirectTo: 'https://talentspark.uz/auth?mode=password-reset'
+      }
     });
 
-    const resetData = await resetResponse.json();
-    console.log("Supabase reset response:", resetData);
+    if (error) {
+      console.error("Error generating recovery link:", error);
+      throw new Error(`Failed to generate recovery link: ${error.message}`);
+    }
 
-    // Create reset link for email
-    const redirectUrl = `${supabaseUrl.replace('supabase.co', 'supabase.co')}/auth/v1/verify?token=${resetData.action_link?.split('token=')[1]?.split('&')[0] || 'token'}&type=recovery&redirect_to=${encodeURIComponent(`${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovableproject.com') || 'http://localhost:3000'}/auth?mode=password-reset`)}`;
+    if (!data?.properties?.action_link) {
+      throw new Error("No recovery link generated");
+    }
+
+    const resetUrl = data.properties.action_link;
+    console.log("Generated reset link:", resetUrl);
 
     // Email templates
     const templates = {
@@ -70,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${redirectUrl}" 
+                <a href="${resetUrl}" 
                    style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
                   Reset Password
                 </a>
@@ -78,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p style="color: #666; font-size: 14px; margin-top: 20px;">
                 Or copy and paste this link in your browser:<br>
-                <span style="background-color: #f0f0f0; padding: 8px; border-radius: 4px; word-break: break-all; display: inline-block; margin-top: 5px;">${redirectUrl}</span>
+                <span style="background-color: #f0f0f0; padding: 8px; border-radius: 4px; word-break: break-all; display: inline-block; margin-top: 5px;">${resetUrl}</span>
               </p>
               
               <p style="color: #666; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
@@ -108,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${redirectUrl}" 
+                <a href="${resetUrl}" 
                    style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
                   Сбросить пароль
                 </a>
@@ -116,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p style="color: #666; font-size: 14px; margin-top: 20px;">
                 Или скопируйте и вставьте эту ссылку в браузер:<br>
-                <span style="background-color: #f0f0f0; padding: 8px; border-radius: 4px; word-break: break-all; display: inline-block; margin-top: 5px;">${redirectUrl}</span>
+                <span style="background-color: #f0f0f0; padding: 8px; border-radius: 4px; word-break: break-all; display: inline-block; margin-top: 5px;">${resetUrl}</span>
               </p>
               
               <p style="color: #666; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
