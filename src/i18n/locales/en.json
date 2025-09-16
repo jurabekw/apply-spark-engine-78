@@ -646,11 +646,19 @@
       "remaining": "remaining",
       "urgent": "⚠ Trial ending soon!",
       "creditsLeft": "credits left",
+      "creditsUsed": "{{used}} of {{total}} credits used",
+      "creditsRemaining": "{{remaining}}% remaining",
       "usage": "Credits used",
+      "refreshes": "Refreshes: {{date}}",
       "timeExpired": "Trial time has expired",
       "usageExpired": "Credit limit reached",
       "timeRunningOut": "Less than 24 hours remaining",
-      "usageRunningOut": "Approaching credit limit"
+      "usageRunningOut": "Approaching credit limit",
+      "tooltip": "Credits are used for candidate searches and AI features",
+      "viewDetails": "View credit history",
+      "buyCreditsButtom": "Buy Credits",
+      "upgradeButton": "Upgrade Plan",
+      "loadError": "Failed to load credit information"
     },
     "expired": {
       "title": "Trial Expired",
