@@ -202,12 +202,6 @@ export const HeaderTrialBanner: React.FC = () => {
                 <span className="text-muted-foreground">{t('trial.banner.details.remaining')}</span>
                 <span className={colors.text}>{analysesRemaining}</span>
               </div>
-              {formatRefreshDate() && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('trial.banner.details.refreshes')}</span>
-                  <span>{formatRefreshDate()}</span>
-                </div>
-              )}
             </div>
 
             <Button
