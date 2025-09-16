@@ -227,11 +227,33 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `https://talentspark.uz/auth?mode=reset`,
+      // First, try to generate a password reset link using Supabase
+      const { data, error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase reset error:', error);
+        // If Supabase email fails, send via our custom edge function
+        const response = await supabase.functions.invoke('send-password-reset-email', {
+          body: { 
+            email: resetEmail,
+            resetLink: null // We'll send a generic email since we don't have the reset link
+          }
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message || 'Failed to send reset email');
+        }
+      } else {
+        // Also send via our custom edge function for better deliverability
+        await supabase.functions.invoke('send-password-reset-email', {
+          body: { 
+            email: resetEmail,
+            resetLink: `${window.location.origin}/auth?mode=reset`
+          }
+        });
+      }
 
       setResetEmailSent(true);
       toast({
@@ -239,9 +261,10 @@ const Auth = () => {
         description: t('pages.auth.checkEmailForReset'),
       });
     } catch (error: any) {
+      console.error('Password reset error:', error);
       toast({
         title: t('pages.auth.passwordResetFailed'),
-        description: error.message,
+        description: error.message || 'Failed to send password reset email. Please check your email address and try again.',
         variant: "destructive",
       });
     } finally {
