@@ -752,7 +752,7 @@ export default function ResumeSearch() {
               <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
-              {analysesRemaining} {t('trial.analysesRemaining')}
+              {analysesRemaining} {t('trial.banner.analysesLeft')}
             </Badge>
           </div>
         </CardHeader>

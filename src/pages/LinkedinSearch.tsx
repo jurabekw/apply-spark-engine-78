@@ -285,16 +285,33 @@ const LinkedinSearch = () => {
       const normalizedCandidates = normalizeCandidates(webhookData);
       console.log('Normalized candidates:', normalizedCandidates);
 
-      // Record usage for this search
-      const usageRecorded = await recordUsage('linkedin_search', {
-        job_title: data.job_title,
-        candidate_count: normalizedCandidates.length,
-        timestamp: new Date().toISOString(),
-      });
+      // Set search results first to show data to user
+      setSearchResults(normalizedCandidates);
+      setLastSearch(data);
 
-      if (!usageRecorded) {
-        // If usage recording failed, stop the process
-        return;
+      // Record usage for this search (non-blocking for user experience)
+      try {
+        const usageRecorded = await recordUsage('linkedin_search', {
+          job_title: data.job_title,
+          candidate_count: normalizedCandidates.length,
+          timestamp: new Date().toISOString(),
+        });
+
+        if (!usageRecorded) {
+          console.warn('Credit deduction failed but search results are shown');
+          toast({
+            title: t('toasts.warning'),
+            description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
+            variant: 'default',
+          });
+        }
+      } catch (usageError) {
+        console.error('Error recording usage:', usageError);
+        toast({
+          title: t('toasts.warning'),
+          description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
+          variant: 'default',
+        });
       }
 
       // Store the search in the database
@@ -406,9 +423,6 @@ const LinkedinSearch = () => {
         window.dispatchEvent(new CustomEvent('candidatesUpdated'));
       }
 
-      setSearchResults(normalizedCandidates);
-      setLastSearch(data);
-
       toast({
         title: t('linkedinSearch.searchCompleted'),
         description: t('linkedinSearch.foundCandidates', { count: normalizedCandidates.length }),
@@ -452,7 +466,7 @@ const LinkedinSearch = () => {
                 <div className="flex justify-between items-center">
                   <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
                   <Badge variant="secondary" className="text-xs">
-                    {analysesRemaining} {t('trial.analysesRemaining')}
+                    {analysesRemaining} {t('trial.banner.analysesLeft')}
                   </Badge>
                 </div>
               </CardHeader>
