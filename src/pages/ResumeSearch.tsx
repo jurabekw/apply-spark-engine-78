@@ -527,26 +527,41 @@ export default function ResumeSearch() {
         allTitles: normalized.map(c => c.title)
       });
       console.debug("ABOUT TO SET CANDIDATES STATE:", normalized);
-      // Record usage for this search
-      const usageRecorded = await recordUsage('hh_search', {
-        job_title: values.jobTitle.trim(),
-        required_skills: values.requiredSkills.trim(),
-        experience_level: values.experienceLevel,
-        city: values.city,
-        candidate_count: normalized.length,
-        timestamp: new Date().toISOString(),
-      });
-
-      if (!usageRecorded) {
-        // If usage recording failed, stop the process
-        return;
-      }
-
+      // Set search results first to show data to user
       setCandidates(normalized);
       console.debug("STATE SET. Current candidates length should be:", normalized.length);
       if (normalized.length === 0) {
         setError(t('errors.noCandidatesFound'));
       }
+
+      // Record usage for this search (non-blocking for user experience)
+      try {
+        const usageRecorded = await recordUsage('hh_search', {
+          job_title: values.jobTitle.trim(),
+          required_skills: values.requiredSkills.trim(),
+          experience_level: values.experienceLevel,
+          city: values.city,
+          candidate_count: normalized.length,
+          timestamp: new Date().toISOString(),
+        });
+
+        if (!usageRecorded) {
+          console.warn('Credit deduction failed but search results are shown');
+          toast({
+            title: t('toasts.warning'),
+            description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
+            variant: 'default',
+          });
+        }
+      } catch (usageError) {
+        console.error('Error recording usage:', usageError);
+        toast({
+          title: t('toasts.warning'),
+          description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
+          variant: 'default',
+        });
+      }
+
       if (user?.id) {
         // Save search record
         const {

@@ -70,9 +70,45 @@ export const useTrialUsage = (): TrialUsageResult => {
         return;
       }
 
+      // If no trial found, create one
       if (!trial) {
-        // No trial found - this shouldn't happen if useTrialStatus is working
-        setError('Trial not found');
+        console.log('No trial found, creating one for user:', user.id);
+        const { error: insertError } = await supabase
+          .from('user_trials')
+          .insert({ user_id: user.id });
+        
+        if (insertError) {
+          console.error('Failed to create trial:', insertError);
+          setError('Failed to initialize trial');
+          return;
+        }
+        
+        // Retry fetching after creating
+        const { data: newTrial, error: retryError } = await supabase
+          .from('user_trials')
+          .select('analyses_used, analyses_limit, is_active, trial_ends_at')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (retryError || !newTrial) {
+          console.error('Failed to fetch created trial:', retryError);
+          setError('Failed to load trial information');
+          return;
+        }
+        
+        // Use the newly created trial
+        const analysesUsed = 0;
+        const analysesLimit = 20;
+        const analysesRemaining = analysesLimit;
+        const usagePercentage = 0;
+
+        setUsageData({
+          analysesUsed,
+          analysesLimit,
+          analysesRemaining,
+          usagePercentage,
+          canUseAnalysis: true,
+        });
         return;
       }
 
