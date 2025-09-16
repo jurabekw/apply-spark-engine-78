@@ -180,7 +180,7 @@ export const HeaderTrialBanner: React.FC = () => {
         <div className="absolute top-full right-0 mt-2 p-4 rounded-lg border shadow-lg z-50 min-w-64 bg-background border-border">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Credit Usage Details</h3>
+              <h3 className="text-sm font-medium">{t('trial.banner.details.title')}</h3>
               <button
                 onClick={() => setShowDetails(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -191,20 +191,20 @@ export const HeaderTrialBanner: React.FC = () => {
             
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Credits:</span>
+                <span className="text-muted-foreground">{t('trial.banner.details.totalCredits')}</span>
                 <span>{analysesLimit}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Used:</span>
+                <span className="text-muted-foreground">{t('trial.banner.details.used')}</span>
                 <span>{analysesUsed}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Remaining:</span>
+                <span className="text-muted-foreground">{t('trial.banner.details.remaining')}</span>
                 <span className={colors.text}>{analysesRemaining}</span>
               </div>
               {formatRefreshDate() && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Refreshes:</span>
+                  <span className="text-muted-foreground">{t('trial.banner.details.refreshes')}</span>
                   <span>{formatRefreshDate()}</span>
                 </div>
               )}

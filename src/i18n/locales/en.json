@@ -658,7 +658,14 @@
       "viewDetails": "View credit history",
       "buyCreditsButtom": "Buy Credits",
       "upgradeButton": "Upgrade Plan",
-      "loadError": "Failed to load credit information"
+      "loadError": "Failed to load credit information",
+      "details": {
+        "title": "Credit Usage Details",
+        "totalCredits": "Total Credits:",
+        "used": "Used:",
+        "remaining": "Remaining:",
+        "refreshes": "Refreshes:"
+      }
     },
     "expired": {
       "title": "Trial Expired",
