@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n/config';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -227,32 +228,16 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // First, try to generate a password reset link using Supabase
-      const { data, error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      // Send password reset email via our custom edge function with language support
+      const response = await supabase.functions.invoke('send-password-reset-email', {
+        body: { 
+          email: resetEmail,
+          language: i18n.language || 'en'
+        }
       });
 
-      if (error) {
-        console.error('Supabase reset error:', error);
-        // If Supabase email fails, send via our custom edge function
-        const response = await supabase.functions.invoke('send-password-reset-email', {
-          body: { 
-            email: resetEmail,
-            resetLink: null // We'll send a generic email since we don't have the reset link
-          }
-        });
-
-        if (response.error) {
-          throw new Error(response.error.message || 'Failed to send reset email');
-        }
-      } else {
-        // Also send via our custom edge function for better deliverability
-        await supabase.functions.invoke('send-password-reset-email', {
-          body: { 
-            email: resetEmail,
-            resetLink: `${window.location.origin}/auth?mode=reset`
-          }
-        });
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to send reset email');
       }
 
       setResetEmailSent(true);
