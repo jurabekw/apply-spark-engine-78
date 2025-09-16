@@ -388,7 +388,7 @@ const Auth = () => {
                         </div>
                         <h3 className="text-xl font-semibold">{t('auth.checkYourEmail')}</h3>
                         <p className="text-muted-foreground">
-                          {t('auth.resetLinkSent', { email: resetEmail })}
+                          {t('auth.resetLinkSent').replace('{email}', resetEmail)}
                         </p>
                         <Button 
                           variant="outline" 
