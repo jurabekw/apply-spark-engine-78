@@ -13,7 +13,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserDropdown } from './UserDropdown';
 import { SettingsSheet } from './SettingsSheet';
-import { TrialStatusBanner } from './TrialStatusBanner';
+import { HeaderTrialBanner } from './HeaderTrialBanner';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -120,6 +120,9 @@ const Header = () => {
               <Search className="w-4 h-4" />
             </Button>
             
+            {/* Trial Status Banner */}
+            <HeaderTrialBanner />
+            
             {/* Notifications */}
             <NotificationsDropdown />
             
@@ -152,8 +155,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Trial Status Banner */}
-      <TrialStatusBanner />
 
       {/* Settings Sheet */}
       <SettingsSheet 

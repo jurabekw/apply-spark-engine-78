@@ -645,18 +645,18 @@
       "message": "Free trial active -",
       "remaining": "remaining",
       "urgent": "⚠ Trial ending soon!",
-      "analysesLeft": "analyses left",
-      "usage": "Analyses used",
+      "creditsLeft": "credits left",
+      "usage": "Credits used",
       "timeExpired": "Trial time has expired",
-      "usageExpired": "Analysis limit reached",
+      "usageExpired": "Credit limit reached",
       "timeRunningOut": "Less than 24 hours remaining",
-      "usageRunningOut": "Approaching analysis limit"
+      "usageRunningOut": "Approaching credit limit"
     },
     "expired": {
       "title": "Trial Expired",
       "message": "Your free trial has ended. Contact our team to continue using our services.",
       "timeMessage": "Your 3-day trial period has ended. Contact our team to continue using our services.",
-      "usageMessage": "You've reached your 20 analysis limit. Contact our team to continue using our services.",
+      "usageMessage": "You've reached your 20 credit limit. Contact our team to continue using our services.",
       "contact": {
         "title": "Contact Us",
         "description": "Get in touch to upgrade your account and unlock unlimited features.",
@@ -676,8 +676,8 @@
     },
     "warnings": {
       "approaching": "Trial Limit Approaching",
-      "fiveLeft": "You have 5 analyses remaining in your trial",
-      "lastAnalysis": "Last Analysis",
+      "fiveLeft": "You have 5 credits remaining in your trial",
+      "lastCredit": "Last Credit",
       "lastAnalysisDesc": "This is your final analysis in the trial period"
     }
   },
