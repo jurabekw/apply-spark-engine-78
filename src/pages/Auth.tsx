@@ -64,7 +64,7 @@ const Auth = () => {
     const mode = searchParams.get('mode');
     
     // Don't redirect to dashboard if we're in password reset mode
-    if (user && mode !== 'reset') {
+    if (user && mode !== 'reset' && mode !== 'password-reset') {
       navigate('/dashboard');
       return;
     }
@@ -91,8 +91,8 @@ const Auth = () => {
       navigate('/auth', { replace: true });
     }
 
-    // Check for password reset mode (using existing mode variable)
-    if (mode === 'reset') {
+    // Check for password reset mode (supports legacy 'reset' and 'password-reset')
+    if (mode === 'reset' || mode === 'password-reset') {
       setResetMode(true);
       setActiveTab('signin');
     }
@@ -227,17 +227,20 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    const redirectTo = 'https://talentspark.uz/auth?mode=password-reset';
+
     try {
-      // Send password reset email via our custom edge function with language support
+      // Try sending via Edge Function (Resend) first for localized emails
       const response = await supabase.functions.invoke('send-password-reset-email', {
-        body: { 
+        body: {
           email: resetEmail,
-          language: i18n.language || 'en'
-        }
+          language: i18n.language || 'en',
+        },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to send reset email');
+      // If the Edge Function returned an error or success=false, trigger fallback
+      if (response.error || (response.data && response.data.success === false)) {
+        throw new Error(response.error?.message || (response.data as any)?.error || 'Edge function failed');
       }
 
       setResetEmailSent(true);
@@ -246,12 +249,26 @@ const Auth = () => {
         description: t('pages.auth.checkEmailForReset'),
       });
     } catch (error: any) {
-      console.error('Password reset error:', error);
-      toast({
-        title: t('pages.auth.passwordResetFailed'),
-        description: error.message || 'Failed to send password reset email. Please check your email address and try again.',
-        variant: "destructive",
+      console.error('Edge function failed, falling back to Supabase resetPasswordForEmail:', error);
+
+      // Fallback: use Supabase native email (does not depend on Resend domain verification)
+      const { error: fallbackError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo,
       });
+
+      if (fallbackError) {
+        toast({
+          title: t('pages.auth.passwordResetFailed'),
+          description: fallbackError.message,
+          variant: 'destructive',
+        });
+      } else {
+        setResetEmailSent(true);
+        toast({
+          title: t('pages.auth.passwordResetEmailSent'),
+          description: t('pages.auth.checkEmailForReset'),
+        });
+      }
     } finally {
       setLoading(false);
     }

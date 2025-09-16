@@ -135,21 +135,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     const template = templates[language as keyof typeof templates] || templates.en;
 
-    const emailResponse = await resend.emails.send({
+    const { data: sendData, error: sendError } = await resend.emails.send({
       from: "TalentSpark <onboarding@resend.dev>",
       to: [email],
       subject: template.subject,
       html: template.html,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    if (sendError) {
+      console.error("Resend error sending reset email:", sendError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: sendError.error ?? "Email delivery failed",
+          details: sendError,
+        }),
+        { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Email sent successfully:", sendData);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Password reset email sent successfully",
-        emailId: emailResponse.data?.id 
-      }), 
+        emailId: sendData?.id,
+      }),
       {
         status: 200,
         headers: {
