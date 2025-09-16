@@ -13,6 +13,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserDropdown } from './UserDropdown';
 import { SettingsSheet } from './SettingsSheet';
+import { TrialStatusBanner } from './TrialStatusBanner';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -150,6 +151,9 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Trial Status Banner */}
+      <TrialStatusBanner />
 
       {/* Settings Sheet */}
       <SettingsSheet 

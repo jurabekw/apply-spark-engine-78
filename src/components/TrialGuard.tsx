@@ -48,7 +48,17 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
   blockOnExpired = true 
 }) => {
   const { t } = useTranslation();
-  const { loading, hasActiveTrial, isExpired, timeRemaining, hoursRemaining, error } = useTrialStatus();
+  const { 
+    loading, 
+    hasActiveTrial, 
+    isExpired, 
+    timeRemaining, 
+    hoursRemaining, 
+    analysesRemaining,
+    isTimeExpired,
+    isUsageExpired,
+    error 
+  } = useTrialStatus();
 
   // Show loading state
   if (loading) {
@@ -97,7 +107,12 @@ export const TrialGuard: React.FC<TrialGuardProps> = ({
               {t('trial.expired.title')}
             </DialogTitle>
             <DialogDescription>
-              {t('trial.expired.message')}
+              {isTimeExpired 
+                ? t('trial.expired.timeMessage') 
+                : isUsageExpired 
+                ? t('trial.expired.usageMessage')
+                : t('trial.expired.message')
+              }
             </DialogDescription>
           </DialogHeader>
           

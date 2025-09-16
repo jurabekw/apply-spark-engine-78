@@ -8,6 +8,8 @@ interface TrialData {
   trial_started_at: string;
   trial_ends_at: string;
   is_active: boolean;
+  analyses_used: number;
+  analyses_limit: number;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +22,12 @@ interface TrialStatus {
   daysRemaining: number;
   timeRemaining: string;
   trialEndsAt: Date | null;
+  analysesUsed: number;
+  analysesLimit: number;
+  analysesRemaining: number;
+  usagePercentage: number;
+  isUsageExpired: boolean;
+  isTimeExpired: boolean;
   error: string | null;
 }
 
@@ -149,7 +157,13 @@ export const useTrialStatus = (): TrialStatus => {
 
   // Calculate current trial status
   const timeCalculation = calculateTimeRemaining();
-  const isExpired = timeCalculation.expired || !trialData?.is_active;
+  const isTimeExpired = timeCalculation.expired;
+  const analysesUsed = trialData?.analyses_used || 0;
+  const analysesLimit = trialData?.analyses_limit || 20;
+  const analysesRemaining = Math.max(0, analysesLimit - analysesUsed);
+  const usagePercentage = Math.round((analysesUsed / analysesLimit) * 100);
+  const isUsageExpired = analysesUsed >= analysesLimit;
+  const isExpired = isTimeExpired || isUsageExpired || !trialData?.is_active;
   const hasActiveTrial = !isExpired && trialData !== null;
 
   return {
@@ -160,6 +174,12 @@ export const useTrialStatus = (): TrialStatus => {
     daysRemaining: timeCalculation.days,
     timeRemaining: timeCalculation.timeString,
     trialEndsAt: trialData ? new Date(trialData.trial_ends_at) : null,
+    analysesUsed,
+    analysesLimit,
+    analysesRemaining,
+    usagePercentage,
+    isUsageExpired,
+    isTimeExpired,
     error
   };
 };
