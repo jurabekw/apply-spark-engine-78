@@ -492,7 +492,12 @@ export type Database = {
     Functions: {
       increment_trial_usage: {
         Args: { p_metadata?: Json; p_module_type: string; p_user_id: string }
-        Returns: Json
+        Returns: {
+          analyses_remaining: number
+          analyses_used: number
+          message: string
+          success: boolean
+        }[]
       }
       refresh_analytics_views: {
         Args: Record<PropertyKey, never>
