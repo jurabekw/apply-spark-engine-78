@@ -722,6 +722,13 @@
     "timeLeft": {
       "daysLeft": "{{count}} дн. осталось",
       "hoursLeft": "{{count}} ч. осталось"
+    },
+    "avatar": {
+      "alt": "Пользователь"
+    },
+    "upgrade": {
+      "upgradeNow": "Обновить сейчас",
+      "upgradePlan": "Обновить план"
     }
   },
   "toasts": {

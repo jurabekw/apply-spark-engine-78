@@ -89,7 +89,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.avatar_url || ''} alt="User" />
+            <AvatarImage src={profile?.avatar_url || ''} alt={t('userDropdown.avatar.alt', 'User')} />
             <AvatarFallback className="text-xs">
               {user?.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
@@ -101,7 +101,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
         <DropdownMenuLabel className="font-normal p-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 ring-2 ring-border">
-              <AvatarImage src={profile?.avatar_url || ''} alt="User" />
+              <AvatarImage src={profile?.avatar_url || ''} alt={t('userDropdown.avatar.alt', 'User')} />
               <AvatarFallback className="text-sm font-medium">
                 {user?.email ? getInitials(user.email) : 'U'}
               </AvatarFallback>
@@ -159,7 +159,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
                 className="w-full text-xs font-medium h-8 border-primary/20 text-primary hover:bg-primary/5"
                 onClick={() => window.open('https://t.me/shakhnoz_burkhan', '_blank')}
               >
-                {t('trial.upgradeButton', getTrialUrgency() === 'critical' ? 'Upgrade Now' : 'Upgrade Plan')}
+                {getTrialUrgency() === 'critical' ? t('userDropdown.upgrade.upgradeNow', 'Upgrade Now') : t('userDropdown.upgrade.upgradePlan', 'Upgrade Plan')}
               </Button>
             </div>
           </>

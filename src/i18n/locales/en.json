@@ -703,6 +703,13 @@
     "timeLeft": {
       "daysLeft": "{{count}} days left",
       "hoursLeft": "{{count}} hours left"
+    },
+    "avatar": {
+      "alt": "User"
+    },
+    "upgrade": {
+      "upgradeNow": "Upgrade Now",
+      "upgradePlan": "Upgrade Plan"
     }
   },
   "toasts": {
