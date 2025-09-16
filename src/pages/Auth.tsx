@@ -230,6 +230,20 @@ const Auth = () => {
     const redirectTo = 'https://talentspark.uz/auth?mode=password-reset';
 
     try {
+      // Local cooldown to avoid Supabase 60s rate limit
+      const key = `ts_reset_ts_${resetEmail}`;
+      const last = parseInt(localStorage.getItem(key) || '0', 10);
+      const now = Date.now();
+      const elapsed = Math.floor((now - last) / 1000);
+      if (last && elapsed < 60) {
+        setResetEmailSent(true);
+        toast({
+          title: t('pages.auth.passwordResetEmailSent'),
+          description: t('pages.auth.checkEmailForReset'),
+        });
+        return;
+      }
+
       // Try sending via Edge Function (Resend) first for localized emails
       const response = await supabase.functions.invoke('send-password-reset-email', {
         body: {
@@ -239,10 +253,11 @@ const Auth = () => {
       });
 
       // If the Edge Function returned an error or success=false, trigger fallback
-      if (response.error || (response.data && response.data.success === false)) {
+      if (response.error || (response.data && (response.data as any).success === false)) {
         throw new Error(response.error?.message || (response.data as any)?.error || 'Edge function failed');
       }
 
+      localStorage.setItem(key, String(now));
       setResetEmailSent(true);
       toast({
         title: t('pages.auth.passwordResetEmailSent'),
@@ -257,12 +272,25 @@ const Auth = () => {
       });
 
       if (fallbackError) {
-        toast({
-          title: t('pages.auth.passwordResetFailed'),
-          description: fallbackError.message,
-          variant: 'destructive',
-        });
+        const msg = fallbackError.message?.toLowerCase?.() || '';
+        const isRateLimited = msg.includes('for security purposes') || msg.includes('request this after') || msg.includes('rate limit');
+        if (isRateLimited) {
+          // Treat rate-limit as success because an email was already sent recently
+          localStorage.setItem(`ts_reset_ts_${resetEmail}`, String(Date.now()));
+          setResetEmailSent(true);
+          toast({
+            title: t('pages.auth.passwordResetEmailSent'),
+            description: t('pages.auth.checkEmailForReset'),
+          });
+        } else {
+          toast({
+            title: t('pages.auth.passwordResetFailed'),
+            description: fallbackError.message,
+            variant: 'destructive',
+          });
+        }
       } else {
+        localStorage.setItem(`ts_reset_ts_${resetEmail}`, String(Date.now()));
         setResetEmailSent(true);
         toast({
           title: t('pages.auth.passwordResetEmailSent'),
