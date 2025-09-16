@@ -18,7 +18,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'signin');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isRecoverySession } = useAuth();
   const { t } = useTranslation();
 
   // Login form state
@@ -62,9 +62,10 @@ const Auth = () => {
   useEffect(() => {
     // Check for password reset mode first
     const mode = searchParams.get('mode');
+    const urlType = searchParams.get('type');
     
-    // Don't redirect to dashboard if we're in password reset mode
-    if (user && mode !== 'reset' && mode !== 'password-reset') {
+    // Don't redirect to dashboard if we're in password reset mode or recovery session
+    if (user && mode !== 'reset' && mode !== 'password-reset' && urlType !== 'recovery' && !isRecoverySession) {
       navigate('/dashboard');
       return;
     }
@@ -92,7 +93,8 @@ const Auth = () => {
     }
 
     // Check for password reset mode (supports legacy 'reset' and 'password-reset')
-    if (mode === 'reset' || mode === 'password-reset') {
+    const recoveryType = searchParams.get('type');
+    if (mode === 'reset' || mode === 'password-reset' || recoveryType === 'recovery' || isRecoverySession) {
       setResetMode(true);
       setActiveTab('signin');
     }
@@ -101,7 +103,7 @@ const Auth = () => {
     if (tab && (tab === 'signin' || tab === 'signup')) {
       setActiveTab(tab);
     }
-  }, [searchParams, user, navigate, toast]);
+  }, [searchParams, user, navigate, toast, isRecoverySession]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,11 +317,13 @@ const Auth = () => {
         description: t('pages.auth.passwordResetComplete'),
       });
 
-      // Reset state and redirect to sign in
+      // Reset state and redirect to dashboard after successful password reset
       setResetMode(false);
       setNewPassword('');
       setConfirmPassword('');
-      navigate('/auth?tab=signin', { replace: true });
+      
+      // Force redirect to dashboard after password reset completion
+      window.location.href = '/dashboard';
     } catch (error: any) {
       toast({
         title: t('pages.auth.passwordResetFailed'),

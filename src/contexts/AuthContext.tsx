@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isRecoverySession: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRecoverySession, setIsRecoverySession] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener
@@ -31,17 +33,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
         
-        if (event === 'SIGNED_IN' && session) {
+        // Check if this is a recovery session
+        const isRecovery = event === 'PASSWORD_RECOVERY' || 
+          (session?.user?.app_metadata?.provider === 'recovery') ||
+          window.location.search.includes('type=recovery');
+        
+        setIsRecoverySession(isRecovery);
+        
+        if (event === 'PASSWORD_RECOVERY' && session) {
           setSession(session);
           setUser(session.user);
           setLoading(false);
           
-          // Check if this is a password recovery session
+          // Redirect to password reset form
+          window.location.href = '/auth?mode=password-reset';
+        } else if (event === 'SIGNED_IN' && session) {
+          setSession(session);
+          setUser(session.user);
+          setLoading(false);
+          
+          // Check if this is a password recovery session or reset mode
           const urlParams = new URLSearchParams(window.location.search);
           const mode = urlParams.get('mode');
           
-          // Don't redirect to dashboard if we're in password reset mode
-          if (mode !== 'reset') {
+          // Don't redirect to dashboard if we're in password reset mode or recovery session
+          if (mode !== 'reset' && mode !== 'password-reset' && !isRecovery) {
             // Redirect to dashboard after successful sign-in
             setTimeout(() => {
               if (window.location.pathname === '/auth' || window.location.pathname === '/') {
@@ -52,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
+          setIsRecoverySession(false);
           setLoading(false);
         } else if (event === 'TOKEN_REFRESHED') {
           setSession(session);
@@ -100,6 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
+    isRecoverySession,
     signOut,
   };
 
