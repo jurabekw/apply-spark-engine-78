@@ -420,9 +420,11 @@ const LinkedinSearch = () => {
         window.dispatchEvent(new CustomEvent('candidatesUpdated'));
       }
 
+      const foundMessage = t('linkedinSearch.foundCandidates', { count: normalizedCandidates.length });
+      
       toast({
         title: t('linkedinSearch.searchCompleted'),
-        description: t('linkedinSearch.foundCandidates', { count: normalizedCandidates.length }),
+        description: foundMessage,
       });
 
       // Trigger refresh of search history
