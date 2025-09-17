@@ -7,13 +7,12 @@ import { Settings, User, Bell, LogOut, Search, Clock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTrialStatus } from '@/hooks/useTrialStatus';
 import Logo from './Logo';
 import LanguageSwitcher from './LanguageSwitcher';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserDropdown } from './UserDropdown';
 import { SettingsSheet } from './SettingsSheet';
-import { HeaderTrialBanner } from './HeaderTrialBanner';
+import { CreditDisplay } from './CreditDisplay';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -22,36 +21,6 @@ const Header = () => {
   const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { hasActiveTrial, timeRemaining, hoursRemaining } = useTrialStatus();
-  
-  // Determine trial urgency level for color coding
-  const getTrialUrgency = (): 'low' | 'medium' | 'high' => {
-    if (hoursRemaining > 48) return 'low';    // Green: More than 2 days
-    if (hoursRemaining > 24) return 'medium'; // Yellow: 1-2 days
-    return 'high';                            // Red: Less than 1 day
-  };
-
-  const urgency = getTrialUrgency();
-
-  // Format time remaining with proper Russian localization
-  const formatTimeRemaining = (timeString: string): string => {
-    if (i18n.language === 'ru') {
-      return timeString
-        .replace(/(\d+)\s+day(s)?/g, (match, num) => {
-          const n = parseInt(num);
-          if (n === 1) return `${n} день`;
-          if (n >= 2 && n <= 4) return `${n} дня`;
-          return `${n} дней`;
-        })
-        .replace(/(\d+)\s+hour(s)?/g, (match, num) => {
-          const n = parseInt(num);
-          if (n === 1 || (n % 10 === 1 && n % 100 !== 11)) return `${n} час`;
-          if ((n >= 2 && n <= 4) || (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20))) return `${n} часа`;
-          return `${n} часов`;
-        });
-    }
-    return timeString;
-  };
   
   const handleSignOut = async () => {
     await signOut();
@@ -120,8 +89,8 @@ const Header = () => {
               <Search className="w-4 h-4" />
             </Button>
             
-            {/* Trial Status Banner */}
-            <HeaderTrialBanner />
+            {/* Credit Display */}
+            <CreditDisplay className="mr-2" />
             
             {/* Notifications */}
             <NotificationsDropdown />

@@ -78,6 +78,8 @@ export const CreditProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
+      console.log('Deducting credits:', { amount, moduleName, description, userId: user.id });
+      
       const { data, error } = await supabase.rpc('deduct_credits', {
         p_user_id: user.id,
         p_amount: amount,
@@ -88,8 +90,18 @@ export const CreditProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
 
       const result = data as any;
+      console.log('Credit deduction result:', result);
+      
       if (result?.success) {
+        console.log('Setting balance to:', result.balance);
         setBalance(result.balance);
+        
+        // Force refresh balance to ensure sync
+        setTimeout(() => {
+          console.log('Force refreshing balance after deduction');
+          refreshBalance();
+        }, 500);
+        
         toast.success(`${amount} credit${amount > 1 ? 's' : ''} deducted successfully`);
         return true;
       } else {
