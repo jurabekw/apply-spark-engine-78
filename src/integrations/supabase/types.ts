@@ -146,6 +146,39 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          module_name: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module_name?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module_name?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       hh_searches: {
         Row: {
           candidate_count: number
@@ -263,6 +296,30 @@ export type Database = {
         }
         Relationships: []
       }
+      modules: {
+        Row: {
+          created_at: string | null
+          credit_cost: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          credit_cost?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          credit_cost?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -353,6 +410,30 @@ export type Database = {
           module_type?: string
           trial_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -493,6 +574,23 @@ export type Database = {
       }
     }
     Functions: {
+      add_credits: {
+        Args: { p_amount: number; p_description?: string; p_user_id: string }
+        Returns: Json
+      }
+      deduct_credits: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_module_name: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      get_user_credits: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       increment_trial_usage: {
         Args:
           | {

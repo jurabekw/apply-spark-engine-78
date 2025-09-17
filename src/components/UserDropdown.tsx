@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Settings, LogOut, Building, Mail, Clock, Zap, AlertTriangle } from 'lucide-react';
+import { User, Settings, LogOut, Building, Mail, Clock, Coins, AlertTriangle, Sparkles } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +11,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useTrialStatus } from '@/hooks/useTrialStatus';
+import { useCredits } from '@/contexts/CreditContext';
+import { CreditDisplay } from '@/components/CreditDisplay';
 import { useTranslation } from 'react-i18next';
 
 interface UserDropdownProps {
@@ -25,7 +25,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
-  const { hasActiveTrial, isExpired, hoursRemaining, daysRemaining, timeRemaining, trialEndsAt } = useTrialStatus();
+  const { balance } = useCredits();
 
   const getInitials = (email: string) => {
     return email.split('@')[0].slice(0, 2).toUpperCase();
@@ -41,47 +41,25 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
     return 'User';
   };
 
-  // Trial urgency levels
-  const getTrialUrgency = () => {
-    if (isExpired) return 'expired';
-    if (hoursRemaining <= 6) return 'critical';
-    if (hoursRemaining <= 24) return 'warning';
-    if (daysRemaining <= 1) return 'medium';
+  // Credit status helpers
+  const getCreditUrgency = (): 'low' | 'medium' | 'high' => {
+    if (balance === 0) return 'high';
+    if (balance <= 5) return 'medium';
     return 'low';
   };
 
-  const getCircularProgress = () => {
-    if (isExpired) return 0;
-    const totalHours = 72; // 3 days
-    return Math.max(0, Math.min(100, (hoursRemaining / totalHours) * 100));
+  const getCreditIcon = () => {
+    const urgency = getCreditUrgency();
+    if (urgency === 'high') return <AlertTriangle className="w-3 h-3" />;
+    if (urgency === 'medium') return <Clock className="w-3 h-3" />;
+    return <Coins className="w-3 h-3" />;
   };
 
-  const getCircularProgressColor = () => {
-    const progress = getCircularProgress();
-    if (progress > 66) return 'text-emerald-500'; // 3 days - green
-    if (progress > 33) return 'text-yellow-500'; // 2 days - yellow
-    return 'text-orange-500'; // 1 day - orange
-  };
-
-  const getTrialProgressPercent = () => {
-    if (isExpired) return 0;
-    const totalHours = 72; // 3 days
-    return Math.max(0, Math.min(100, (hoursRemaining / totalHours) * 100));
-  };
-
-  const getTrialIcon = () => {
-    const urgency = getTrialUrgency();
-    if (urgency === 'expired' || urgency === 'critical') return AlertTriangle;
-    if (urgency === 'warning') return Clock;
-    return Zap;
-  };
-
-  const getTrialVariant = () => {
-    const urgency = getTrialUrgency();
-    if (urgency === 'expired') return 'destructive';
-    if (urgency === 'critical') return 'destructive';
-    if (urgency === 'warning') return 'warning';
-    return 'brand';
+  const getCreditVariant = (): "default" | "secondary" | "destructive" | "outline" => {
+    const urgency = getCreditUrgency();
+    if (urgency === 'high') return 'destructive';
+    if (urgency === 'medium') return 'outline';
+    return 'secondary';
   };
 
   return (
@@ -130,40 +108,43 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
           </div>
         </DropdownMenuLabel>
         
-        {/* Simplified Trial Status Section */}
-        {hasActiveTrial && (
-          <>
-            <DropdownMenuSeparator className="my-1" />
-            <div className="px-4 py-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    getTrialUrgency() === 'critical' ? 'bg-destructive' : 
-                    getTrialUrgency() === 'warning' ? 'bg-yellow-500' : 'bg-primary'
-                  }`} />
-                  <span className="text-sm text-foreground">
-                    {t('trial.title', 'Free Trial')}
-                  </span>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">
-                    {isExpired ? t('trial.expired', 'Expired') : 
-                     daysRemaining > 0 ? t('userDropdown.timeLeft.daysLeft', '{{count}} days left', { count: daysRemaining }) : 
-                     t('userDropdown.timeLeft.hoursLeft', '{{count}} hours left', { count: hoursRemaining })}
-                  </span>
-                </div>
-              </div>
-              
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="w-full text-xs font-medium h-8 border-primary/20 text-primary hover:bg-primary/5"
-                onClick={() => window.open('https://t.me/shakhnoz_burkhan', '_blank')}
-              >
-                {getTrialUrgency() === 'critical' ? t('userDropdown.upgrade.upgradeNow', 'Upgrade Now') : t('userDropdown.upgrade.upgradePlan', 'Upgrade Plan')}
-              </Button>
-            </div>
-          </>
-        )}
+        <DropdownMenuSeparator />
+        
+        {/* Credit Status Section */}
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-muted-foreground">Credits</span>
+            <CreditDisplay />
+          </div>
+          
+          <div className="space-y-1">
+            {balance === 0 && (
+              <Badge variant="destructive" className="w-full justify-center text-xs py-1">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                No Credits Left
+              </Badge>
+            )}
+            
+            {balance > 0 && balance <= 5 && (
+              <Badge variant="outline" className="w-full justify-center text-xs py-1">
+                <Clock className="w-3 h-3 mr-1" />
+                Low Credits
+              </Badge>
+            )}
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-xs py-1 h-6"
+              onClick={() => {
+                window.open('https://t.me/talentspark_support', '_blank');
+              }}
+            >
+              <Sparkles className="w-3 h-3 mr-1" />
+              Get More Credits
+            </Button>
+          </div>
+        </div>
         
         <DropdownMenuSeparator />
         
