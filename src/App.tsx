@@ -25,23 +25,23 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <AuthProvider>
-            <CreditProvider>
-              <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/dashboard" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/confirm" element={<EmailConfirmation />} />
-                <Route path="/resume-search" element={<ResumeSearch />} />
-                <Route path="/linkedin-search" element={<LinkedinSearch />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <CreditDebugPanel />
-              </BrowserRouter>
-            </CreditProvider>
-          </AuthProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <CreditProvider>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/dashboard" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/confirm" element={<EmailConfirmation />} />
+                  <Route path="/resume-search" element={<ResumeSearch />} />
+                  <Route path="/linkedin-search" element={<LinkedinSearch />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <CreditDebugPanel />
+              </CreditProvider>
+            </AuthProvider>
+          </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
