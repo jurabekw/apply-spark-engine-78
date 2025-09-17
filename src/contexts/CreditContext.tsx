@@ -102,7 +102,6 @@ export const CreditProvider = ({ children }: { children: ReactNode }) => {
           refreshBalance();
         }, 500);
         
-        toast.success(`${amount} credit${amount > 1 ? 's' : ''} deducted successfully`);
         return true;
       } else {
         toast.error(result?.error || 'Failed to deduct credits');
