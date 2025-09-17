@@ -1,7 +1,8 @@
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
@@ -24,12 +25,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastEventRef = useRef<string>('');
+
+  // Debounced navigation to prevent multiple redirects
+  const debouncedNavigate = useCallback((path: string) => {
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+    }
+    navigationTimeoutRef.current = setTimeout(() => {
+      if (location.pathname !== path) {
+        navigate(path, { replace: true });
+      }
+    }, 100);
+  }, [navigate, location.pathname]);
 
   useEffect(() => {
+    // Handle tab visibility changes to prevent unnecessary auth state re-evaluations
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab became inactive - clear any pending navigation timeouts
+        if (navigationTimeoutRef.current) {
+          clearTimeout(navigationTimeoutRef.current);
+          navigationTimeoutRef.current = null;
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
+        
+        // Prevent duplicate processing of the same event
+        const eventKey = `${event}-${session?.user?.id || 'null'}`;
+        if (lastEventRef.current === eventKey && event !== 'TOKEN_REFRESHED') {
+          return;
+        }
+        lastEventRef.current = eventKey;
         
         if (event === 'SIGNED_IN' && session) {
           setSession(session);
@@ -40,14 +77,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const urlParams = new URLSearchParams(window.location.search);
           const mode = urlParams.get('mode');
           
-          // Don't redirect to dashboard if we're in password reset mode
-          if (mode !== 'reset') {
-            // Redirect to dashboard after successful sign-in
-            setTimeout(() => {
-              if (window.location.pathname === '/auth' || window.location.pathname === '/') {
-                window.location.href = '/dashboard';
-              }
-            }, 100);
+          // Only redirect on actual sign-in events, not session restoration
+          if (mode !== 'reset' && !document.hidden) {
+            if (location.pathname === '/auth' || location.pathname === '/') {
+              debouncedNavigate('/dashboard');
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
@@ -72,8 +106,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, [debouncedNavigate, location.pathname]);
 
   const signOut = async () => {
     try {
@@ -87,12 +127,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Attempt global sign out
       await supabase.auth.signOut({ scope: 'global' });
       
-      // Force page reload for clean state
-      window.location.href = '/auth';
+      // Navigate to auth page instead of hard reload
+      navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Sign out error:', error);
-      // Force reload even if sign out fails
-      window.location.href = '/auth';
+      // Navigate to auth page even if sign out fails
+      navigate('/auth', { replace: true });
     }
   };
 
