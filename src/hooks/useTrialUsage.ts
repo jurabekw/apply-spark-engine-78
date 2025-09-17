@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { generateIdempotencyKey } from '@/utils/fileUtils';
+import { logCreditOperation, withCreditMonitoring } from '@/utils/creditMonitoring';
 
 interface TrialUsageData {
   analysesUsed: number;
@@ -143,6 +145,12 @@ export const useTrialUsage = (): TrialUsageResult => {
   // Record usage for an analysis
   const recordUsage = useCallback(async (moduleType: string, metadata: any = {}): Promise<boolean> => {
     if (!user) {
+      logCreditOperation({
+        userId: 'anonymous',
+        moduleType,
+        action: 'failure',
+        error: 'User not authenticated'
+      });
       toast({
         title: t('trial.errors.notAuthenticated'),
         description: t('trial.errors.pleaseSignIn'),
@@ -151,21 +159,41 @@ export const useTrialUsage = (): TrialUsageResult => {
       return false;
     }
 
+    // Generate idempotency key for this operation
+    const idempotencyKey = generateIdempotencyKey(user.id, moduleType);
+    
     // Helper to call RPC and normalize response shape
     const callIncrement = async () => {
-      const { data, error } = await supabase.rpc('increment_trial_usage', {
-        p_user_id: user.id,
-        p_module_type: moduleType,
-        p_metadata: metadata
-      });
-      if (error) return { ok: false as const, message: error.message };
-      const row = Array.isArray(data) ? data?.[0] : data;
-      return { ok: Boolean(row?.success), message: String(row?.message || ''), analyses_used: row?.analyses_used, analyses_remaining: row?.analyses_remaining };
+      return withCreditMonitoring(
+        async () => {
+          const { data, error } = await supabase.rpc('increment_trial_usage', {
+            p_user_id: user.id,
+            p_module_type: moduleType,
+            p_metadata: metadata,
+            p_idempotency_key: idempotencyKey
+          });
+          if (error) return { ok: false as const, message: error.message };
+          const row = Array.isArray(data) ? data?.[0] : data;
+          return { ok: Boolean(row?.success), message: String(row?.message || ''), analyses_used: row?.analyses_used, analyses_remaining: row?.analyses_remaining };
+        },
+        {
+          userId: user.id,
+          moduleType,
+          idempotencyKey,
+          details: { metadata }
+        }
+      );
     };
 
     try {
       // First check if user can still use analyses
       if (!usageData.canUseAnalysis) {
+        logCreditOperation({
+          userId: user.id,
+          moduleType,
+          action: 'failure',
+          error: 'Analysis limit reached'
+        });
         toast({
           title: t('trial.errors.limitReached'),
           description: t('trial.errors.limitReachedDesc'),
@@ -200,6 +228,13 @@ export const useTrialUsage = (): TrialUsageResult => {
       }
 
       if (!result.ok) {
+        logCreditOperation({
+          userId: user.id,
+          moduleType,
+          action: 'failure',
+          error: result.message,
+          idempotencyKey
+        });
         console.error('Error recording usage (handled):', result.message);
         if (/expired|limit/i.test(result.message || '')) {
           toast({
@@ -219,6 +254,14 @@ export const useTrialUsage = (): TrialUsageResult => {
         return false;
       }
 
+      logCreditOperation({
+        userId: user.id,
+        moduleType,
+        action: 'success',
+        idempotencyKey,
+        details: { analyses_used: result.analyses_used, analyses_remaining: result.analyses_remaining }
+      });
+
       // Refresh usage data after successful recording
       await fetchUsageData();
       // Notify other parts of the app (e.g., headers using useTrialStatus)
@@ -232,12 +275,24 @@ export const useTrialUsage = (): TrialUsageResult => {
         : (usageData.analysesLimit - (usageData.analysesUsed + 1));
 
       if (remaining === 5) {
+        logCreditOperation({
+          userId: user.id,
+          moduleType,
+          action: 'warning',
+          details: { remaining, message: 'Approaching limit' }
+        });
         toast({
           title: t('trial.warnings.approaching'),
           description: t('trial.warnings.fiveLeft'),
           variant: 'default',
         });
       } else if (remaining === 1) {
+        logCreditOperation({
+          userId: user.id,
+          moduleType,
+          action: 'warning',
+          details: { remaining, message: 'Last analysis' }
+        });
         toast({
           title: t('trial.warnings.lastAnalysis'),
           description: t('trial.warnings.lastAnalysisDesc'),
@@ -248,6 +303,12 @@ export const useTrialUsage = (): TrialUsageResult => {
       return true;
 
     } catch (err) {
+      logCreditOperation({
+        userId: user.id,
+        moduleType,
+        action: 'failure',
+        error: err instanceof Error ? err.message : String(err)
+      });
       console.error('Unexpected error in recordUsage:', err);
       toast({
         title: t('trial.errors.unexpected'),

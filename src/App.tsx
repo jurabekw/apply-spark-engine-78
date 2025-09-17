@@ -13,6 +13,7 @@ import EmailConfirmation from "./pages/EmailConfirmation";
 import NotFound from "./pages/NotFound";
 import ResumeSearch from "./pages/ResumeSearch";
 import LinkedinSearch from "./pages/LinkedinSearch";
+import { CreditDebugPanel } from "@/components/CreditDebugPanel";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            <CreditDebugPanel />
           </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>

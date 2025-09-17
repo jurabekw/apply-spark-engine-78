@@ -328,6 +328,7 @@ export type Database = {
           action_type: string
           created_at: string
           id: string
+          idempotency_key: string | null
           metadata: Json | null
           module_type: string
           trial_id: string
@@ -337,6 +338,7 @@ export type Database = {
           action_type?: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
           module_type: string
           trial_id: string
@@ -346,6 +348,7 @@ export type Database = {
           action_type?: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
           module_type?: string
           trial_id?: string
@@ -491,7 +494,14 @@ export type Database = {
     }
     Functions: {
       increment_trial_usage: {
-        Args: { p_metadata?: Json; p_module_type: string; p_user_id: string }
+        Args:
+          | {
+              p_idempotency_key?: string
+              p_metadata?: Json
+              p_module_type: string
+              p_user_id: string
+            }
+          | { p_metadata?: Json; p_module_type: string; p_user_id: string }
         Returns: {
           analyses_remaining: number
           analyses_used: number

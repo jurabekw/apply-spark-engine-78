@@ -55,3 +55,13 @@ export const generateUniqueFilename = (originalFilename: string, userId: string)
   
   return `${userId.substring(0, 8)}_${timestamp}_${name}${extension}`;
 };
+
+/**
+ * Generates a unique idempotency key for credit operations
+ * Format: {userId}_{timestamp}_{moduleType}_{random}
+ */
+export const generateIdempotencyKey = (userId: string, moduleType: string): string => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${userId.substring(0, 8)}_${timestamp}_${moduleType}_${random}`;
+};
