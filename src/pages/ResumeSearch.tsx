@@ -745,9 +745,6 @@ export default function ResumeSearch() {
               <CardTitle>{t('resumeSearchPage.searchCandidates')}</CardTitle>
               <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
             </div>
-            <Badge variant="secondary" className="text-xs">
-              {balance} Credits
-            </Badge>
           </div>
         </CardHeader>
         <CardContent>
