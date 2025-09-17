@@ -1,7 +1,23 @@
 {
   "credits": {
+    "credit": "credit",
+    "credits": "credits",
     "insufficientTitle": "Insufficient Credits",
-    "insufficientDesc": "You don't have enough credits to perform this action. Please top up your account."
+    "insufficientDesc": "You don't have enough credits to perform this action. Please top up your account.",
+    "errors": {
+      "insufficientBalance": "Insufficient Credits",
+      "needMoreCredits": "You need {{required}} credit(s) but only have {{available}}. Please get more credits to continue.",
+      "deductionFailed": "Credit deduction failed. Please try again.",
+      "systemError": "Credit system error. Please contact support."
+    },
+    "success": {
+      "deducted": "{{amount}} credit(s) deducted for {{module}}",
+      "added": "{{amount}} credit(s) added to your account"
+    },
+    "display": {
+      "balance": "Credits: {{balance}}",
+      "cost": "Cost: {{cost}} credit(s)"
+    }
   },
   "common": {
     "search": "Search",

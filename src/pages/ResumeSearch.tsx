@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useCredits } from '@/contexts/CreditContext';
+import { CREDIT_COSTS } from '@/utils/creditUtils';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -536,7 +537,7 @@ export default function ResumeSearch() {
 
       // Deduct credits for this search (non-blocking for user experience)
       try {
-        const creditDeducted = await deductCredits(3, 'hh_search', `HH search: ${values.jobTitle.trim()}`);
+        const creditDeducted = await deductCredits(CREDIT_COSTS.HH_SEARCH, 'hh_search', `HH search: ${values.jobTitle.trim()}`);
 
         if (!creditDeducted) {
           console.warn('Credit deduction failed but search results are shown');

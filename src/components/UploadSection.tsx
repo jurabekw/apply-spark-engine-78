@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, FileText, Loader2, CheckCircle, AlertCircle, X, Plus, CloudUpload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useTrialUsage } from '@/hooks/useTrialUsage';
+import { useCredits } from '@/contexts/CreditContext';
+import { CREDIT_COSTS } from '@/utils/creditUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
@@ -23,7 +24,7 @@ const UploadSection = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
-  const { canUseAnalysis, recordUsage, analysesRemaining } = useTrialUsage();
+  const { balance, deductCredits } = useCredits();
   const validateAndSetFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
@@ -185,11 +186,11 @@ const UploadSection = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check trial usage limits first
-    if (!canUseAnalysis) {
+    // Check credit balance first
+    if (balance < CREDIT_COSTS.BATCH_ANALYSIS) {
       toast({
-        title: t('trial.errors.limitReached'),
-        description: t('trial.errors.limitReachedDesc'),
+        title: t('credits.errors.insufficientBalance'),
+        description: t('credits.errors.needMoreCredits', { required: CREDIT_COSTS.BATCH_ANALYSIS, available: balance }),
         variant: "destructive"
       });
       return;
@@ -230,15 +231,11 @@ const UploadSection = () => {
         const candidateCount = result.candidates?.length || 0;
         setProcessingProgress(prev => [...prev, `✅ ${t('upload.processedCandidates', { count: candidateCount })}`]);
         
-        // Record trial usage for this analysis
-        const usageRecorded = await recordUsage('upload', {
-          jobTitle,
-          candidateCount,
-          fileCount: files.length
-        });
+        // Deduct credits for batch analysis
+        const creditSuccess = await deductCredits(CREDIT_COSTS.BATCH_ANALYSIS, 'batch_analysis', `Batch analysis: ${jobTitle} (${files.length} resumes)`);
 
-        if (!usageRecorded) {
-          // If usage recording failed, don't proceed (user hit limit)
+        if (!creditSuccess) {
+          // If credit deduction failed, don't proceed
           return;
         }
         
@@ -450,24 +447,22 @@ const UploadSection = () => {
               type="submit" 
               size="lg"
               className="w-full h-12" 
-              disabled={isProcessing || !selectedFiles || selectedFiles.length === 0 || !canUseAnalysis}
+              disabled={isProcessing || !selectedFiles || selectedFiles.length === 0 || balance < CREDIT_COSTS.BATCH_ANALYSIS}
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-3 animate-spin" />
                   {t('upload.analyzing')}
                 </>
-              ) : !canUseAnalysis ? (
-                t('trial.errors.limitReached')
+              ) : balance < CREDIT_COSTS.BATCH_ANALYSIS ? (
+                t('credits.errors.insufficientBalance')
               ) : (
                 <>
                   <CloudUpload className="w-5 h-5 mr-3" />
                   {t('upload.analyze')} {selectedFiles ? selectedFiles.length : 0} {selectedFiles && selectedFiles.length === 1 ? t('upload.resume') : t('upload.resumes')}
-                  {analysesRemaining > 0 && (
-                    <span className="ml-2 text-xs opacity-75">
-                      ({analysesRemaining} {t('trial.banner.analysesLeft')})
-                    </span>
-                  )}
+                  <span className="ml-2 text-xs opacity-75">
+                    (1 {t('credits.credit')})
+                  </span>
                 </>
               )}
             </Button>

@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCredits } from '@/contexts/CreditContext';
+import { CREDIT_COSTS } from '@/utils/creditUtils';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
 import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
@@ -291,7 +292,7 @@ const LinkedinSearch = () => {
 
       // Deduct credits for the search
       try {
-        const creditDeducted = await deductCredits(2, 'linkedin_search', `LinkedIn search: ${data.job_title}`);
+        const creditDeducted = await deductCredits(CREDIT_COSTS.LINKEDIN_SEARCH, 'linkedin_search', `LinkedIn search: ${data.job_title}`);
 
         if (!creditDeducted) {
           console.warn('Credit deduction failed but search results are shown');

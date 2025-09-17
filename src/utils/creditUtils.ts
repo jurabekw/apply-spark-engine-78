@@ -13,9 +13,9 @@ export const generateCreditIdempotencyKey = (userId: string, moduleName: string)
 
 export const CREDIT_COSTS = {
   RESUME_ANALYSIS: 1,
-  HH_SEARCH: 3,
-  LINKEDIN_SEARCH: 2,
-  BATCH_ANALYSIS: 5,
+  HH_SEARCH: 1,
+  LINKEDIN_SEARCH: 1,
+  BATCH_ANALYSIS: 1,
 } as const;
 
 export type CreditModule = keyof typeof CREDIT_COSTS;
