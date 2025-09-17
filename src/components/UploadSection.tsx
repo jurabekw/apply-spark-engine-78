@@ -264,9 +264,14 @@ const UploadSection = () => {
         const fileInput = document.getElementById('resume-files') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
         
-        // Trigger refresh of analysis history and trial usage
-        window.dispatchEvent(new CustomEvent('analysis-completed'));
-        window.dispatchEvent(new CustomEvent('trial-usage-updated'));
+        // Show completion message with smooth transition
+        setProcessingProgress(prev => [...prev, `🎉 ${t('upload.analysisComplete')}`]);
+        
+        // Delayed trigger to allow UI to settle
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('analysis-completed'));
+          window.dispatchEvent(new CustomEvent('trial-usage-updated'));
+        }, 1000);
       }
     } catch (error) {
       console.error('Processing error:', error);

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 const AnalysisHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { batches, loading, deleteBatch, deleteAllBatches } = useBatchHistory();
+  const { batches, loading, refreshing, deleteBatch, deleteAllBatches } = useBatchHistory();
   const { t } = useTranslation();
   
   // State to handle viewing batch details
@@ -60,7 +60,7 @@ const AnalysisHistory = () => {
 
   return (
     <>
-      <Card>
+      <Card className={`transition-opacity duration-300 ${refreshing ? 'opacity-75' : 'opacity-100'}`}>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">

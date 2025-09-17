@@ -16,14 +16,18 @@ interface BatchHistory {
 export const useBatchHistory = () => {
   const [batches, setBatches] = useState<BatchHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchBatchHistory = async () => {
+  const fetchBatchHistory = async (silent = false) => {
     if (!user) return;
     
     try {
+      if (!silent) {
+        setRefreshing(true);
+      }
       // Get batches with their candidates
       const { data: batchData, error: batchError } = await supabase
         .from('candidate_batches')
@@ -60,6 +64,7 @@ export const useBatchHistory = () => {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -137,22 +142,31 @@ export const useBatchHistory = () => {
 
   useEffect(() => {
     fetchBatchHistory();
+  }, [user]);
+
+  useEffect(() => {
+    // Debounced refresh on analysis completion
+    let refreshTimeout: NodeJS.Timeout;
     
-    // Listen for analysis completion to refresh data
     const handleAnalysisCompleted = () => {
-      fetchBatchHistory();
+      clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(() => {
+        fetchBatchHistory(true); // Silent refresh to avoid loading states
+      }, 500); // Wait 500ms before refreshing to avoid rapid updates
     };
     
     window.addEventListener('analysis-completed', handleAnalysisCompleted);
     
     return () => {
+      clearTimeout(refreshTimeout);
       window.removeEventListener('analysis-completed', handleAnalysisCompleted);
     };
-  }, [user]);
+  }, []);
 
   return {
     batches,
     loading,
+    refreshing,
     deleteBatch,
     deleteAllBatches,
     refetch: fetchBatchHistory,
