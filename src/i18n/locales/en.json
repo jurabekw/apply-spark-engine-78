@@ -1,5 +1,7 @@
 {
   "credits": {
+    "credit_one": "Credit",
+    "credit_other": "Credits", 
     "credit": "credit",
     "credits": "credits",
     "insufficientTitle": "Insufficient Credits",

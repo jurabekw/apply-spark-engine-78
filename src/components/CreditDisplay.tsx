@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Coins, Loader2 } from 'lucide-react';
 import { useCredits } from '@/contexts/CreditContext';
+import { useTranslation } from 'react-i18next';
 
 interface CreditDisplayProps {
   className?: string;
@@ -8,12 +9,13 @@ interface CreditDisplayProps {
 
 export const CreditDisplay = ({ className }: CreditDisplayProps) => {
   const { balance, loading } = useCredits();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
       <Badge variant="secondary" className={className}>
         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-        Loading...
+        {t('common.loading')}...
       </Badge>
     );
   }
@@ -27,7 +29,7 @@ export const CreditDisplay = ({ className }: CreditDisplayProps) => {
   return (
     <Badge variant={getVariant()} className={className}>
       <Coins className="w-3 h-3 mr-1" />
-      {balance} Credit{balance !== 1 ? 's' : ''}
+      {balance} {t('credits.credit', { count: balance })}
     </Badge>
   );
 };

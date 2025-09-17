@@ -1,5 +1,9 @@
 {
   "credits": {
+    "credit_one": "Кредит",
+    "credit_few": "Кредита", 
+    "credit_many": "Кредитов",
+    "credit_other": "Кредитов",
     "credit": "кредит",
     "credits": "кредитов",
     "insufficientTitle": "Недостаточно кредитов",
