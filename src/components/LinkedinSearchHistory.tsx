@@ -183,8 +183,6 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t('linkedinSearch.searchQuery')}</TableHead>
-                    <TableHead>{t('tableHeaders.requiredSkills')}</TableHead>
-                    <TableHead>{t('tableHeaders.experienceLevel')}</TableHead>
                     <TableHead>{t('tableHeaders.results')}</TableHead>
                     <TableHead>{t('tableHeaders.date')}</TableHead>
                     <TableHead>{t('tableHeaders.actions')}</TableHead>
@@ -195,30 +193,6 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                     <TableRow key={search.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="font-medium">{search.job_title}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {search.required_skills.split(',').slice(0, 3).map((skill, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {skill.trim()}
-                            </Badge>
-                          ))}
-                          {search.required_skills.split(',').length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{search.required_skills.split(',').length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className="font-medium text-foreground">
-                            {getWorkExperienceSummary(search.response)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {t('experienceLevels.searchFilter')}: {getExperienceLevelLabel(search.experience_level)}
-                          </div>
-                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{search.candidate_count}</span> {t('linkedinSearch.candidates')}
