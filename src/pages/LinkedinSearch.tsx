@@ -464,9 +464,6 @@ const LinkedinSearch = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    {balance} Credits
-                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
