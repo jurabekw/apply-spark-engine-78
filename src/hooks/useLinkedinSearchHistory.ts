@@ -17,12 +17,16 @@ interface LinkedinSearchHistory {
 export const useLinkedinSearchHistory = () => {
   const [searches, setSearches] = useState<LinkedinSearchHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchSearchHistory = async () => {
+  const fetchSearchHistory = async (silent = false) => {
     if (!user) return;
+    
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     
     try {
       const { data, error } = await supabase
@@ -35,13 +39,16 @@ export const useLinkedinSearchHistory = () => {
       setSearches(data || []);
     } catch (error) {
       console.error('Error fetching LinkedIn search history:', error);
-      toast({
-        title: t('linkedinSearch.toasts.loadErrorTitle'),
-        description: t('linkedinSearch.toasts.loadErrorDesc'),
-        variant: "destructive",
-      });
+      if (!silent) {
+        toast({
+          title: t('linkedinSearch.toasts.loadErrorTitle'),
+          description: t('linkedinSearch.toasts.loadErrorDesc'),
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -98,6 +105,21 @@ export const useLinkedinSearchHistory = () => {
     }
   };
 
+  // Add debounced refresh listener for linkedin-search-completed event
+  useEffect(() => {
+    const handleSearchCompleted = () => {
+      // Debounce the refresh to prevent rapid successive calls
+      setTimeout(() => {
+        fetchSearchHistory(true); // silent refresh
+      }, 1000);
+    };
+
+    window.addEventListener('linkedin-search-completed', handleSearchCompleted);
+    return () => {
+      window.removeEventListener('linkedin-search-completed', handleSearchCompleted);
+    };
+  }, [user]);
+
   useEffect(() => {
     fetchSearchHistory();
   }, [user]);
@@ -105,6 +127,7 @@ export const useLinkedinSearchHistory = () => {
   return {
     searches,
     loading,
+    refreshing,
     deleteSearch,
     deleteAllSearches,
     refetch: fetchSearchHistory,

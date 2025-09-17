@@ -16,7 +16,7 @@ interface LinkedinSearchHistoryProps {
 
 const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { searches, loading, deleteSearch, deleteAllSearches } = useLinkedinSearchHistory();
+  const { searches, loading, refreshing, deleteSearch, deleteAllSearches } = useLinkedinSearchHistory();
   const { t } = useTranslation();
 
   // State to handle viewing saved results
@@ -127,7 +127,13 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className={refreshing ? "opacity-70 transition-opacity duration-300" : ""}>
+          {refreshing && (
+            <div className="flex items-center justify-center py-2 mb-4">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+              <span className="text-sm text-muted-foreground">Updating search history...</span>
+            </div>
+          )}
           {filteredSearches.length === 0 ? (
             <div className="text-center py-8">
               <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />

@@ -420,15 +420,22 @@ const LinkedinSearch = () => {
         window.dispatchEvent(new CustomEvent('candidatesUpdated'));
       }
 
-      const foundMessage = t('linkedinSearch.foundCandidates', { count: normalizedCandidates.length });
+      // Use string interpolation to ensure count is properly displayed
+      const candidateCount = normalizedCandidates.length;
+      console.log('LinkedIn search completed:', { candidateCount, normalizedCandidates });
+      
+      const foundMessage = t('linkedinSearch.foundCandidates', { count: candidateCount });
+      console.log('Found message:', foundMessage);
       
       toast({
         title: t('linkedinSearch.searchCompleted'),
         description: foundMessage,
       });
 
-      // Trigger refresh of search history
-      window.dispatchEvent(new CustomEvent('linkedin-search-completed'));
+      // Debounce the search history refresh to prevent immediate re-renders
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('linkedin-search-completed'));
+      }, 500);
 
     } catch (error) {
       console.error('LinkedIn search error:', error);
