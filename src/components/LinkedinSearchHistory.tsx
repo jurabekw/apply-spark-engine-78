@@ -17,7 +17,7 @@ interface LinkedinSearchHistoryProps {
 const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { searches, loading, refreshing, deleteSearch, deleteAllSearches } = useLinkedinSearchHistory();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // State to handle viewing saved results
   const [isResultsOpen, setIsResultsOpen] = useState(false);
@@ -34,7 +34,8 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const locale = i18n.language === 'ru' ? 'ru-RU' : 'en-US';
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
