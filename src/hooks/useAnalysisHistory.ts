@@ -20,25 +20,36 @@ export const useAnalysisHistory = () => {
   const [analyses, setAnalyses] = useState<AnalysisHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchAnalysisHistory = async () => {
+  const fetchAnalysisHistory = async (page: number = 1) => {
     if (!user) return;
     
     try {
-      // Get all data without pagination
+      const offset = (page - 1) * itemsPerPage;
+      
+      // Get total count
+      const { count } = await supabase
+        .from('candidates')
+        .select('*', { count: 'exact', head: true })
+        .eq('source', 'upload');
+      
+      // Get paginated data
       const { data, error } = await supabase
         .from('candidates')
         .select('*')
         .eq('source', 'upload')
         .order('created_at', { ascending: false })
-        .limit(100);
+        .range(offset, offset + itemsPerPage - 1);
 
       if (error) throw error;
       setAnalyses(data || []);
-      setTotalCount(data?.length || 0);
+      setTotalCount(count || 0);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching analysis history:', error);
       toast({
@@ -60,8 +71,8 @@ export const useAnalysisHistory = () => {
 
       if (error) throw error;
       
-      setAnalyses(prev => prev.filter(analysis => analysis.id !== analysisId));
-      setTotalCount(prev => prev - 1);
+      // Refetch current page after deletion
+      await fetchAnalysisHistory(currentPage);
 
       toast({
         title: t('hooks.analysisHistory.analysisDeleted'),
@@ -89,6 +100,7 @@ export const useAnalysisHistory = () => {
       
       setAnalyses([]);
       setTotalCount(0);
+      setCurrentPage(1);
 
       // Trigger a window event to notify dashboard to refresh stats
       window.dispatchEvent(new CustomEvent('candidates-deleted'));
@@ -107,16 +119,21 @@ export const useAnalysisHistory = () => {
     }
   };
 
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   useEffect(() => {
-    fetchAnalysisHistory();
+    fetchAnalysisHistory(1);
   }, [user]);
 
   return {
     analyses,
     loading,
     totalCount,
+    currentPage,
+    totalPages,
     deleteAnalysis,
     deleteAllAnalyses,
     refetch: fetchAnalysisHistory,
+    goToPage: (page: number) => fetchAnalysisHistory(page),
   };
 };

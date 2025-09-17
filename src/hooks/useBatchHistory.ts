@@ -17,23 +17,36 @@ export const useBatchHistory = () => {
   const [batches, setBatches] = useState<BatchHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchBatchHistory = async (silent = false) => {
+  const fetchBatchHistory = async (page: number = 1, silent = false) => {
     if (!user) return;
     
     try {
       if (!silent) {
+        setLoading(true);
+      } else {
         setRefreshing(true);
       }
-      // Get batches with their candidates
+
+      const offset = (page - 1) * itemsPerPage;
+
+      // Get total count
+      const { count } = await supabase
+        .from('candidate_batches')
+        .select('*', { count: 'exact', head: true });
+
+      // Get paginated batches
       const { data: batchData, error: batchError } = await supabase
         .from('candidate_batches')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, offset + itemsPerPage - 1);
 
       if (batchError) throw batchError;
 
@@ -55,6 +68,8 @@ export const useBatchHistory = () => {
       );
 
       setBatches(batchesWithCandidates);
+      setTotalCount(count || 0);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching batch history:', error);
       toast({
@@ -86,7 +101,8 @@ export const useBatchHistory = () => {
 
       if (batchError) throw batchError;
       
-      setBatches(prev => prev.filter(batch => batch.id !== batchId));
+      // Refetch current page after deletion
+      await fetchBatchHistory(currentPage);
 
       toast({
         title: t('hooks.batchHistory.batchDeleted'),
@@ -122,6 +138,8 @@ export const useBatchHistory = () => {
       if (batchError) throw batchError;
       
       setBatches([]);
+      setTotalCount(0);
+      setCurrentPage(1);
 
       // Trigger window event to notify dashboard to refresh stats
       window.dispatchEvent(new CustomEvent('batches-deleted'));
@@ -140,8 +158,10 @@ export const useBatchHistory = () => {
     }
   };
 
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   useEffect(() => {
-    fetchBatchHistory();
+    fetchBatchHistory(1);
   }, [user]);
 
   useEffect(() => {
@@ -151,7 +171,7 @@ export const useBatchHistory = () => {
     const handleAnalysisCompleted = () => {
       clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(() => {
-        fetchBatchHistory(true); // Silent refresh to avoid loading states
+        fetchBatchHistory(currentPage, true); // Silent refresh to avoid loading states
       }, 500); // Wait 500ms before refreshing to avoid rapid updates
     };
     
@@ -161,14 +181,18 @@ export const useBatchHistory = () => {
       clearTimeout(refreshTimeout);
       window.removeEventListener('analysis-completed', handleAnalysisCompleted);
     };
-  }, []);
+  }, [currentPage]);
 
   return {
     batches,
     loading,
     refreshing,
+    totalCount,
+    currentPage,
+    totalPages,
     deleteBatch,
     deleteAllBatches,
-    refetch: fetchBatchHistory,
+    refetch: (page?: number) => fetchBatchHistory(page || currentPage),
+    goToPage: (page: number) => fetchBatchHistory(page),
   };
 };

@@ -18,22 +18,35 @@ interface SearchHistory {
 export const useSearchHistory = () => {
   const [searches, setSearches] = useState<SearchHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchSearchHistory = async () => {
+  const fetchSearchHistory = async (page: number = 1) => {
     if (!user) return;
     
     try {
+      const offset = (page - 1) * itemsPerPage;
+      
+      // Get total count
+      const { count } = await supabase
+        .from('hh_searches')
+        .select('*', { count: 'exact', head: true });
+      
+      // Get paginated data
       const { data, error } = await supabase
         .from('hh_searches')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .range(offset, offset + itemsPerPage - 1);
 
       if (error) throw error;
       setSearches(data || []);
+      setTotalCount(count || 0);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching search history:', error);
       toast({
@@ -55,7 +68,8 @@ export const useSearchHistory = () => {
 
       if (error) throw error;
       
-      setSearches(prev => prev.filter(search => search.id !== searchId));
+      // Refetch current page after deletion
+      await fetchSearchHistory(currentPage);
 
       toast({
         title: t('hooks.searchHistory.searchDeleted'),
@@ -81,6 +95,8 @@ export const useSearchHistory = () => {
       if (error) throw error;
       
       setSearches([]);
+      setTotalCount(0);
+      setCurrentPage(1);
 
       // Trigger a window event to notify dashboard to refresh stats
       window.dispatchEvent(new CustomEvent('searches-deleted'));
@@ -99,15 +115,21 @@ export const useSearchHistory = () => {
     }
   };
 
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   useEffect(() => {
-    fetchSearchHistory();
+    fetchSearchHistory(1);
   }, [user]);
 
   return {
     searches,
     loading,
+    totalCount,
+    currentPage,
+    totalPages,
     deleteSearch,
     deleteAllSearches,
     refetch: fetchSearchHistory,
+    goToPage: (page: number) => fetchSearchHistory(page),
   };
 };

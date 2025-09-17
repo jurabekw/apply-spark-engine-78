@@ -18,25 +18,38 @@ export const useLinkedinSearchHistory = () => {
   const [searches, setSearches] = useState<LinkedinSearchHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const fetchSearchHistory = async (silent = false) => {
+  const fetchSearchHistory = async (page: number = 1, silent = false) => {
     if (!user) return;
     
     if (!silent) setLoading(true);
     else setRefreshing(true);
     
     try {
+      const offset = (page - 1) * itemsPerPage;
+      
+      // Get total count
+      const { count } = await supabase
+        .from('linkedin_searches')
+        .select('*', { count: 'exact', head: true });
+      
+      // Get paginated data
       const { data, error } = await supabase
         .from('linkedin_searches')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .range(offset, offset + itemsPerPage - 1);
 
       if (error) throw error;
       setSearches(data || []);
+      setTotalCount(count || 0);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching LinkedIn search history:', error);
       if (!silent) {
@@ -61,7 +74,8 @@ export const useLinkedinSearchHistory = () => {
 
       if (error) throw error;
       
-      setSearches(prev => prev.filter(search => search.id !== searchId));
+      // Refetch current page after deletion
+      await fetchSearchHistory(currentPage);
 
       toast({
         title: t('linkedinSearch.toasts.deletedTitle'),
@@ -87,6 +101,8 @@ export const useLinkedinSearchHistory = () => {
       if (error) throw error;
       
       setSearches([]);
+      setTotalCount(0);
+      setCurrentPage(1);
 
       // Trigger a window event to notify dashboard to refresh stats
       window.dispatchEvent(new CustomEvent('linkedin-searches-deleted'));
@@ -105,12 +121,14 @@ export const useLinkedinSearchHistory = () => {
     }
   };
 
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   // Add debounced refresh listener for linkedin-search-completed event
   useEffect(() => {
     const handleSearchCompleted = () => {
       // Debounce the refresh to prevent rapid successive calls
       setTimeout(() => {
-        fetchSearchHistory(true); // silent refresh
+        fetchSearchHistory(currentPage, true); // silent refresh
       }, 1000);
     };
 
@@ -118,18 +136,22 @@ export const useLinkedinSearchHistory = () => {
     return () => {
       window.removeEventListener('linkedin-search-completed', handleSearchCompleted);
     };
-  }, [user]);
+  }, [currentPage]);
 
   useEffect(() => {
-    fetchSearchHistory();
+    fetchSearchHistory(1);
   }, [user]);
 
   return {
     searches,
     loading,
     refreshing,
+    totalCount,
+    currentPage,
+    totalPages,
     deleteSearch,
     deleteAllSearches,
-    refetch: fetchSearchHistory,
+    refetch: (page?: number) => fetchSearchHistory(page || currentPage),
+    goToPage: (page: number) => fetchSearchHistory(page),
   };
 };

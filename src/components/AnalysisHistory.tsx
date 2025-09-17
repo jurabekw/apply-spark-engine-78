@@ -5,14 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Eye, Trash2, Clock, FileText, Trash, Users } from 'lucide-react';
+import { Search, Eye, Trash2, Clock, FileText, Trash, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useBatchHistory } from '@/hooks/useBatchHistory';
 import BatchHistoryModal from './BatchHistoryModal';
 import { useTranslation } from 'react-i18next';
 
 const AnalysisHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { batches, loading, refreshing, deleteBatch, deleteAllBatches } = useBatchHistory();
+  const { batches, loading, refreshing, totalCount, currentPage, totalPages, deleteBatch, deleteAllBatches, goToPage } = useBatchHistory();
   const { t } = useTranslation();
   
   // State to handle viewing batch details
@@ -200,6 +201,40 @@ const AnalysisHistory = () => {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          )}
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && goToPage(currentPage - 1)}
+                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => goToPage(page)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && goToPage(currentPage + 1)}
+                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </CardContent>
