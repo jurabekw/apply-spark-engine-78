@@ -1049,6 +1049,15 @@
     "role": {
       "recruiter": "Recruiter"
     },
+    "avatar": {
+      "alt": "User"
+    },
+    "credits": {
+      "title": "Credits",
+      "noCreditsLeft": "No Credits Left",
+      "lowCredits": "Low Credits",
+      "getMoreCredits": "Get More Credits"
+    },
     "timeLeft": {
       "daysLeft": "{{count}} days left",
       "hoursLeft": "{{count}} hours left"

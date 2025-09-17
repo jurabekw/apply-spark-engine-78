@@ -1163,6 +1163,15 @@
     "role": {
       "recruiter": "Рекрутер"
     },
+    "avatar": {
+      "alt": "Пользователь"
+    },
+    "credits": {
+      "title": "Кредиты",
+      "noCreditsLeft": "Кредиты закончились",
+      "lowCredits": "Мало кредитов",
+      "getMoreCredits": "Получить больше кредитов"
+    },
     "timeLeft": {
       "daysLeft": "{{count}} дн. осталось",
       "hoursLeft": "{{count}} ч. осталось"

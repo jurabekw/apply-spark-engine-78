@@ -113,7 +113,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
         {/* Credit Status Section */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-muted-foreground">Credits</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('userDropdown.credits.title', 'Credits')}</span>
             <CreditDisplay />
           </div>
           
@@ -121,14 +121,14 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
             {balance === 0 && (
               <Badge variant="destructive" className="w-full justify-center text-xs py-1">
                 <AlertTriangle className="w-3 h-3 mr-1" />
-                No Credits Left
+                {t('userDropdown.credits.noCreditsLeft', 'No Credits Left')}
               </Badge>
             )}
             
             {balance > 0 && balance <= 5 && (
               <Badge variant="outline" className="w-full justify-center text-xs py-1">
                 <Clock className="w-3 h-3 mr-1" />
-                Low Credits
+                {t('userDropdown.credits.lowCredits', 'Low Credits')}
               </Badge>
             )}
             
@@ -141,7 +141,7 @@ export const UserDropdown = ({ onSettingsClick }: UserDropdownProps) => {
               }}
             >
               <Sparkles className="w-3 h-3 mr-1" />
-              Get More Credits
+              {t('userDropdown.credits.getMoreCredits', 'Get More Credits')}
             </Button>
           </div>
         </div>
