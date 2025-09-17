@@ -14,7 +14,7 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { useTrialUsage } from '@/hooks/useTrialUsage';
+import { useCredits } from '@/contexts/CreditContext';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -355,7 +355,7 @@ export default function ResumeSearch() {
     toast
   } = useToast();
   const { t, i18n } = useTranslation();
-  const { canUseAnalysis, recordUsage, analysesRemaining } = useTrialUsage();
+  const { balance, deductCredits } = useCredits();
 
   // Validation Schema
   const schema = useMemo(() => z.object({
@@ -457,11 +457,11 @@ export default function ResumeSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const handleSearch = async (values: z.infer<typeof schema>) => {
-    // Check if user can use analysis
-    if (!canUseAnalysis) {
+    // Check if user has enough credits
+    if (balance < 3) {
       toast({
-        title: t('trial.errors.limitReached'),
-        description: t('trial.errors.limitReachedDesc'),
+        title: t('credits.insufficientTitle'),
+        description: t('credits.insufficientDesc'),
         variant: "destructive",
       });
       return;
@@ -534,18 +534,11 @@ export default function ResumeSearch() {
         setError(t('errors.noCandidatesFound'));
       }
 
-      // Record usage for this search (non-blocking for user experience)
+      // Deduct credits for this search (non-blocking for user experience)
       try {
-        const usageRecorded = await recordUsage('hh_search', {
-          job_title: values.jobTitle.trim(),
-          required_skills: values.requiredSkills.trim(),
-          experience_level: values.experienceLevel,
-          city: values.city,
-          candidate_count: normalized.length,
-          timestamp: new Date().toISOString(),
-        });
+        const creditDeducted = await deductCredits(3, 'hh_search', `HH search: ${values.jobTitle.trim()}`);
 
-        if (!usageRecorded) {
+        if (!creditDeducted) {
           console.warn('Credit deduction failed but search results are shown');
           toast({
             title: t('toasts.warning'),
@@ -553,8 +546,8 @@ export default function ResumeSearch() {
             variant: 'default',
           });
         }
-      } catch (usageError) {
-        console.error('Error recording usage:', usageError);
+      } catch (creditError) {
+        console.error('Error deducting credits:', creditError);
         toast({
           title: t('toasts.warning'),
           description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
@@ -752,7 +745,7 @@ export default function ResumeSearch() {
               <CardDescription>{t('resumeSearchPage.enterRequirements')}</CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
-              {analysesRemaining} {t('trial.banner.analysesLeft')}
+              {balance} Credits
             </Badge>
           </div>
         </CardHeader>

@@ -1,4 +1,8 @@
 {
+  "credits": {
+    "insufficientTitle": "Insufficient Credits",
+    "insufficientDesc": "You don't have enough credits to perform this action. Please top up your account."
+  },
   "common": {
     "search": "Search",
     "upload": "Upload",

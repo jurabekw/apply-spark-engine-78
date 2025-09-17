@@ -153,6 +153,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          idempotency_key: string | null
           module_name: string | null
           type: string | null
           user_id: string | null
@@ -163,6 +164,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          idempotency_key?: string | null
           module_name?: string | null
           type?: string | null
           user_id?: string | null
@@ -173,6 +175,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          idempotency_key?: string | null
           module_name?: string | null
           type?: string | null
           user_id?: string | null
@@ -419,21 +422,21 @@ export type Database = {
           created_at: string | null
           id: string
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           balance?: number | null
           created_at?: string | null
           id?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           balance?: number | null
           created_at?: string | null
           id?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

@@ -12,11 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrialUsage } from '@/hooks/useTrialUsage';
+import { useCredits } from '@/contexts/CreditContext';
 
 import ResumeSearchTable from '@/components/ResumeSearchTable';
 import LinkedinSearchHistory from '@/components/LinkedinSearchHistory';
-import { TrialGuard } from '@/components/TrialGuard';
+import { CreditGuard } from '@/components/CreditGuard';
 import { Search, Clock, Settings, Linkedin } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,7 @@ const LinkedinSearch = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { canUseAnalysis, recordUsage, analysesRemaining } = useTrialUsage();
+  const { balance, deductCredits } = useCredits();
 
   // Validation Schema
   const searchSchema = useMemo(() => z.object({
@@ -230,11 +230,11 @@ const LinkedinSearch = () => {
       return;
     }
 
-    // Check if user can use analysis
-    if (!canUseAnalysis) {
+    // Check if user has enough credits
+    if (balance < 2) {
       toast({
-        title: t('trial.errors.limitReached'),
-        description: t('trial.errors.limitReachedDesc'),
+        title: t('credits.insufficientTitle'),
+        description: t('credits.insufficientDesc'),
         variant: "destructive",
       });
       return;
@@ -289,15 +289,11 @@ const LinkedinSearch = () => {
       setSearchResults(normalizedCandidates);
       setLastSearch(data);
 
-      // Record usage for this search (non-blocking for user experience)
+      // Deduct credits for the search
       try {
-        const usageRecorded = await recordUsage('linkedin_search', {
-          job_title: data.job_title,
-          candidate_count: normalizedCandidates.length,
-          timestamp: new Date().toISOString(),
-        });
+        const creditDeducted = await deductCredits(2, 'linkedin_search', `LinkedIn search: ${data.job_title}`);
 
-        if (!usageRecorded) {
+        if (!creditDeducted) {
           console.warn('Credit deduction failed but search results are shown');
           toast({
             title: t('toasts.warning'),
@@ -305,8 +301,8 @@ const LinkedinSearch = () => {
             variant: 'default',
           });
         }
-      } catch (usageError) {
-        console.error('Error recording usage:', usageError);
+      } catch (creditError) {
+        console.error('Error deducting credits:', creditError);
         toast({
           title: t('toasts.warning'),
           description: 'Search completed but credit tracking failed. Please refresh and check your remaining credits.',
@@ -466,7 +462,7 @@ const LinkedinSearch = () => {
                 <div className="flex justify-between items-center">
                   <CardTitle>{t('linkedinSearch.whatCandidate')}</CardTitle>
                   <Badge variant="secondary" className="text-xs">
-                    {analysesRemaining} {t('trial.banner.analysesLeft')}
+                    {balance} Credits
                   </Badge>
                 </div>
               </CardHeader>
