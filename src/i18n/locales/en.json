@@ -875,7 +875,8 @@
     "noExperience": "No Experience",
     "between1And3": "1-3 Years",
     "between3And6": "3-6 Years", 
-    "moreThan6": "6+ Years"
+    "moreThan6": "6+ Years",
+    "searchFilter": "Search Filter"
   },
   "selects": {
     "selectExperience": "Select experience level",

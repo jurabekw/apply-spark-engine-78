@@ -896,7 +896,8 @@
     "noExperience": "Без опыта",
     "between1And3": "1-3 года",
     "between3And6": "3-6 лет",
-    "moreThan6": "6+ лет"
+    "moreThan6": "6+ лет",
+    "searchFilter": "Фильтр поиска"
   },
   "selects": {
     "selectExperience": "Выберите уровень опыта",

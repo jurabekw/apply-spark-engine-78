@@ -33,6 +33,35 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
     return labels[level as keyof typeof labels] || level;
   };
 
+  // Extract work experience from candidates in the search response
+  const getWorkExperienceSummary = (searchResponse: any) => {
+    if (!searchResponse || !searchResponse.candidates) {
+      return t('experienceLevels.noExperience');
+    }
+    
+    const candidates = searchResponse.candidates;
+    const experienceValues = candidates
+      .map((candidate: any) => candidate.experience_years || 0)
+      .filter((exp: number) => exp > 0);
+    
+    if (experienceValues.length === 0) {
+      return t('experienceLevels.noExperience');
+    }
+    
+    const avgExperience = Math.round(
+      experienceValues.reduce((sum: number, exp: number) => sum + exp, 0) / experienceValues.length
+    );
+    
+    const minExp = Math.min(...experienceValues);
+    const maxExp = Math.max(...experienceValues);
+    
+    if (minExp === maxExp) {
+      return `${avgExperience} ${i18n.language === 'ru' ? 'лет' : 'years'}`;
+    }
+    
+    return `${minExp}-${maxExp} ${i18n.language === 'ru' ? 'лет' : 'years'} (${i18n.language === 'ru' ? 'ср.' : 'avg'} ${avgExperience})`;
+  };
+
   const formatDate = (dateString: string) => {
     const locale = i18n.language === 'ru' ? 'ru-RU' : 'en-US';
     return new Date(dateString).toLocaleDateString(locale, {
@@ -182,9 +211,14 @@ const LinkedinSearchHistory = ({ onRerunSearch }: LinkedinSearchHistoryProps) =>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {getExperienceLevelLabel(search.experience_level)}
-                        </Badge>
+                        <div className="text-sm">
+                          <div className="font-medium text-foreground">
+                            {getWorkExperienceSummary(search.response)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {t('experienceLevels.searchFilter')}: {getExperienceLevelLabel(search.experience_level)}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{search.candidate_count}</span> {t('linkedinSearch.candidates')}
