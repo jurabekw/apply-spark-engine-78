@@ -151,28 +151,6 @@ const Auth = () => {
       // Clean up existing state
       cleanupAuthState();
       
-      // Check if email already exists
-      const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
-        email: signupEmail,
-        password: 'temporary-check'
-      });
-
-      // If we get any response that's not 'Invalid login credentials', the email exists
-      if (checkError && !checkError.message.includes('Invalid login credentials')) {
-        // Email might exist, but let's be more certain with a signup attempt
-      } else if (checkError?.message.includes('Invalid login credentials')) {
-        // Email exists but password is wrong - user should sign in
-        toast({
-          title: t('toasts.accountExists'),
-          description: t('pages.auth.accountExistsSignIn'),
-          variant: "destructive",
-        });
-        setLoginEmail(signupEmail);
-        setActiveTab('signin');
-        setLoading(false);
-        return;
-      }
-      
       // Use the correct domain for email confirmation
       const redirectUrl = `https://talentspark.uz/confirm`;
       
