@@ -17,6 +17,25 @@ const EmailConfirmation = () => {
   useEffect(() => {
     const handleEmailConfirmation = async () => {
       try {
+        // Get the current session first to handle the confirmation
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (session?.user && !sessionError) {
+          // User is already authenticated, redirect to dashboard
+          setStatus('success');
+          setMessage(t('toasts.accountVerified'));
+          
+          toast({
+            title: t('toasts.emailConfirmed'),
+            description: t('toasts.accountVerified'),
+          });
+
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+          return;
+        }
+
         // Check for error in URL hash first
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const error = hashParams.get('error');
@@ -34,6 +53,40 @@ const EmailConfirmation = () => {
           return;
         }
 
+        // Check for access_token and refresh_token in URL hash for manual session handling
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          // Manually set the session using the tokens from the URL
+          const { data, error: setSessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (setSessionError) {
+            console.error('Error setting session:', setSessionError);
+            setStatus('error');
+            setMessage(setSessionError.message);
+            return;
+          }
+          
+          if (data.session?.user) {
+            setStatus('success');
+            setMessage(t('toasts.accountVerified'));
+            
+            toast({
+              title: t('toasts.emailConfirmed'),
+              description: t('toasts.accountVerified'),
+            });
+
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 2000);
+            return;
+          }
+        }
+
         // Set up auth state listener to detect successful confirmation
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
@@ -48,7 +101,7 @@ const EmailConfirmation = () => {
             // Redirect to dashboard after 3 seconds
             setTimeout(() => {
               navigate('/dashboard');
-            }, 3000);
+            }, 2000);
           } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
             // Check if there's a user session after token refresh
             const checkSession = async () => {
@@ -64,7 +117,7 @@ const EmailConfirmation = () => {
 
                 setTimeout(() => {
                   navigate('/dashboard');
-                }, 3000);
+                }, 2000);
               }
             };
             checkSession();
@@ -84,16 +137,16 @@ const EmailConfirmation = () => {
 
           setTimeout(() => {
             navigate('/dashboard');
-          }, 3000);
+          }, 2000);
         } else {
           // If no session and no error, wait a moment for Supabase to process the URL
           setTimeout(() => {
             // If still loading after 5 seconds, show error
             if (status === 'loading') {
               setStatus('error');
-              setMessage(t('errors.confirmationTimedOut'));
+              setMessage(t('errors.confirmationTimedOut') + ' Please try signing in manually.');
             }
-          }, 5000);
+          }, 3000);
         }
 
         // Cleanup subscription

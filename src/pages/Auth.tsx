@@ -152,7 +152,7 @@ const Auth = () => {
       cleanupAuthState();
       
       // Use the correct domain for email confirmation
-      const redirectUrl = `https://talentspark.uz/confirm`;
+      const redirectUrl = `${window.location.origin}/confirm`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
@@ -206,7 +206,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `https://talentspark.uz/auth?mode=reset`,
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
       });
 
       if (error) throw error;
