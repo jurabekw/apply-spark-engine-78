@@ -1,5 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import pdfParse from 'https://esm.sh/pdf-parse@1.1.1'
+
+// Add type declarations for Deno
+declare const Deno: any
 
 // CORS headers for web requests
 const corsHeaders = {
@@ -53,30 +57,24 @@ serve(async (req) => {
       try {
         console.log('Processing file:', fileUrl)
         
-        // Step 1: Extract text from PDF using OCR.space API
-        const ocrResponse = await fetch(
-          `https://api.ocr.space/parse/imageurl?apikey=K83345704588957&url=${encodeURIComponent(fileUrl)}&language=eng&OCREngine=2&scale=true&filetype=PDF`,
-          { method: 'GET' }
-        )
-
-        if (!ocrResponse.ok) {
-          throw new Error(`OCR API failed with status ${ocrResponse.status}`)
+        // Step 1: Download PDF file
+        const response = await fetch(fileUrl)
+        if (!response.ok) {
+          throw new Error(`Failed to download PDF: ${response.status} ${response.statusText}`)
         }
-
-        const ocrResult = await ocrResponse.json()
-        console.log('OCR result received')
         
-        // Extract text from OCR result
-        let resumeText = ''
-        if (ocrResult.ParsedResults && ocrResult.ParsedResults.length > 0) {
-          resumeText = ocrResult.ParsedResults[0].ParsedText || ''
-        }
-
+        const arrayBuffer = await response.arrayBuffer()
+        const pdfBuffer = new Uint8Array(arrayBuffer)
+        
+        // Step 2: Extract text from PDF using pdf-parse
+        const pdfData = await pdfParse(pdfBuffer)
+        const resumeText = pdfData.text
+        
         if (!resumeText.trim()) {
           throw new Error('Failed to extract text from PDF')
         }
 
-        // Step 2: Analyze with AI using OpenRouter
+        // Step 3: Analyze with AI using OpenRouter
         const openRouterKey = Deno.env.get('OPENROUTER_API_KEY')
         if (!openRouterKey) {
           throw new Error('OPENROUTER_API_KEY not configured')
