@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeFilename, generateUniqueFilename } from '@/utils/fileUtils';
 import AnalysisHistory from '@/components/AnalysisHistory';
 import { useTranslation } from 'react-i18next';
+
 const UploadSection = () => {
   const [jobTitle, setJobTitle] = useState('');
   const [jobRequirements, setJobRequirements] = useState('');
@@ -25,6 +26,7 @@ const UploadSection = () => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const { balance, deductCredits } = useCredits();
+
   const validateAndSetFiles = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const pdfFiles = fileArray.filter(file => file.type === 'application/pdf');
@@ -107,6 +109,7 @@ const UploadSection = () => {
     remainingFiles.forEach(file => dataTransfer.items.add(file));
     setSelectedFiles(dataTransfer.files.length > 0 ? dataTransfer.files : null);
   };
+
   const uploadAllResumes = async (files: File[]) => {
     const uploadedResumes = [];
     
@@ -146,13 +149,23 @@ const UploadSection = () => {
     try {
       console.log('Processing all resumes with AI...');
 
-      // Process all resumes with AI via Make.com webhook
-      const { data, error } = await supabase.functions.invoke('process-resume', {
+      // Get public URLs for all uploaded files
+      const fileUrls = [];
+      for (const resume of uploadedResumes) {
+        const { data } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(resume.filePath);
+        
+        fileUrls.push(data.publicUrl);
+      }
+
+      // Process all resumes with AI via our new edge function
+      const { data, error } = await supabase.functions.invoke('bulk-resume-analysis', {
         body: {
           jobRequirements,
           jobTitle,
           userId: user?.id,
-          uploadedResumes,
+          files: fileUrls,
           language: i18n.language // Pass user's language preference
         }
       });
@@ -183,6 +196,7 @@ const UploadSection = () => {
       throw error;
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -298,6 +312,7 @@ const UploadSection = () => {
       setIsProcessing(false);
     }
   };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Modern Upload Card */}
