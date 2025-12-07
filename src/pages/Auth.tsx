@@ -44,20 +44,6 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Clean up auth state utility
-  const cleanupAuthState = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
   useEffect(() => {
     // Check for password reset mode first
     const mode = searchParams.get('mode');
@@ -107,16 +93,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      
-      // Attempt global sign out first
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
@@ -129,8 +105,6 @@ const Auth = () => {
           title: t('toasts.welcomeBack'),
           description: t('pages.auth.signedInSuccess'),
         });
-        // Force page reload for clean state
-        window.location.href = '/dashboard';
       }
     } catch (error: any) {
       toast({
@@ -148,9 +122,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      
       // Use the correct domain for email confirmation
       const redirectUrl = `${window.location.origin}/confirm`;
       
