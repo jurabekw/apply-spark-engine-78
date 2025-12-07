@@ -18,9 +18,9 @@ const EmailConfirmation = () => {
     const handleEmailConfirmation = async () => {
       try {
         // Get the current session first to handle the confirmation
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
         
-        if (session?.user && !sessionError) {
+        if (currentSession?.user && !sessionError) {
           // User is already authenticated, redirect to dashboard
           setStatus('success');
           setMessage(t('toasts.accountVerified'));
@@ -105,8 +105,8 @@ const EmailConfirmation = () => {
           } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
             // Check if there's a user session after token refresh
             const checkSession = async () => {
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session?.user) {
+              const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+              if (refreshedSession?.user) {
                 setStatus('success');
                 setMessage(t('toasts.accountVerified'));
                 
@@ -125,8 +125,8 @@ const EmailConfirmation = () => {
         });
 
         // Check for existing session (in case user is already authenticated)
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (existingSession?.user) {
           setStatus('success');
           setMessage(t('toasts.accountVerified'));
           

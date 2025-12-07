@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,19 +57,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+      (event, sessionData) => {
+        console.log('Auth state change:', event, sessionData?.user?.id);
         
         // Prevent duplicate processing of the same event
-        const eventKey = `${event}-${session?.user?.id || 'null'}`;
+        const eventKey = `${event}-${sessionData?.user?.id || 'null'}`;
         if (lastEventRef.current === eventKey && event !== 'TOKEN_REFRESHED') {
           return;
         }
         lastEventRef.current = eventKey;
         
-        if (event === 'SIGNED_IN' && session) {
-          setSession(session);
-          setUser(session.user);
+        if (event === 'SIGNED_IN' && sessionData) {
+          setSession(sessionData);
+          setUser(sessionData.user);
           setLoading(false);
           
           // Check if this is a password recovery session
@@ -88,21 +87,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
           setLoading(false);
         } else if (event === 'TOKEN_REFRESHED') {
-          setSession(session);
-          setUser(session?.user ?? null);
+          setSession(sessionData);
+          setUser(sessionData?.user ?? null);
           setLoading(false);
         } else {
-          setSession(session);
-          setUser(session?.user ?? null);
+          setSession(sessionData);
+          setUser(sessionData?.user ?? null);
           setLoading(false);
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
       setLoading(false);
     });
 
